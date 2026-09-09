@@ -6,6 +6,16 @@
 
 **Propone:** el grupo · **ODS:** 8 (trabajo decente) y 12 (consumo responsable) · **Estado:** favorita
 
+<div align="center">
+
+<img src="https://media.giphy.com/media/psqPGTNGDfTD6GDPQt/giphy.gif" height="170" alt="Cooking Mama">
+<img src="https://media.giphy.com/media/NzgFQmyjQxdMUTDRtN/giphy.gif" height="170" alt="Coctelería">
+<img src="https://media.giphy.com/media/4WETSVpDQeFMMoBW2x/giphy.gif" height="170" alt="Agitar">
+
+*El juego te dice qué hacer. Nosotros medimos **cómo** lo hiciste.*
+
+</div>
+
 ## 🎯 Problema
 
 Aprender coctelería se hace mirando videos y repitiendo a ciegas. Nadie te dice si
@@ -35,6 +45,8 @@ actuador confirmando. Al final da un **puntaje de ejecución**.
 
 ## 🤲 Las 6 clases
 
+<img src="../assets/gestos.png" alt="Las 5 clases y su firma en el sensor inercial" width="100%">
+
 | # | Clase | Gesto real | Firma en el IMU | ⚙️ Actuador | Qué hace |
 |:-:|---|---|---|---|---|
 | 1 | `agitar` | Shake con la coctelera | Oscilación fuerte y periódica, 2–4 Hz, picos altos | 📟 **Pantalla OLED** | Cuenta regresiva `AGITAR 10s` y barra de progreso |
@@ -47,6 +59,11 @@ actuador confirmando. Al final da un **puntaje de ejecución**.
 ✅ Cinco actuadores **físicamente distintos**. Ningún LED.
 
 ## 🏗️ Arquitectura
+
+<img src="../assets/arquitectura.png" alt="Arquitectura del sistema" width="100%">
+
+<details>
+<summary>📐 Ver el mismo diagrama en texto</summary>
 
 ```
         ┌───────────────────────────────────────────────┐
@@ -63,6 +80,8 @@ actuador confirmando. Al final da un **puntaje de ejecución**.
         │  Servo · motor vibrador · relé de la luz      │
         └───────────────────────────────────────────────┘
 ```
+
+</details>
 
 Aquí las dos placas se justifican solas: la coctelera se agita con violencia y no puede
 llevar colgando un servo ni un relé. **Sin un solo cable al PC.**

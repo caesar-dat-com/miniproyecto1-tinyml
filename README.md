@@ -1,8 +1,8 @@
 <div align="center">
 
-# 🍸 Miniproyecto 1 — TinyML en movimiento
+<img src="assets/banner.png" alt="Miniproyecto 1 — TinyML en movimiento" width="100%">
 
-### IA en Dispositivos Móviles y Embebidos · UAO 2026-2 · Grupo 2
+### 🍸 IA en Dispositivos Móviles y Embebidos · UAO 2026-2 · Grupo 2
 
 ![Fase](https://img.shields.io/badge/fase-ideaci%C3%B3n-yellow?style=for-the-badge)
 ![Entrega](https://img.shields.io/badge/entrega-22%20sep%202026-red?style=for-the-badge)
@@ -38,7 +38,28 @@ coctelería**. Nada está cerrado todavía: falta llenar la matriz y escoger.
 > gestos y el Nano 33 BLE no trae sensor de caudal ni anemómetro. Está desarrollada en
 > el repo con dos maneras de rescatarla, pero hay que leerlas antes de votarla.
 
-📊 **La decisión se toma en [`decision/matriz.md`](decision/matriz.md).** Fecha objetivo: **jueves 11-sep.**
+<div align="center">
+
+<img src="https://media.giphy.com/media/psqPGTNGDfTD6GDPQt/giphy.gif" height="150" alt="Cooking Mama">
+<img src="https://media.giphy.com/media/4WETSVpDQeFMMoBW2x/giphy.gif" height="150" alt="Agitar la coctelera">
+<img src="https://media.giphy.com/media/AkddpN9a3cY7GYhW5g/giphy.gif" height="150" alt="Servir">
+
+### 🍸 *"Cooking Mama, pero de cócteles"*
+
+Un juego de cocina te dice **qué** hacer. Esto además reconoce **cómo** lo hiciste,
+porque el gesto se mide de verdad con el sensor inercial.
+
+</div>
+
+---
+
+## 📊 Cómo se ve hoy
+
+<img src="assets/comparativa.png" alt="Comparación previa de las 4 ideas" width="100%">
+
+⚠️ **Eso de arriba no es la decisión.** Son puntajes de arranque para discutir.
+La matriz real se llena entre los tres en [`decision/matriz.md`](decision/matriz.md).
+Fecha objetivo: **jueves 11-sep.**
 
 ---
 
@@ -100,6 +121,7 @@ Resumen en [`research/estado-del-arte.md`](research/estado-del-arte.md). Lo cort
 📁 ideas/      Las 4 propuestas del grupo + plantilla para más
 📁 research/   Estado del arte y referencias
 📁 decision/   Matriz de comparación y acta
+📁 assets/     Banner y diagramas del repo
 ```
 
 ## 🤝 Cómo aportar
@@ -107,3 +129,19 @@ Resumen en [`research/estado-del-arte.md`](research/estado-del-arte.md). Lo cort
 1. Copiar `ideas/PLANTILLA.md` → `ideas/NN-nombre.md`
 2. Llenar la tabla de 5 clases + actuador
 3. Commit o PR. Si no manejan git, la mandan al grupo y la subo yo.
+
+---
+
+## 🖼️ Créditos de las imágenes
+
+- 🎨 `assets/*.png` — banner y diagramas hechos por nosotros para este repo.
+- 🎞️ Los GIF están **enlazados** desde [GIPHY](https://giphy.com), no copiados al repo.
+  Son de sus respectivos autores y solo se usan como ilustración académica.
+
+<div align="center">
+
+<img src="https://media.giphy.com/media/skvQrdVxwT3cA/giphy.gif" height="130" alt="Cooking Mama">
+
+**Grupo 2** · IA en Dispositivos Móviles y Embebidos · UAO 2026-2
+
+</div>

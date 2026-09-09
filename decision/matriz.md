@@ -18,6 +18,8 @@ Llenar entre los tres. Escala **1–5** (5 = mejor). Fecha objetivo: **jueves 11
 
 Esto es lo que se ve desde la investigación y los requisitos. Los números los ponen ustedes.
 
+<img src="../assets/comparativa.png" alt="Lectura previa de las 4 ideas" width="100%">
+
 | | 🎾 01 Tenis | 🏆 02 Social | 💧 03 Renovables | 🍸 04 Bartender |
 |---|---|---|---|---|
 | **Fuerte en** | Riesgo técnico mínimo: la literatura reporta 95–98 % | Lo social engancha y se ve bien en la sustentación | La idea con más peso técnico real | Gestos muy distintos + hueco real en la literatura |

@@ -5,6 +5,14 @@
 
 **Propone:** el grupo · **ODS:** 3 (salud) y 4 (educación) · **Estado:** candidata
 
+<div align="center">
+
+<img src="https://media.giphy.com/media/TjAijpcNDTjdpNPUSL/giphy.gif" height="190" alt="Corrección de un forehand">
+
+*Corregir el golpe es exactamente lo que la literatura ya resuelve al 95–98 %.*
+
+</div>
+
 ## 🎯 Problema
 
 Un jugador aficionado no tiene entrenador al lado corrigiéndole cada golpe. Repite

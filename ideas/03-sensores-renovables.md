@@ -4,6 +4,14 @@
 
 **Propone:** el grupo · **ODS:** 7 (energía asequible y no contaminante) · **Estado:** candidata con reparo
 
+<div align="center">
+
+<img src="https://media.giphy.com/media/C9cB5UWIO8XfykP6NY/giphy.gif" height="190" alt="Aerogenerador junto al agua">
+
+*La idea tiene peso técnico. El problema es que la guía pide **gestos**, no niveles de una señal.*
+
+</div>
+
 ## 🎯 Problema
 
 Una microcentral o un aerogenerador pequeño no sabe en qué régimen está trabajando.

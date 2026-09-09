@@ -5,6 +5,14 @@
 
 **Propone:** el grupo · **ODS:** 3 (salud) · **Estado:** candidata
 
+<div align="center">
+
+<img src="https://media.giphy.com/media/3m9S7LRmvndpTEIyo2/giphy.gif" height="190" alt="Golpe de tenis">
+
+*El golpe se mide igual que en la 01. Lo que cambia — y lo que cuesta el comodín — es la capa social.*
+
+</div>
+
 ## 🎯 Problema
 
 Jugar solo aburre. Lo que engancha a la gente a moverse es competir y mostrar lo que
