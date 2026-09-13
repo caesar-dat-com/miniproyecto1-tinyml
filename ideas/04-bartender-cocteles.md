@@ -1,129 +1,151 @@
-# 🍸 Idea 04 — Estación de coctelería que enseña a preparar tragos
+# 🍸 Idea 04 — Coctelera inteligente + app interactiva
 
-![Favorita](https://img.shields.io/badge/⭐-favorita_del_grupo-gold?style=flat-square)
+![Ganadora](https://img.shields.io/badge/🏆-idea_ganadora-gold?style=flat-square)
 ![Riesgo](https://img.shields.io/badge/riesgo-medio-yellow?style=flat-square)
 ![Originalidad](https://img.shields.io/badge/originalidad-alta-brightgreen?style=flat-square)
 
-**Propone:** el grupo · **ODS:** 8 (trabajo decente) y 12 (consumo responsable) · **Estado:** favorita
+**Propone:** el grupo · **ODS:** 8 y 12 · **Estado:** seleccionada
 
-<div align="center">
+## 🎯 Concepto
 
-<img src="https://media.giphy.com/media/psqPGTNGDfTD6GDPQt/giphy.gif" height="170" alt="Cooking Mama">
-<img src="https://media.giphy.com/media/NzgFQmyjQxdMUTDRtN/giphy.gif" height="170" alt="Coctelería">
-<img src="https://media.giphy.com/media/4WETSVpDQeFMMoBW2x/giphy.gif" height="170" alt="Agitar">
+Una coctelera instrumentada con **Arduino Nano 33 BLE + IMU + TinyML** reconoce movimientos reales de coctelería y envía el resultado por BLE a una app móvil/tablet.
 
-*El juego te dice qué hacer. Nosotros medimos **cómo** lo hiciste.*
+La experiencia de usuario se inspira en juegos de cocina paso a paso: la app guía la receta y el vaso mide si el usuario ejecutó correctamente el gesto solicitado.
 
-</div>
+> La app te dice qué hacer. La coctelera entiende cómo lo hiciste.
 
-## 🎯 Problema
+## 📱 Experiencia tipo juego
 
-Aprender coctelería se hace mirando videos y repitiendo a ciegas. Nadie te dice si
-**agitaste** el tiempo suficiente, si **removiste** con la técnica correcta o si te
-pasaste sirviendo. En un bar eso se traduce en tragos inconsistentes, producto
-desperdiciado y meseros que tardan meses en formarse.
+La app tendrá cuatro áreas principales:
 
-Un curso presencial de bartender en Cali cuesta entre $300.000 y $800.000. Un sensor
-de $60.000 que corrige la técnica en tiempo real es otra puerta de entrada al oficio.
+- **Recetas:** seleccionar un cóctel y ver su secuencia.
+- **Entrenar gestos:** practicar movimientos individuales.
+- **Jugar:** completar una receta y recibir puntuación.
+- **Progreso:** consultar precisión, historial y mejores resultados.
 
-## 🍹 Cómo funciona — "Cooking Mama, pero de cócteles"
+Durante una receta, el teléfono puede mostrar:
 
-La placa va **pegada a la coctelera** (o en una muñequera). El sistema guía una receta
-paso a paso: pide un gesto, reconoce si lo estás haciendo, y cada gesto tiene su propio
-actuador confirmando. Al final da un **puntaje de ejecución**.
+```text
+Mojito — Paso 3 de 5
 
-```
-   Receta: Mojito
-   ┌──────────────────────────────────────────┐
-   │ 1. 🌿 Macerar la menta      → ✅ 8 golpes │
-   │ 2. 🥄 Remover con hielo     → ⏳ 4 s...   │
-   │ 3. 🍾 Servir el ron         → ⬜ pendiente│
-   │ 4. 🫙 Agitar 10 s           → ⬜ pendiente│
-   │ 5. ⬇️ Colar en el vaso       → ⬜ pendiente│
-   └──────────────────────────────────────────┘
+        ¡AGITA!
+
+      ⏱ 00:12
+
+Precisión del gesto: 92 %
+██████████████████░░
+
+⭐ ⭐ ☆
 ```
 
-## 🤲 Las 6 clases
+Una tablet puede quedarse en el menú general mientras el teléfono acompaña la ejecución en vivo.
 
-<img src="../assets/gestos.png" alt="Las 5 clases y su firma en el sensor inercial" width="100%">
+---
 
-| # | Clase | Gesto real | Firma en el IMU | ⚙️ Actuador | Qué hace |
-|:-:|---|---|---|---|---|
-| 1 | `agitar` | Shake con la coctelera | Oscilación fuerte y periódica, 2–4 Hz, picos altos | 📟 **Pantalla OLED** | Cuenta regresiva `AGITAR 10s` y barra de progreso |
-| 2 | `remover` | Stir con cuchara en vaso mezclador | Rotación suave y sostenida, amplitud baja | ⚙️ **Servomotor** | Aguja que avanza como medidor de dilución |
-| 3 | `servir` | Pour, inclinar la botella | Inclinación mantenida ~70–90°, casi sin vibración | 🔊 **Buzzer** | Tono que sube con los ml; pita al llegar a la medida |
-| 4 | `macerar` | Muddle, machacar menta/lima | Golpes verticales cortos y repetidos, alta frecuencia | 📳 **Motor DC vibrador** | Un pulso corto por golpe válido |
-| 5 | `colar` | Strain / volcar al vaso final | Giro decidido de ~180° y parada | 🔌 **Relé** | Enciende la luz de la estación: trago listo |
-| 6 | `reposo` | Coctelera quieta en la barra | Solo gravedad, varianza casi nula | — | Nada |
+## 🤲 Dataset
 
-✅ Cinco actuadores **físicamente distintos**. Ningún LED.
+| # | Clase | Gesto real | Firma esperada en IMU |
+|:-:|---|---|---|
+| 1 | `agitar` | Shake de coctelera | Oscilación fuerte y periódica |
+| 2 | `remover` | Stir con cuchara | Rotación suave y sostenida |
+| 3 | `servir` | Inclinar para verter | Inclinación mantenida con baja vibración |
+| 4 | `macerar` | Golpes verticales | Impactos cortos repetidos en un eje dominante |
+| 5 | `colar` | Giro/inclinación final | Cambio angular claro y parada |
+| 6 | `reposo` | Sin movimiento | Varianza mínima |
 
-## 🏗️ Arquitectura
+El dataset será **propio** y debe incluir muestras de los tres integrantes para mejorar generalización.
 
-<img src="../assets/arquitectura.png" alt="Arquitectura del sistema" width="100%">
+---
 
-<details>
-<summary>📐 Ver el mismo diagrama en texto</summary>
+## 🏗️ Arquitectura actual
 
+```text
+         COCTELERA
+             │
+             ▼
+┌───────────────────────────────┐
+│ Arduino Nano 33 BLE           │
+│                               │
+│ IMU                           │
+│  ↓                            │
+│ TinyML / Edge Impulse         │
+│  ↓                            │
+│ clase + confianza             │
+│                               │
+│ OLED + RGB opcionales         │
+│ batería interna recargable    │
+└───────────────┬───────────────┘
+                │ BLE
+                ▼
+        📱 APP / TABLET
+        receta · gesto · tiempo
+        confianza · puntuación
+        progreso
 ```
-        ┌───────────────────────────────────────────────┐
-        │  🍸 Coctelera instrumentada                   │
-        │  Arduino Nano 33 BLE + power bank             │
-        │  IMU → Edge Impulse → clase + confianza       │
-        │  OLED y buzzer montados en la misma coctelera │
-        └────────────────────┬──────────────────────────┘
-                             │  BLE (notify)
-                             ▼
-        ┌───────────────────────────────────────────────┐
-        │  🎛️ Estación de barra                         │
-        │  ESP32 con batería propia                     │
-        │  Servo · motor vibrador · relé de la luz      │
-        └───────────────────────────────────────────────┘
+
+El módulo electrónico va sujeto **al lateral de la coctelera**, en una carcasa compacta desmontable. La idea es integrar placa, batería, carga USB-C, interruptor y, opcionalmente, OLED/RGB en una sola pieza.
+
+---
+
+## 🔧 Hardware
+
+| Componente | Uso |
+|---|---|
+| Arduino Nano 33 BLE / Rev2 | IMU + procesamiento + BLE |
+| OLED SSD1306 0.96" I²C | Feedback local opcional |
+| WS2812B RGB | Estado de sistema opcional |
+| LiPo 3.7 V ~1000 mAh | Alimentación autónoma |
+| TP4056 USB-C | Carga/protección de LiPo |
+| MT3608 | Conversión de tensión |
+| Interruptor ON/OFF | Encendido físico |
+| JST | Conexión desmontable de batería |
+| Carcasa 3D + velcro/abrazadera | Integración lateral |
+
+La lista con precios y enlaces de compra está en [`../docs/materiales.md`](../docs/materiales.md).
+
+---
+
+## 💰 Presupuesto
+
+- Todo desde cero: **~$337.951 COP**
+- Reutilizando el Arduino del grupo: **~$177.469 COP**
+- MVP mínimo sin OLED ni RGB: **~$133.569 COP**
+- MVP mínimo + margen: **~$158.569 COP**
+
+---
+
+## 🧠 Flujo de datos
+
+```text
+acelerómetro + giroscopio
+          ↓
+    ventana de señal
+          ↓
+      Edge Impulse
+          ↓
+    modelo TinyML
+          ↓
+ gesto + confianza
+          ↓ BLE
+          app
 ```
 
-</details>
+La ventana inicial a probar será de aproximadamente **1–2 segundos**. El problema más importante será evitar confusión entre `agitar` y `macerar`; para eso se aprovecharán tanto acelerómetro como giroscopio, frecuencia y eje dominante.
 
-Aquí las dos placas se justifican solas: la coctelera se agita con violencia y no puede
-llevar colgando un servo ni un relé. **Sin un solo cable al PC.**
+---
 
-Versión mínima si el tiempo aprieta: una sola placa en una muñequera con los cinco
-actuadores en una cajita al lado, unidos por cable corto a la misma placa.
+## ⚠️ Validación pendiente
 
-## 🛒 Compras
+La guía original todavía indica **un actuador diferente por clase** y aclara que los LEDs no cuentan. Esta versión del proyecto está orientada a que la representación se haga en la app, así que debemos confirmar con el profesor si esto sustituye el requisito de actuadores.
 
-| Componente | Para qué | 💰 Aprox. |
-|---|---|---|
-| OLED SSD1306 0.96" I2C | Paso actual y temporizador | $5.000 |
-| Servomotor SG90 | Medidor de dilución | $4.000 |
-| Buzzer pasivo | Guía de servida | $1.000 |
-| Motor DC vibrador | Confirmación de macerado | $2.000 |
-| Módulo relé 5 V | Luz de "trago listo" | $3.000 |
-| Power bank | Alimentación sin PC | $15.000–30.000 |
-| ESP32 (si van dos placas) | Receptor BLE | $20.000 |
-| Coctelera + cuchara + macerador | Utilería de la demo | prestada o $30.000 |
+También hay que confirmar si utilizar la app como parte central del MVP consume el **comodín de app móvil** del curso.
 
-**Total: $30.000 con una placa · ~$55.000 con dos.**
+---
 
-## ⚠️ Riesgos
+## 💪 Por qué elegimos esta idea
 
-| Riesgo | Gravedad | Mitigación |
-|---|:-:|---|
-| `agitar` y `macerar` son ambos "sacudidas": el modelo puede confundirlos | 🔴 alta | Son distintos en **eje y frecuencia** (macerar es vertical y más rápido). Usar giroscopio además del acelerómetro y ventana de 2 s |
-| Líquido real cerca de la electrónica | 🟡 media | Demo **en seco** o con agua y la placa en bolsa sellada. Nadie exige alcohol |
-| La app "Cooking Mama" gastaría el comodín | 🟡 media | Que la app sea opcional: el MVP es la coctelera + OLED. La app queda para el Miniproyecto 2 |
-| Cada persona agita distinto | 🟢 baja | Capturar con los tres integrantes; eso vuelve el modelo más robusto, no menos |
-
-## 💪 Por qué es buena idea
-
-- Los cinco gestos son **naturalmente distintos** en el espacio del acelerómetro:
-  oscilación, rotación, inclinación, impacto vertical y giro. Es de los conjuntos más
-  fáciles de separar que se pueden armar con la mano.
-- **Casi no hay trabajo publicado.** Para el paper eso vale: hay precedentes que citar
-  (ver [`research/estado-del-arte.md`](../research/estado-del-arte.md)) pero no un
-  proyecto igual del cual se sospeche una copia.
-- La demo se explica sola en 15 minutos y se ve en vivo.
-
-## ❓ Preguntar al profesor
-
-1. ¿La pantalla OLED cuenta como actuador o la equipara a un LED?
-2. Si la app móvil queda como extra opcional y no como parte del MVP, ¿gasta el comodín?
+- Los gestos tienen firmas inerciales naturalmente diferentes.
+- El sistema se puede demostrar en vivo de manera muy visual.
+- Tiene un componente TinyML real y medible.
+- La app convierte una clasificación técnica en una experiencia fácil de entender.
+- Hay antecedentes científicos para reconocimiento de gestos de bebidas, pero el enfoque de tutor interactivo de coctelería sigue siendo poco explorado.
