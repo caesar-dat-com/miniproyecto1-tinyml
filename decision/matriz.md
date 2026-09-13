@@ -1,55 +1,74 @@
-# 📊 Matriz de decisión
+# 📊 Decisión del grupo
 
-Llenar entre los tres. Escala **1–5** (5 = mejor). Fecha objetivo: **jueves 11-sep**.
+## 🏆 Idea seleccionada
 
-## Puntuación
+La propuesta elegida para el Miniproyecto 1 es:
 
-| Criterio | Peso | 🎾 01 Tenis | 🏆 02 Social | 💧 03 Renovables | 🍸 04 Bartender |
-|---|:-:|:-:|:-:|:-:|:-:|
-| Gestos fáciles de separar para el modelo | 25 % | | | | |
-| Encaje con la guía sin pedir permisos | 20 % | | | | |
-| No gasta el comodín de la app | 15 % | | | | |
-| Facilidad de capturar el dataset | 15 % | | | | |
-| Originalidad para el paper | 15 % | | | | |
-| Que nos guste hacerlo | 10 % | | | | |
-| **Total ponderado** | | | | | |
+### 🍸 **Bartender TinyML — coctelera inteligente + app interactiva**
 
-## 🤔 Lectura previa (para discutir, no para imponer)
+La decisión se tomó porque combina un problema claro, gestos inerciales distinguibles, una demo visual y un espacio de investigación suficientemente original para el paper.
 
-Esto es lo que se ve desde la investigación y los requisitos. Los números los ponen ustedes.
+## ✅ Razones principales
 
-<img src="../assets/comparativa.png" alt="Lectura previa de las 4 ideas" width="100%">
+| Criterio | Lectura final |
+|---|---|
+| Gestos fáciles de separar | Alta: agitar, remover, servir, macerar y colar tienen patrones distintos |
+| Encaje con TinyML | Muy alto: IMU + clasificación en dispositivo |
+| Facilidad de capturar dataset | Alta: puede hacerse en casa/laboratorio |
+| Originalidad | Alta frente a propuestas típicas de HAR |
+| Demo | Muy visual y fácil de explicar |
+| Experiencia de usuario | App estilo juego de cocina paso a paso |
 
-| | 🎾 01 Tenis | 🏆 02 Social | 💧 03 Renovables | 🍸 04 Bartender |
-|---|---|---|---|---|
-| **Fuerte en** | Riesgo técnico mínimo: la literatura reporta 95–98 % | Lo social engancha y se ve bien en la sustentación | La idea con más peso técnico real | Gestos muy distintos + hueco real en la literatura |
-| **Débil en** | Muy publicado: el paper arranca cuesta arriba | Gasta el comodín y hay que programar una app en 11 días | No cumple "5 clases de movimiento con sensor inercial" tal como está | Hay que cuidar que `agitar` y `macerar` no se confundan |
-| **Hay que ir a** | Una cancha | Una cancha + desarrollo de app | Construir un anemómetro | La cocina de la casa |
-| **Bloqueante** | — | 🃏 comodín | ⚠️ preguntar al profesor primero | — |
+## 🧠 Arquitectura elegida
 
-**En una línea:** la 01 es la apuesta segura, la 04 es la que da mejor paper con riesgo
-manejable, la 02 cuesta el comodín, y la 03 hay que reformularla (versión A del anemómetro)
-antes de poder votarla.
+La coctelera será principalmente un **dispositivo autónomo de toma de datos e inferencia**:
 
-## ❓ Preguntas para el profesor
+```text
+IMU del Arduino Nano 33 BLE
+        ↓
+modelo TinyML
+        ↓
+gesto + confianza
+        ↓ BLE
+app móvil / tablet
+```
 
-Cualquiera de estas cambia el diseño. Vale la pena mandarle un correo esta semana:
+La app mostrará recetas, gesto solicitado, temporizador, confianza, puntuación y progreso.
 
-1. ¿La pantalla OLED cuenta como actuador o la equipara a un LED?
-2. Si dos clases usan el mismo buzzer con patrones distintos, ¿cuentan como dos actuadores?
-3. Si el PC solo **recibe** por BLE y no alimenta ni programa la placa durante la demo,
-   ¿se considera "conectado al PC"?
-4. Si la app móvil es un extra opcional y el MVP funciona sin ella, ¿gasta el comodín?
-5. ¿Aceptaría clases de movimiento generadas por un sistema mecánico (anemómetro girando)
-   y no por gestos humanos, si el dataset igual sale del IMU?
+La OLED y el RGB quedan como **feedback local opcional**. Servo, relé, motor vibrador y otros actuadores dejan de ser el centro del diseño.
+
+## 📱 Concepto visual
+
+La experiencia se inspira en juegos de cocina: menú de recetas, modo práctica, modo juego y puntuación por estrellas.
+
+Nombre visual provisional: **MixLab**.
+
+## 🤲 Clases
+
+1. `agitar`
+2. `remover`
+3. `servir`
+4. `macerar`
+5. `colar`
+6. `reposo`
+
+## ⚠️ Validaciones pendientes con el profesor
+
+1. La guía guardada actualmente exige **un actuador distinto por clase**. Hay que confirmar si la representación de la respuesta en la app puede sustituir ese requisito.
+2. Confirmar si usar la app como parte central del MVP consume el comodín de aplicación móvil.
+3. Confirmar que la comunicación BLE placa → app cumple completamente el requisito de autonomía durante la demostración.
 
 ## 📝 Acta
 
-- **Fecha de la decisión:**
-- **Idea elegida:**
-- **Por qué:**
-- **Reparto de trabajo:**
-  - César:
-  - Díaz Rangel:
-  - Santana:
-- **Primera fecha de captura de datos:**
+- **Fecha de la decisión:** 12-sep-2026
+- **Idea elegida:** Bartender TinyML / coctelera inteligente + app
+- **Por qué:** mejor balance entre originalidad, viabilidad, calidad del dataset y experiencia de demostración.
+- **Hardware principal:** Arduino Nano 33 BLE + IMU integrada + batería autónoma.
+- **Interfaz:** app móvil/tablet por BLE; OLED/RGB opcionales.
+- **Primera prioridad:** construir módulo lateral y capturar dataset propio.
+
+### Reparto de trabajo
+
+- **César:** integración del proyecto, TinyML/app/documentación.
+- **Díaz Rangel:** por definir con el grupo.
+- **Santana:** hardware/Nano 33 BLE y apoyo en captura; por cerrar con el grupo.
