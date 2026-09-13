@@ -4,144 +4,187 @@
 
 ### 🍸 IA en Dispositivos Móviles y Embebidos · UAO 2026-2 · Grupo 2
 
-![Fase](https://img.shields.io/badge/fase-ideaci%C3%B3n-yellow?style=for-the-badge)
+![Fase](https://img.shields.io/badge/fase-desarrollo%20MVP-brightgreen?style=for-the-badge)
 ![Entrega](https://img.shields.io/badge/entrega-22%20sep%202026-red?style=for-the-badge)
-![Ideas](https://img.shields.io/badge/ideas-4%20candidatas-blue?style=for-the-badge)
+![Idea](https://img.shields.io/badge/idea-Bartender%20TinyML-ff69b4?style=for-the-badge)
 
 ![Arduino](https://img.shields.io/badge/Arduino_Nano_33_BLE-00979D?style=flat-square&logo=arduino&logoColor=white)
 ![Edge Impulse](https://img.shields.io/badge/Edge_Impulse-3B47CE?style=flat-square&logo=edgeimpulse&logoColor=white)
 ![TinyML](https://img.shields.io/badge/TinyML-FF6F00?style=flat-square&logo=tensorflow&logoColor=white)
 ![BLE](https://img.shields.io/badge/BLE-0082FC?style=flat-square&logo=bluetooth&logoColor=white)
-![C++](https://img.shields.io/badge/C%2B%2B-00599C?style=flat-square&logo=cplusplus&logoColor=white)
 
-**César Reyes** · **Juan Camilo Díaz Rangel** · **Sebastián Santana**
+**César Reyes** · **Juan Camilo Díaz Rangel** · **Sebastián Santana**  
 Profesor: Juan Camilo Giraldo Londoño
 
 </div>
 
 ---
 
-## 🟡 Estado: ideación
+# 🍸 Proyecto seleccionado: Bartender TinyML
 
-Tenemos **4 ideas propias** sobre la mesa. La favorita del grupo es la 🍸 **estación de
-coctelería**. Nada está cerrado todavía: falta llenar la matriz y escoger.
+La idea elegida es una **coctelera inteligente** que reconoce movimientos reales de coctelería con un sensor inercial y utiliza TinyML para identificar el gesto que está realizando el usuario.
 
-| # | Idea | Qué mide | ODS | Estado |
-|:-:|---|---|:-:|:-:|
-| ⭐ 04 | [🍸 **Bartender — Cooking Mama de cócteles**](ideas/04-bartender-cocteles.md) | Gestos de coctelería | 🎯 8 · 12 | **favorita** |
-| 01 | [🎾 Entrenador de tenis](ideas/01-tenis-entrenador.md) | Golpes de raqueta | 🏅 3 · 4 | candidata |
-| 02 | [🏆 Tenis social](ideas/02-tenis-social.md) | Golpes + puntuación | 🏅 3 | candidata |
-| 03 | [💧 Sensores de agua/aire](ideas/03-sensores-renovables.md) | Caudal / viento | ⚡ 7 | ⚠️ ver riesgo |
+La experiencia se inspira en la lógica de juegos de cocina paso a paso: la app indica qué hacer, la coctelera mide **cómo se hizo** y el sistema muestra el resultado en tiempo real.
 
-> ⚠️ **La idea 03 tiene un problema serio de encaje**, no de calidad: la guía exige
-> **5 clases de movimiento** capturadas con **sensor inercial**. Agua y viento no son
-> gestos y el Nano 33 BLE no trae sensor de caudal ni anemómetro. Está desarrollada en
-> el repo con dos maneras de rescatarla, pero hay que leerlas antes de votarla.
+> Nombre visual provisional: **MixLab** — *Cooking Mama, pero de cócteles*.
 
-<div align="center">
+## 🎯 Objetivo del MVP
 
-<img src="https://media.giphy.com/media/psqPGTNGDfTD6GDPQt/giphy.gif" height="150" alt="Cooking Mama">
-<img src="https://media.giphy.com/media/4WETSVpDQeFMMoBW2x/giphy.gif" height="150" alt="Agitar la coctelera">
-<img src="https://media.giphy.com/media/AkddpN9a3cY7GYhW5g/giphy.gif" height="150" alt="Servir">
+El foco principal ya no es mover servos o relés alrededor del vaso. El dispositivo debe funcionar como un **módulo autónomo de adquisición + inferencia + comunicación**:
 
-### 🍸 *"Cooking Mama, pero de cócteles"*
+1. El IMU del Arduino captura acelerómetro y giroscopio.
+2. El modelo TinyML reconoce el movimiento.
+3. La placa envía por **BLE** la clase y su confianza.
+4. La **app** representa la receta, el paso actual, temporizador, precisión y progreso.
+5. Una OLED y un RGB pueden dar feedback local básico, pero no sustituyen la interfaz de la app.
 
-Un juego de cocina te dice **qué** hacer. Esto además reconoce **cómo** lo hiciste,
-porque el gesto se mide de verdad con el sensor inercial.
-
-</div>
-
----
-
-## 📊 Cómo se ve hoy
-
-<img src="assets/comparativa.png" alt="Comparación previa de las 4 ideas" width="100%">
-
-⚠️ **Eso de arriba no es la decisión.** Son puntajes de arranque para discutir.
-La matriz real se llena entre los tres en [`decision/matriz.md`](decision/matriz.md).
-Fecha objetivo: **jueves 11-sep.**
+```text
+   🍸 COCTELERA INSTRUMENTADA
+   ┌────────────────────────────────────────┐
+   │ Arduino Nano 33 BLE                    │
+   │ IMU → modelo TinyML → clase/confianza  │
+   │ OLED / RGB (feedback local opcional)   │
+   │ batería interna + carga USB-C           │
+   └──────────────────┬─────────────────────┘
+                      │ BLE
+                      ▼
+   📱 APP / TABLET
+   ┌────────────────────────────────────────┐
+   │ Recetas · Entrenar · Jugar · Progreso  │
+   │ gesto actual · tiempo · confianza       │
+   │ feedback y puntuación                   │
+   └────────────────────────────────────────┘
+```
 
 ---
 
-## 📋 Reglas que ninguna idea puede romper
+## 🤲 Clases de movimiento
 
-Sacadas de la guía del profesor ([`docs/requisitos.md`](docs/requisitos.md)):
+Dataset propio con **5 clases + reposo**:
 
-| ✅ | Requisito |
-|:-:|---|
-| 🎯 | Dataset **propio** con sensor inercial: **5 clases de movimiento + `reposo`** (reposo no cuenta) |
-| ⚙️ | **Un actuador distinto por clase**. Servo, motor DC, buzzer, relé, pantalla, vibrador. **Los LEDs NO valen** |
-| 🧠 | Entrenamiento en **Edge Impulse**, proyecto **público**, enlace en el informe |
-| 🔌 | El Arduino **no puede estar conectado al PC**, ni para energía ni para datos → power bank + BLE/WiFi |
-| 📡 | Si una segunda placa mueve los actuadores, ese enlace **también** inalámbrico |
-| 🃏 | **Comodín:** la app móvil se usa **una sola vez** entre el Miniproyecto 1 y el 2 |
-| 🚀 | MVP funcional (no maqueta) · **paper IEEE** · código · sustentación ≤15 min |
+| # | Clase | Movimiento | Firma esperada del IMU |
+|:-:|---|---|---|
+| 1 | `agitar` | Shake de coctelera | Oscilación fuerte y periódica |
+| 2 | `remover` | Stir con cuchara | Rotación suave y sostenida |
+| 3 | `servir` | Inclinar para verter | Inclinación mantenida y estable |
+| 4 | `macerar` | Golpes verticales cortos | Impactos repetidos sobre un eje dominante |
+| 5 | `colar` | Giro/inclinación final | Cambio angular marcado y parada |
+| 6 | `reposo` | Coctelera quieta | Varianza mínima; solo gravedad |
 
-### 🃏 Ojo con el comodín
-
-Tres de nuestras cuatro ideas dicen "app". **Si la app móvil es parte del MVP aquí,
-se gasta el comodín y no queda para el Miniproyecto 2.** Salida limpia: que la app
-sea *opcional* y que el MVP viva completo en la placa + actuadores. Se ve mejor en la
-sustentación y no cuesta el comodín.
+El principal riesgo de clasificación sigue siendo separar `agitar` de `macerar`; se trabajará con acelerómetro + giroscopio, eje dominante, frecuencia y ventanas de aproximadamente 1–2 s.
 
 ---
 
-## 🔧 Hardware
+## 📱 Concepto de la app
 
-**Arduino Nano 33 BLE** (lo tiene Santana). Ojo con la revisión:
+La interfaz se plantea como una experiencia lúdica de aprendizaje de coctelería:
 
-| Revisión | IMU | Librería |
-|---|---|---|
-| Rev1 | LSM9DS1 | `Arduino_LSM9DS1` |
-| **Rev2** | BMI270 + BMM150 | `Arduino_BMI270_BMM150` |
+- **Recetas:** elegir el cóctel y ver los pasos.
+- **Entrenar gestos:** practicar cada movimiento de forma individual.
+- **Jugar:** completar la receta en secuencia y recibir puntuación.
+- **Progreso:** historial, precisión y mejores resultados.
+- **Modo en vivo:** gesto solicitado, temporizador, confianza del modelo y estrellas/puntuación.
 
-Con la librería equivocada `IMU.begin()` devuelve `false` y el sketch se cuelga en el
-`setup()` sin decir por qué. Mirar la serigrafía antes de instalar nada.
+La idea es que una tablet pueda mostrar el menú general mientras un teléfono muestra el paso activo durante la preparación.
 
 ---
 
-## 🔬 Qué dice la literatura
+## 🔧 Hardware del módulo lateral
 
-Resumen en [`research/estado-del-arte.md`](research/estado-del-arte.md). Lo corto:
+El módulo se monta en un costado de la coctelera mediante abrazaderas o velcro, sin perforar el recipiente.
 
-- 🎾 **Tenis está resuelto y bien documentado.** Clasificar drive/revés/saque con un IMU en
-  la muñeca alcanza **95–98 %** de accuracy en la literatura. Es la idea de menor riesgo técnico.
-- 🍸 **Coctelería está mucho menos explorada** — hay precedentes (`Cocktail`, 2011; patente de
-  monitoreo de servidas por IMU) pero ningún trabajo escolar típico. Es la idea con más
-  originalidad para el paper, y los gestos son bien distintos entre sí.
-- ⚠️ El problema común es distinguir **movimientos visualmente parecidos**. Eso decide qué
-  gestos elegir, más que el modelo que se use.
+| Componente | Rol |
+|---|---|
+| **Arduino Nano 33 BLE / Rev2** | Procesamiento, IMU, TinyML y BLE |
+| **OLED SSD1306 0.96" I²C** | Feedback local opcional |
+| **WS2812B RGB** | Estado de conexión/captura opcional |
+| **LiPo 3.7 V ~1000 mAh** | Alimentación autónoma |
+| **TP4056 USB-C con protección** | Recarga de la batería |
+| **MT3608 Step-Up** | Conversión de tensión |
+| **Interruptor ON/OFF** | Encendido físico |
+| **Conector JST** | Batería desmontable |
+| **Carcasa 3D + abrazaderas** | Protección y fijación lateral |
+| **Cableado/conectores** | Integración del prototipo |
+
+👉 Presupuesto detallado y enlaces de compra: [`docs/materiales.md`](docs/materiales.md)
+
+### 💰 Presupuesto de referencia
+
+- **Todo desde cero:** ~**$337.951 COP**
+- **Reutilizando el Nano 33 BLE del grupo:** ~**$177.469 COP**
+- **MVP mínimo sin OLED ni RGB, reutilizando Arduino:** ~**$133.569 COP**
+- **MVP mínimo + margen:** ~**$158.569 COP**
+
+Los precios son aproximados y pueden cambiar en Mercado Libre.
+
+---
+
+## ⚠️ Punto que debemos validar con el profesor
+
+La guía actualmente guardada en [`docs/requisitos.md`](docs/requisitos.md) indica **un actuador distinto por clase** y que los LEDs no cuentan. La arquitectura seleccionada está centrada en captura, inferencia y representación en la app, así que este punto debe confirmarse antes de eliminar formalmente los actuadores del alcance evaluable.
+
+Lo mismo aplica al **comodín de la app móvil**: si la app cuenta como parte obligatoria del MVP, se consumiría aquí.
+
+---
+
+## 🧠 Pipeline TinyML
+
+```text
+Captura IMU
+   ↓
+Dataset propio — 3 integrantes
+   ↓
+Edge Impulse
+   ↓
+Procesamiento / features
+   ↓
+Clasificador TinyML
+   ↓
+Arduino Nano 33 BLE
+   ↓
+clase + confianza
+   ↓ BLE
+App móvil / tablet
+```
+
+El proyecto de Edge Impulse debe quedar **público** y su enlace irá tanto en este repositorio como en el paper IEEE.
+
+---
+
+## 🔬 Estado del arte
+
+La investigación previa está en [`research/estado-del-arte.md`](research/estado-del-arte.md). Los antecedentes encontrados indican que gestos como servir, agitar y remover son reconocibles mediante IMU, pero hay mucho menos trabajo en un **tutor embebido de coctelería completo**, que es donde está el aporte del proyecto.
+
+---
+
+## 📋 Requisitos de entrega
+
+- Dataset propio con sensor inercial.
+- 5 clases de movimiento + `reposo`.
+- Entrenamiento en Edge Impulse.
+- Sistema autónomo: sin depender del PC para energía o ejecución.
+- MVP funcional.
+- Paper en formato IEEE.
+- Código fuente.
+- Sustentación ≤15 min.
+- Validar con el profesor el requisito de actuadores y el uso del comodín de app.
 
 ---
 
 ## 🗂️ Estructura
 
-```
-📁 docs/       Guía del profesor + tabla de requisitos duros
-📁 ideas/      Las 4 propuestas del grupo + plantilla para más
+```text
+📁 docs/       Requisitos + materiales y presupuesto
+📁 ideas/      Propuestas originales + diseño ganador
 📁 research/   Estado del arte y referencias
-📁 decision/   Matriz de comparación y acta
-📁 assets/     Banner y diagramas del repo
+📁 decision/   Matriz y decisión del grupo
+📁 assets/     Banner y diagramas del proyecto
 ```
-
-## 🤝 Cómo aportar
-
-1. Copiar `ideas/PLANTILLA.md` → `ideas/NN-nombre.md`
-2. Llenar la tabla de 5 clases + actuador
-3. Commit o PR. Si no manejan git, la mandan al grupo y la subo yo.
-
----
-
-## 🖼️ Créditos de las imágenes
-
-- 🎨 `assets/*.png` — banner y diagramas hechos por nosotros para este repo.
-- 🎞️ Los GIF están **enlazados** desde [GIPHY](https://giphy.com), no copiados al repo.
-  Son de sus respectivos autores y solo se usan como ilustración académica.
 
 <div align="center">
 
-<img src="https://media.giphy.com/media/skvQrdVxwT3cA/giphy.gif" height="130" alt="Cooking Mama">
+### 🍹 *La app te dice qué hacer. La coctelera entiende cómo lo hiciste.*
 
-**Grupo 2** · IA en Dispositivos Móviles y Embebidos · UAO 2026-2
+**Grupo 2 · UAO 2026-2**
 
 </div>
