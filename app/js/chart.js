@@ -84,10 +84,15 @@ class StreamChart {
     if (!Number.isFinite(max) || max === 0) max = 1;
 
     // Paso "bonito" para que las etiquetas no bailen entre 1.37 y 1.41.
+    // La escalera incluye 1.5 y 3: con solo 1/2/5/10 un pico de 2.6 g
+    // saltaba a un eje de 5 g y la señal quedaba aplastada en el centro.
     const exp = Math.pow(10, Math.floor(Math.log10(max)));
     const norm = max / exp;
-    const paso = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 5 ? 5 : 10;
-    const destino = paso * exp * 1.15;
+    const paso = norm <= 1 ? 1 : norm <= 1.5 ? 1.5 : norm <= 2 ? 2
+               : norm <= 3 ? 3 : norm <= 5 ? 5 : 10;
+    // Sin holgura extra: la escalera ya redondea hacia arriba, así que
+    // las etiquetas caen en valores redondos (3 y 1.5, no 3.45 y 1.72).
+    const destino = paso * exp;
 
     // Suavizado: el eje crece rápido y se encoge despacio. Sin esto,
     // un pico aislado hace saltar toda la gráfica al desaparecer.
