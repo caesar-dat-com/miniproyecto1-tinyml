@@ -1,8 +1,13 @@
-# App de captura — MixLab
+# MixLab — la app
 
-Webapp para **conectar la placa, ver el movimiento en vivo, grabar el dataset y
-mostrar la inferencia**. HTML, CSS y JavaScript planos: sin build, sin
-dependencias y sin red al ejecutar.
+Un **bar de autor metido en una consola de doble pantalla**. Arriba el
+escaparate, abajo la barra táctil: eliges cóctel, la app te pide un gesto y la
+coctelera dice si lo hiciste bien.
+
+Detrás de la puerta de servicio está el **Taller**: conectar la placa, ver el
+movimiento en vivo, grabar el dataset y exportarlo.
+
+HTML, CSS y JavaScript planos: sin build, sin dependencias y sin red al ejecutar.
 
 ## Cuatro formas de conectar
 
@@ -36,7 +41,35 @@ python3 -m http.server 8080
 # http://localhost:8080  ← localhost cuenta como contexto seguro: BLE y Serial funcionan
 ```
 
-## Las cuatro pestañas
+## El salón
+
+La carta tiene cinco platos:
+
+| | | |
+|---|---|---|
+| **I** | Recetas | Cinco cócteles, de una a tres copas de dificultad. Cada paso es un gesto. |
+| **II** | Entrenar | Un gesto suelto, 10 s, con el medidor de confianza en vivo. |
+| **III** | Servicio | La receta completa contra reloj: puntos, estrellas y precisión paso a paso. |
+| **IV** | Libreta | Tus marcas, y en qué gesto flojeas. |
+| **V** | Taller | La puerta de servicio (abajo). |
+
+### Cómo se puntúa
+
+La app **no clasifica nada**: el modelo corre en el Arduino y aquí solo se juzga
+lo que llega en las líneas `I,<clase>,<confianza>`. Durante un paso se suma
+tiempo mientras la clase detectada coincida con la pedida **y** la confianza
+pase de `0.60`. La precisión del paso es ese tiempo entre el total.
+
+Una inferencia más vieja de **1,5 s** se da por muerta. Sin esa regla, una placa
+que deja de enviar seguiría premiando indefinidamente su último mensaje.
+
+Estrellas: ★★★ desde 85 % de precisión media, ★★ desde 65 %, ★ desde 40 %.
+
+> Con el **simulador**, la pantalla táctil saca unos botones para elegir qué
+> gesto está fingiendo la coctelera. Así el juego se puede enseñar entero sin
+> tener el hardware en la mano.
+
+## El taller
 
 - **Conectar** — elegir transporte y ver el formato de línea que espera la app.
 - **En vivo** — dos gráficas (acelerómetro y giroscopio), frecuencia real
@@ -85,14 +118,34 @@ con una sola mano el modelo aprende esa mano.
 ## Archivos
 
 ```text
-index.html         Una sola página, cuatro paneles
-css/app.css        Tokens de interfaz + tokens de visualización
+index.html         Consola (salón) + taller, en una sola página
+css/app.css        Tokens de la sala y de la pantalla + tokens de visualización
 js/protocol.js     Parser de línea, troceador de flujo, buffer circular, clases
 js/transports.js   BLE · WebSocket · Serial · Simulador (una sola interfaz)
 js/chart.js        Gráfica de líneas en vivo sobre canvas, con hover
 js/recorder.js     Grabación de tomas, CSV, JSON de Edge Impulse y ZIP
-js/main.js         Cableado de la interfaz
+js/game.js         Recetas, motor de partida, puntuación y libreta
+js/main.js         Cableado del salón y del taller
 ```
 
-Las clases y su orden se editan en un solo sitio: la constante `CLASES` de
-`js/protocol.js`.
+Dónde se editan las cosas, cada una en un solo sitio:
+
+- **Clases y su orden** → `CLASES`, en `js/protocol.js`.
+- **Cócteles, pasos y duraciones** → `RECETAS`, en `js/game.js`.
+- **Umbral de acierto y caducidad de la inferencia** → `UMBRAL_CONF` y
+  `VIDA_INFERENCIA_MS`, arriba de `js/game.js`.
+
+## Sobre el aspecto
+
+La consola es CSS puro: sin imágenes, sin fuentes descargadas. El latón es un
+degradado recortado sobre el texto, el grano una textura SVG en línea, y la
+rejilla de la pantalla un `repeating-linear-gradient`. Todo para que la app
+siga abriendo sin red.
+
+La pantalla de abajo **crece con el alto que sobre** en vez de quedarse en 4:3
+fijo: en un móvil quedaban 200 px muertos debajo de la consola mientras la
+carta se cortaba en el cuarto plato. En ventanas bajas se retiran además los
+subtítulos del menú, antes que dejar el menú principal con scroll.
+
+Las marcas viven en `localStorage` (`mixlab.libreta.v1`), separadas de las tomas
+del dataset. Borrar la libreta no toca las tomas.
