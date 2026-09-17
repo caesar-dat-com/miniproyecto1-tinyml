@@ -1,0 +1,327 @@
+/* ============================================================================
+   base.css — lo que comparten la portada y la consola
+   Tokens, fondo de bar, y las piezas de interfaz gordas: botones circulares,
+   botón grande, tarjetas con relieve, chapas y hojas.
+   ========================================================================== */
+
+:root {
+  color-scheme: dark;
+
+  /* --- colores de juego --- */
+  --ambar:     #f0a32a;  --ambar-osc: #a8660d;
+  --verde:     #35a06a;  --verde-osc: #1d6742;
+  --rojo:      #d9564a;  --rojo-osc:  #96301f;
+  --azul:      #3f88c5;  --azul-osc:  #235a8c;
+  --dorado:    #f5b942;  --oro-osc:   #96700f;
+  --morado:    #8a6bc4;  --morado-osc:#523d80;
+
+  /* --- superficies --- */
+  --noche:     #120c07;
+  --panel:     #17120d;          /* fondo sólido de panel y de gráfica */
+  --panel-alto:#221a13;
+  --filo:      rgba(255,255,255,.14);
+
+  /* --- tintas --- */
+  --crema:     #fff8ec;
+  --humo:      rgba(255, 248, 236, .74);
+  --humo-2:    rgba(255, 248, 236, .52);
+
+  --borde:  3px;
+  --r-card: 26px;
+  --r:      18px;
+  --r-sm:   12px;
+
+  --seg-t: env(safe-area-inset-top, 0px);
+  --seg-b: env(safe-area-inset-bottom, 0px);
+  --seg-l: env(safe-area-inset-left, 0px);
+  --seg-r: env(safe-area-inset-right, 0px);
+
+  /* Fuente redondeada: en iPad y iPhone sale la del sistema, que es justo
+     el tipo gordito que pide esta interfaz. */
+  --redonda: ui-rounded, "SF Pro Rounded", -apple-system, "Segoe UI Variable Display",
+             "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* --- tokens de visualización: los lee chart.js ---
+   Validados contra la superficie de panel #17120d: los tres ejes pasan
+   3:1 de contraste y las distancias de daltonismo. */
+.viz-root {
+  --surface-1:      #17120d;
+  --viz-grid:       #2c231a;
+  --viz-axis:       #463829;
+  --text-primary:   #fff8ec;
+  --text-secondary: rgba(255,248,236,.62);
+  --series-1: #3987e5;   /* eje X */
+  --series-2: #d95926;   /* eje Y */
+  --series-3: #199e70;   /* eje Z */
+}
+
+/* ============================================================ reset */
+*, *::before, *::after { box-sizing: border-box; }
+
+/* El atributo [hidden] vale display:none en la hoja del navegador, que
+   pierde contra cualquier regla de clase con display propio: un
+   .btn { display:inline-flex } deja el botón a la vista aunque el JS le
+   ponga hidden. Esta regla lo zanja para toda la hoja. */
+[hidden] { display: none !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
+}
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  background: var(--noche);
+  color: var(--crema);
+  font-family: var(--redonda);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+a { text-decoration: none; color: inherit; }
+button { font: inherit; color: inherit; }
+canvas { display: block; }
+
+:where(a, button, input, select, [tabindex]):focus-visible {
+  outline: 3px solid var(--dorado);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
+
+.solo-lectores {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ============================================================ fondo */
+.fondo { position: fixed; inset: 0; z-index: 0; }
+
+.fondo img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  object-position: 62% 42%;
+  /* Miniatura borrosa de 200 bytes detrás: evita el fogonazo negro mientras
+     baja la foto de verdad. */
+  background: url("data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAABQBACdASoYAA4APuleqE0pJSQiMAgBIB0JaACdMoRwH1bAWuM3Esww0NkAAP40BphqmTl1DmMrD+8ZZIi8yHwDQJWrKyhc+wbtFFvr//E3A8+Dcdb4Q1GzwTOkuchz1foCh1IsrPYcdhnso30h2Veeu16Y0jJ0zd49Etzqs4caQgAA") center/cover no-repeat;
+}
+
+/* Velo: sin blur a propósito. Un backdrop-filter a pantalla completa cuesta
+   caro en iPad; un par de degradados dan el mismo contraste gratis. */
+.fondo__velo {
+  position: absolute; inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10,6,3,.74) 0%, rgba(10,6,3,.20) 28%, rgba(10,6,3,.40) 64%, rgba(10,6,3,.88) 100%),
+    radial-gradient(120% 80% at 50% 38%, transparent 38%, rgba(10,6,3,.48) 100%);
+}
+
+/* La consola tiene mucho más contenido encima: necesita la foto más apagada
+   o los paneles se pelean con las botellas del fondo. */
+.fondo--hondo .fondo__velo {
+  background:
+    linear-gradient(180deg, rgba(10,6,3,.88) 0%, rgba(10,6,3,.72) 40%, rgba(10,6,3,.90) 100%),
+    radial-gradient(120% 80% at 50% 30%, rgba(10,6,3,.35) 0%, rgba(10,6,3,.78) 100%);
+}
+
+/* En vertical estrecho la foto se recorta mucho por los lados: este encuadre
+   deja la estantería iluminada, no el mueble oscuro. */
+@media (orientation: portrait) and (max-width: 620px) {
+  .fondo img { object-position: 57% 32%; }
+}
+
+/* ============================================================ piezas gordas */
+
+/* --- botón circular --- */
+.redondo {
+  width: 56px; height: 56px; flex: none;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: var(--borde) solid rgba(255,255,255,.92);
+  font-size: 1.35rem; cursor: pointer; color: #fff;
+  box-shadow: 0 5px 0 rgba(0,0,0,.38), 0 10px 22px rgba(0,0,0,.45),
+              inset 0 3px 0 rgba(255,255,255,.42);
+  transition: transform .12s ease, box-shadow .12s ease;
+  touch-action: manipulation;
+}
+.redondo > * { filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); line-height: 1; }
+.redondo:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,.38), 0 4px 10px rgba(0,0,0,.4), inset 0 3px 0 rgba(255,255,255,.42); }
+.redondo:disabled { opacity: .4; cursor: not-allowed; }
+
+.redondo--verde  { background: linear-gradient(180deg, #5fc994, var(--verde) 46%, var(--verde-osc)); }
+.redondo--azul   { background: linear-gradient(180deg, #78b6e8, var(--azul) 46%, var(--azul-osc)); }
+.redondo--dorado { background: linear-gradient(180deg, #ffd978, var(--dorado) 46%, var(--oro-osc)); color: #40290a; }
+.redondo--rojo   { background: linear-gradient(180deg, #ef8b7e, var(--rojo) 46%, var(--rojo-osc)); font-weight: 900; }
+.redondo--morado { background: linear-gradient(180deg, #ab92dd, var(--morado) 46%, var(--morado-osc)); }
+.redondo--humo   { background: linear-gradient(180deg, #4a423a, #2a241e 46%, #17120e); border-color: rgba(255,255,255,.4); }
+
+/* --- botón grande --- */
+.grande {
+  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  width: 100%; min-height: 66px; padding: 15px 28px;
+  border: var(--borde) solid rgba(255,255,255,.95);
+  border-radius: 999px; cursor: pointer;
+  background: linear-gradient(180deg, #ffd978, var(--dorado) 46%, var(--oro-osc));
+  color: #3a2405;
+  font-size: clamp(1.05rem, 4.2vw, 1.3rem); font-weight: 800;
+  box-shadow: 0 7px 0 rgba(0,0,0,.42), 0 16px 34px rgba(0,0,0,.5),
+              inset 0 3px 0 rgba(255,255,255,.62);
+  transition: transform .12s ease, box-shadow .12s ease;
+  touch-action: manipulation;
+}
+.grande:active:not(:disabled) { transform: translateY(6px); box-shadow: 0 1px 0 rgba(0,0,0,.42), 0 6px 14px rgba(0,0,0,.45), inset 0 3px 0 rgba(255,255,255,.62); }
+.grande:disabled { opacity: .45; cursor: not-allowed; }
+.grande__ico { font-size: .9em; }
+
+.grande--verde { background: linear-gradient(180deg, #62c894, var(--verde) 46%, var(--verde-osc)); color: #042416; }
+.grande--rojo  { background: linear-gradient(180deg, #ef8b7e, var(--rojo) 46%, var(--rojo-osc)); color: #fff; }
+.grande--suave { background: linear-gradient(180deg, #4a423a, #2a241e 46%, #17120e); color: var(--crema); border-color: rgba(255,255,255,.35); }
+.grande--chico { min-height: 52px; font-size: .96rem; padding: 12px 20px; }
+
+/* --- botón mediano, para barras de herramientas --- */
+.pieza {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  min-height: 48px; padding: 11px 18px; cursor: pointer;
+  border-radius: 999px; border: 2px solid rgba(255,255,255,.28);
+  background: linear-gradient(180deg, #3b332b, #241d17);
+  color: var(--crema); font-size: .9rem; font-weight: 700;
+  box-shadow: 0 4px 0 rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.16);
+  transition: transform .12s ease, box-shadow .12s ease;
+  touch-action: manipulation;
+}
+.pieza:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.16); }
+.pieza:disabled { opacity: .4; cursor: not-allowed; }
+.pieza[aria-pressed="true"], .pieza.es-activa {
+  background: linear-gradient(180deg, #ffd978, var(--dorado) 48%, var(--oro-osc));
+  border-color: rgba(255,255,255,.9); color: #3a2405;
+}
+
+/* --- chapa: pastilla de datos --- */
+.chapa {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px 8px 12px; border-radius: 999px;
+  border: var(--borde) solid rgba(255,255,255,.92);
+  background: linear-gradient(180deg, #ffd978, var(--dorado) 48%, var(--oro-osc));
+  color: #40290a; font-weight: 800; font-size: 1.05rem;
+  box-shadow: 0 4px 0 rgba(0,0,0,.35), 0 10px 22px rgba(0,0,0,.45),
+              inset 0 2px 0 rgba(255,255,255,.6);
+}
+.chapa__ico { font-size: 1.1rem; }
+.chapa__n small { opacity: .62; font-size: .8em; }
+
+.chapa--humo {
+  background: linear-gradient(180deg, #3b332b, #211a14);
+  border-color: rgba(255,255,255,.34); color: var(--crema);
+  font-size: .92rem; font-weight: 700;
+}
+
+/* --- tarjeta con relieve --- */
+.plato {
+  position: relative;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+  min-height: 116px; padding: 14px 10px 12px;
+  border-radius: var(--r-card);
+  border: var(--borde) solid rgba(255,255,255,.9);
+  cursor: pointer; text-align: center;
+  /* El relieve gordo: sombra dura abajo + brillo dentro arriba. Al pulsar
+     la tarjeta baja y la sombra se acorta, como una tecla de verdad. */
+  box-shadow: 0 6px 0 rgba(0,0,0,.4), 0 14px 30px rgba(0,0,0,.5),
+              inset 0 3px 0 rgba(255,255,255,.5);
+  transition: transform .12s ease, box-shadow .12s ease;
+  touch-action: manipulation;
+}
+.plato:active { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.4), 0 6px 14px rgba(0,0,0,.45), inset 0 3px 0 rgba(255,255,255,.5); }
+
+.plato--ambar  { background: linear-gradient(180deg, #f8c163, var(--ambar) 46%, var(--ambar-osc)); color: #3a2405; }
+.plato--verde  { background: linear-gradient(180deg, #62c894, var(--verde) 46%, var(--verde-osc)); color: #062416; }
+.plato--rojo   { background: linear-gradient(180deg, #ef8b7e, var(--rojo) 46%, var(--rojo-osc)); color: #370d07; }
+.plato--azul   { background: linear-gradient(180deg, #7bb8e9, var(--azul) 46%, var(--azul-osc)); color: #06223a; }
+.plato--morado { background: linear-gradient(180deg, #b39ce4, var(--morado) 46%, var(--morado-osc)); color: #1b1030; }
+
+.plato__ico { font-size: clamp(1.7rem, 6vw, 2.2rem); line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
+.plato__nombre { font-size: clamp(1rem, 4vw, 1.2rem); font-weight: 800; line-height: 1.1; text-shadow: 0 1px 0 rgba(255,255,255,.35); }
+.plato__nota { font-size: clamp(.72rem, 2.8vw, .82rem); font-weight: 600; opacity: .72; line-height: 1.2; }
+
+/* medallas: tres estrellas arriba, como en los juegos de recetas */
+.plato__medallas {
+  position: absolute; top: 8px; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 3px;
+  font-size: .72rem; line-height: 1;
+}
+.plato__medallas i { font-style: normal; opacity: .3; }
+.plato__medallas i.on { opacity: 1; color: #fff8d0; text-shadow: 0 0 6px rgba(255,230,140,.95), 0 1px 1px rgba(0,0,0,.4); }
+
+.plato__candado {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+  border-radius: calc(var(--r-card) - var(--borde));
+  background: rgba(8,5,3,.62); text-align: center; padding: 0 10px;
+}
+.plato__candado-ico { font-size: 1.7rem; line-height: 1; }
+.plato__candado b { font-size: .74rem; font-weight: 700; color: var(--humo); line-height: 1.2; }
+
+/* El candado tapa la tarjeta entera: si el contenido de debajo sigue
+   visible, el icono se monta sobre el nombre y se lee «Li🔒ta». */
+.plato.es-bloqueado { filter: saturate(.5); }
+.plato.es-bloqueado > :not(.plato__candado) { visibility: hidden; }
+
+/* --- panel oscuro sobre la foto --- */
+.panel {
+  background: rgba(23,18,13,.82);
+  border: 2px solid var(--filo);
+  border-radius: var(--r);
+  box-shadow: 0 10px 30px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07);
+}
+
+/* --- hoja inferior --- */
+.velo {
+  position: fixed; inset: 0; z-index: 8;
+  background: rgba(6,4,2,.66);
+  animation: velo-entra .18s ease;
+}
+@keyframes velo-entra { from { opacity: 0; } }
+
+.hoja {
+  position: fixed; z-index: 9; left: 0; right: 0; bottom: 0;
+  max-height: 88dvh; overflow-y: auto;
+  padding: 14px calc(var(--seg-r) + 22px) calc(var(--seg-b) + 22px) calc(var(--seg-l) + 22px);
+  border-radius: 30px 30px 0 0;
+  border-top: var(--borde) solid rgba(255,255,255,.3);
+  background: linear-gradient(180deg, #221a13, #14100c);
+  box-shadow: 0 -16px 50px rgba(0,0,0,.7);
+  animation: hoja-sube .26s cubic-bezier(.22,1,.36,1);
+}
+@keyframes hoja-sube { from { transform: translateY(100%); } }
+
+.hoja__asa { width: 44px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.28); margin: 0 auto 14px; }
+.hoja__titulo { margin: 0 0 6px; font-size: 1.35rem; font-weight: 800; text-align: center; }
+.hoja__nota { margin: 0 0 16px; text-align: center; color: var(--humo-2); font-size: .88rem; font-weight: 600; }
+
+@media (min-width: 760px) and (min-height: 700px) {
+  .redondo { width: 62px; height: 62px; font-size: 1.5rem; }
+  .hoja {
+    left: 50%; right: auto; bottom: 50%; transform: translate(-50%, 50%);
+    width: min(620px, 92vw); border-radius: 30px;
+    border: var(--borde) solid rgba(255,255,255,.3);
+  }
+  @keyframes hoja-sube { from { transform: translate(-50%, 60%); opacity: 0; } }
+}
+
+/* ============================================================ recado */
+/* Va ARRIBA, bajo el HUD: abajo siempre hay un botón principal a pantalla
+   completa y el aviso se le montaba encima justo cuando hay que pulsarlo. */
+.recado {
+  position: fixed; z-index: 30; left: 50%; top: calc(var(--seg-t) + 80px);
+  transform: translate(-50%, -14px);
+  padding: 12px 22px; border-radius: 999px; max-width: calc(100vw - 32px); text-align: center;
+  background: linear-gradient(180deg, #3b332b, #1d1711);
+  border: 2px solid rgba(255,255,255,.3); color: var(--crema);
+  font-size: .9rem; font-weight: 700; box-shadow: 0 10px 30px rgba(0,0,0,.7);
+  opacity: 0; transition: opacity .18s ease, transform .18s ease;
+  pointer-events: none;
+}
+.recado.es-visible { opacity: 1; transform: translate(-50%, 0); }

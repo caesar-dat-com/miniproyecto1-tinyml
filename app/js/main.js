@@ -1,5 +1,5 @@
 /* ============================================================================
-   main.js — cableado del salón (consola) y del taller (banco de trabajo)
+   main.js — la consola: salón (recetas, entrenar, servicio, libreta) y taller
    ========================================================================== */
 (function () {
   'use strict';
@@ -16,7 +16,8 @@
   let splitter   = null;
   let partida    = null;
 
-  let vista = 'menu';
+  let vista = 'recetas';
+  let vistaPrevia = 'recetas';   // a dónde vuelve el botón del taller
   let recetaElegida = RECETAS[0].id;
   let gestoElegido  = CLASES[0].id;
   let ultimaActa    = null;
@@ -30,40 +31,67 @@
   let lienzoAcc, lienzoGyr;
 
   const GESTOS = CLASES.filter(c => c.id !== 'reposo');
+  const TONO   = ['ambar', 'verde', 'rojo', 'azul', 'morado'];
+
+  const ROTULO = {
+    recetas:  ['Recetas',  'La carta de la casa'],
+    entrenar: ['Entrenar', 'Un gesto a la vez'],
+    jugar:    ['Servicio', 'La receta contra reloj'],
+    progreso: ['Libreta',  'Tus marcas'],
+    taller:   ['Taller',   'Sensores y dataset'],
+  };
 
   /* ==========================================================================
-     NAVEGACIÓN DEL SALÓN
+     NAVEGACIÓN
      ======================================================================== */
   function irA(v) {
     // Salir de una partida a medias la abandona: dejar el temporizador
     // corriendo bajo otra vista falsearía la precisión.
-    if (partida?.viva && v !== 'jugar' && v !== 'entrenar') {
-      partida.abandonar();
-      partida = null;
-    }
+    if (partida?.viva && v !== 'jugar') { partida.abandonar(); partida = null; }
+
     vista = v;
     $$('.vista').forEach(el => el.classList.toggle('es-activa', el.dataset.vista === v));
+
+    const [t, n] = ROTULO[v] || ROTULO.recetas;
+    $('#tituloTxt').textContent = v === 'jugar' && recetaPorId.get(recetaElegida)
+      ? recetaPorId.get(recetaElegida).nombre : t;
+    $('#tituloNota').textContent = n;
+
+    $('#btnTaller').setAttribute('aria-pressed', String(v === 'taller'));
+    if (location.hash !== '#' + v) history.replaceState(null, '', '#' + v);
+
     pintarVista();
-    pintarHud();
+
+    if (v === 'taller') {
+      // El canvas mide 0 mientras la vista está oculta: hay que remedirlo.
+      requestAnimationFrame(() => {
+        lienzoAcc?._medir(); lienzoGyr?._medir();
+        lienzoAcc?.draw();   lienzoGyr?.draw();
+      });
+    }
   }
 
   function initNavegacion() {
-    document.addEventListener('click', (e) => {
-      const ir = e.target.closest('[data-ir]');
-      if (ir) { irA(ir.dataset.ir); return; }
-
-      if (e.target.closest('[data-taller]'))       { abrirTaller(true);  return; }
-      if (e.target.closest('[data-salir-taller]')) { abrirTaller(false); return; }
+    $('#btnAtras').addEventListener('click', () => {
+      if (partida?.viva) { partida.abandonar(); partida = null; irA('jugar'); return; }
+      if (vista === 'taller' || vista === 'jugar') { irA('recetas'); return; }
+      location.href = 'index.html';
     });
 
-    $$('.pest').forEach(p => {
+    // Entrar al taller y volver debe devolverte donde estabas, no al principio.
+    $('#btnTaller').addEventListener('click', () => {
+      if (vista === 'taller') { irA(vistaPrevia); return; }
+      vistaPrevia = vista;
+      irA('taller');
+    });
+
+    $$('[data-pest]').forEach(p => {
       p.addEventListener('click', () => {
-        $$('.pest').forEach(x => { x.classList.remove('es-activa'); x.setAttribute('aria-selected', 'false'); });
+        $$('[data-pest]').forEach(x => { x.classList.remove('es-activa'); x.setAttribute('aria-selected', 'false'); });
         p.classList.add('es-activa');
         p.setAttribute('aria-selected', 'true');
-        $$('.panel').forEach(x => x.classList.remove('es-activa'));
+        $$('.panel-t').forEach(x => x.classList.remove('es-activa'));
         $(`#p-${p.dataset.pest}`).classList.add('es-activa');
-        // El canvas mide 0 mientras el panel está oculto: hay que remedirlo.
         requestAnimationFrame(() => {
           lienzoAcc?._medir(); lienzoGyr?._medir();
           lienzoAcc?.draw();   lienzoGyr?.draw();
@@ -72,119 +100,334 @@
     });
   }
 
-  function abrirTaller(si) {
-    if (si && partida?.viva) { partida.abandonar(); partida = null; }
-    document.body.classList.toggle('es-taller', si);
-    if (si) {
-      requestAnimationFrame(() => {
-        lienzoAcc?._medir(); lienzoGyr?._medir();
-        lienzoAcc?.draw();   lienzoGyr?.draw();
-      });
-    } else {
-      pintarVista(); pintarHud();
+  /* ==========================================================================
+     VISTAS
+     ======================================================================== */
+  function pintarVista() {
+    if (vista === 'recetas')  pintarRecetas();
+    if (vista === 'entrenar') pintarEntrenar();
+    if (vista === 'jugar')    pintarJugar();
+    if (vista === 'progreso') pintarProgreso();
+  }
+
+  const COPA = { mojito: '🌿', daiquiri: '🍋', negroni: '🍊', 'old-fashioned': '🥃', margarita: '🧂' };
+
+  function pintarRecetas() {
+    const d = Libreta.resumen();
+    $('#rejillaRecetas').innerHTML = d.recetas.map((r, i) => `
+      <button class="plato plato--${TONO[r.grado - 1] || 'ambar'} ${r.id === recetaElegida ? 'es-elegida' : ''}"
+              type="button" data-receta="${r.id}">
+        <span class="plato__medallas" aria-hidden="true">${medallas(r.marca ? r.marca.estrellas : 0)}</span>
+        <span class="plato__ico" aria-hidden="true">${COPA[r.id] || '🍸'}</span>
+        <span class="plato__nombre">${esc(r.nombre)}</span>
+        <span class="plato__nota">${esc(r.nota)}</span>
+        <span class="plato__grados" aria-label="Dificultad ${r.grado} de 3">${'◆'.repeat(r.grado)}<span class="apagado">${'◆'.repeat(3 - r.grado)}</span></span>
+      </button>`).join('');
+  }
+
+  function medallas(n) {
+    return [0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}">★</i>`).join('');
+  }
+
+  const MANO = { agitar: '🫱', remover: '🌀', servir: '🫗', macerar: '🔨', colar: '🥄' };
+
+  function pintarEntrenar() {
+    const d = Libreta.resumen();
+    $('#rejillaGestos').innerHTML = GESTOS.map((c, i) => {
+      const g = d.gestos.find(x => x.id === c.id);
+      const nota = g && g.media !== null ? `${Math.round(g.media * 100)} % de acierto` : c.desc;
+      return `<button class="plato plato--${TONO[i % TONO.length]} ${c.id === gestoElegido ? 'es-elegida' : ''}"
+                      type="button" data-gesto="${c.id}">
+        <span class="plato__medallas" aria-hidden="true">${medallas(g && g.media !== null ? escalon(g.media) : 0)}</span>
+        <span class="plato__ico" aria-hidden="true">${MANO[c.id] || '🤲'}</span>
+        <span class="plato__nombre">${esc(c.label)}</span>
+        <span class="plato__nota">${esc(nota)}</span>
+      </button>`;
+    }).join('');
+
+    $('#demoEntrenar').innerHTML = cajaDemo();
+    $('#btnEntrenar').disabled = !transporte;
+    $('#btnEntrenar').textContent = transporte ? 'Empezar práctica' : 'Conecta la placa en el Taller';
+  }
+
+  function escalon(v) { return v >= 0.85 ? 3 : v >= 0.65 ? 2 : v >= 0.4 ? 1 : 0; }
+
+  /* Con el simulador no hay muñeca que mover: estos botones cambian el gesto
+     que la "placa" está fingiendo, para poder jugar y enseñar el flujo. */
+  function cajaDemo() {
+    if (transporte?.nombre !== 'sim') return '';
+    return `<div class="demo">
+      <p class="demo__txt">Modo simulador — elige qué gesto está haciendo la coctelera</p>
+      <div class="demo__fila">
+        ${GESTOS.map(c => `<button class="pieza" type="button" data-simgesto="${c.id}"
+          aria-pressed="${transporte.gesto === c.id}">${esc(c.label)}</button>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  /* ---------------------------------------------------------------- jugar */
+  const RADIO = 52;
+  const VUELTA = 2 * Math.PI * RADIO;
+
+  function pintarJugar() {
+    const lienzo = $('#lienzoJugar');
+    const zocalo = $('#zocaloJugar');
+    const r = recetaPorId.get(recetaElegida);
+
+    // Basta con que exista la partida: 'viva' no se enciende hasta arrancar(),
+    // y la pantalla tiene que estar montada antes de eso.
+    if (partida) {
+      lienzo.innerHTML = pantallaJuego(partida.receta);
+      zocalo.innerHTML = `<button class="grande grande--suave" type="button" data-abandonar>Abandonar</button>`;
+      refrescarLista();
+      return;
     }
+
+    if (ultimaActa) {
+      lienzo.innerHTML = `
+        <div class="acta">
+          <div class="acta__estrellas">${pintarEstrellas(ultimaActa.estrellas)}</div>
+          <p class="acta__pts">${ultimaActa.puntos}</p>
+          <p class="acta__pie">${Math.round(ultimaActa.precision * 100)} % de precisión</p>
+          <div class="acta__barras barras">
+            ${ultimaActa.pasos.map(p => {
+              const c = CLASES.find(x => x.id === p.clase);
+              return barra(c ? c.label : p.clase, p.precision);
+            }).join('')}
+          </div>
+        </div>`;
+      zocalo.innerHTML = `
+        <button class="grande grande--suave" type="button" data-ir="recetas" style="flex:0 0 auto">Carta</button>
+        <button class="grande" type="button" data-servir>▶ Repetir</button>`;
+      return;
+    }
+
+    lienzo.innerHTML = `
+      <div class="juego">
+        ${transporte ? '' : '<div class="nota nota--aviso panel">Sin placa no hay juego: el modelo corre en el Arduino y la app solo lee lo que él decide. Conecta desde el <b>Taller</b>, o arranca el <b>simulador</b>.</div>'}
+        <h2 class="juego__gesto">${esc(r.nombre)}</h2>
+        <p class="juego__texto">${esc(r.nota)}</p>
+        <ol class="receta">
+          ${r.pasos.map((p, k) => filaPaso(p, k)).join('')}
+        </ol>
+        ${cajaDemo()}
+      </div>`;
+    zocalo.innerHTML = `<button class="grande" type="button" data-servir ${transporte ? '' : 'disabled'}>▶ Servir</button>`;
+  }
+
+  function filaPaso(p, k, clase = '') {
+    const c = CLASES.find(x => x.id === p.clase);
+    return `<li class="${clase}">
+      <span class="receta__n">${k + 1}</span>
+      <span><b>${esc(c ? c.label : p.clase)}</b> · ${esc(p.texto)}</span>
+      <time>${p.seg} s</time>
+    </li>`;
+  }
+
+  function pantallaJuego(receta) {
+    return `
+      <div class="juego">
+        <div class="juego__cabeza">
+          <p class="juego__paso" id="jPaso">—</p>
+          <h2 class="juego__gesto" id="jGesto">—</h2>
+          <p class="juego__texto" id="jTexto"></p>
+        </div>
+
+        <div class="aro" id="jAro">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="aro__via"   cx="60" cy="60" r="${RADIO}"/>
+            <circle class="aro__linea" id="jAroLinea" cx="60" cy="60" r="${RADIO}"
+                    stroke-dasharray="${VUELTA.toFixed(1)}" stroke-dashoffset="0"/>
+          </svg>
+          <div class="aro__centro">
+            <span class="aro__n" id="jCrono">0.0</span>
+            <span class="aro__u">segundos</span>
+          </div>
+        </div>
+
+        <div class="medidor" id="medidor">
+          <div class="medidor__marco"><div class="medidor__liquido" id="medidorLiquido"></div></div>
+          <div class="medidor__pie"><span id="medidorQue">confianza</span><b id="medidorNum">0 %</b></div>
+        </div>
+
+        <div class="pasos" id="jPasos"></div>
+        <ol class="receta" id="jLista">${receta.pasos.map((p, k) => filaPaso(p, k)).join('')}</ol>
+        ${cajaDemo()}
+      </div>`;
+  }
+
+  function refrescarLista() {
+    if (!partida) return;
+    $$('#jLista li').forEach((li, k) => {
+      li.classList.toggle('es-hecho',  k < partida.idx);
+      li.classList.toggle('es-actual', k === partida.idx);
+    });
+    const pasos = $('#jPasos');
+    if (pasos) {
+      pasos.innerHTML = partida.receta.pasos.map((_, k) =>
+        `<span class="pasos__pieza ${k < partida.idx ? 'es-hecho' : k === partida.idx ? 'es-actual' : ''}"></span>`).join('');
+    }
+  }
+
+  function barra(etiqueta, v) {
+    const pct = Math.round(v * 100);
+    return `<div class="barra ${v < 0.5 ? 'es-flojo' : ''}">
+      <span>${esc(etiqueta)}</span>
+      <span class="barra__via"><span class="barra__lleno" style="width:${pct}%"></span></span>
+      <span class="barra__n">${pct}%</span>
+    </div>`;
+  }
+
+  /* -------------------------------------------------------------- libreta */
+  function pintarProgreso() {
+    const r = Libreta.resumen();
+    const lienzo = $('#lienzoProgreso');
+
+    if (!r.partidas && r.gestos.every(g => !g.intentos)) {
+      lienzo.innerHTML = '<p class="vacio">La libreta está en blanco.<br>Sirve tu primer cóctel.</p>';
+      $('#zocaloProgreso').innerHTML = '<button class="grande" type="button" data-ir="recetas">Ver la carta</button>';
+      return;
+    }
+
+    lienzo.innerHTML = `
+      <div class="cifra">
+        <span class="cifra__n">${Math.round((r.global || 0) * 100)}%</span>
+        <span class="cifra__pie">precisión media en ${r.partidas} servicio${r.partidas === 1 ? '' : 's'}</span>
+        <p class="estrellas" style="margin:10px 0 0">${r.estrellasTotales} / ${r.estrellasPosibles} ★</p>
+        ${r.flojo ? `<p class="cifra__pie" style="margin-top:8px">Tu punto flaco: <b>${esc(r.flojo.label)}</b> (${Math.round(r.flojo.media * 100)} %)</p>` : ''}
+      </div>
+
+      <span class="rotulo">Precisión por gesto</span>
+      <div class="barras">
+        ${r.gestos.map(g => g.media === null
+          ? `<div class="barra"><span>${esc(g.label)}</span><span class="barra__via"></span><span class="barra__n">—</span></div>`
+          : barra(g.label, g.media)).join('')}
+      </div>
+
+      <span class="rotulo">Marcas</span>
+      <table class="marcas">
+        <thead><tr><th>Cóctel</th><th>Estrellas</th><th>Mejor</th></tr></thead>
+        <tbody>
+          ${r.recetas.map(x => `<tr>
+            <td>${esc(x.nombre)}</td>
+            <td class="es">${x.marca ? pintarEstrellas(x.marca.estrellas) : '<span class="apagada">★★★</span>'}</td>
+            <td>${x.marca ? x.marca.mejorPts : '—'}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`;
+
+    $('#zocaloProgreso').innerHTML =
+      '<button class="grande grande--suave" type="button" data-borrar-libreta>Borrar la libreta</button>';
   }
 
   /* ==========================================================================
-     PANTALLA SUPERIOR — el escaparate
+     ACCIONES
      ======================================================================== */
-  const LUGAR = {
-    menu: 'Salón', recetas: 'La carta', entrenar: 'Barra de práctica',
-    jugar: 'Servicio', progreso: 'Libreta',
-  };
+  function initAcciones() {
+    document.addEventListener('click', (e) => {
+      const ir = e.target.closest('[data-ir]');
+      if (ir) { irA(ir.dataset.ir); return; }
 
-  function pintarHud() {
-    $('#hudLugar').textContent = LUGAR[vista] || 'Salón';
-    const cuerpo = $('#hudCuerpo');
+      const rec = e.target.closest('[data-receta]');
+      if (rec) { recetaElegida = rec.dataset.receta; pintarRecetas(); abrirHoja(true); return; }
 
-    if (vista === 'menu')     return void (cuerpo.innerHTML = hudPortada());
-    if (vista === 'recetas')  return void (cuerpo.innerHTML = hudReceta());
-    if (vista === 'entrenar') return void (cuerpo.innerHTML = hudGesto());
-    if (vista === 'progreso') return void (cuerpo.innerHTML = hudLibreta());
-    if (vista === 'jugar')    return void (cuerpo.innerHTML = hudJuegoBase());
+      const ges = e.target.closest('[data-gesto]');
+      if (ges) { gestoElegido = ges.dataset.gesto; pintarEntrenar(); return; }
+
+      const sim = e.target.closest('[data-simgesto]');
+      if (sim) {
+        transporte?.setGesto?.(sim.dataset.simgesto);
+        $$('[data-simgesto]').forEach(b => b.setAttribute('aria-pressed', String(b === sim)));
+        return;
+      }
+
+      if (e.target.closest('[data-servir]'))    { abrirHoja(false); empezarPartida(recetaPorId.get(recetaElegida)); return; }
+      if (e.target.closest('[data-abandonar]')) { partida?.abandonar(); partida = null; ultimaActa = null; irA('jugar'); return; }
+
+      if (e.target.closest('[data-borrar-libreta]')) {
+        if (!confirm('¿Borrar todas tus marcas? No se puede deshacer.')) return;
+        Libreta.borrar();
+        ultimaActa = null;
+        pintarProgreso();
+        recado('Libreta en blanco');
+      }
+    });
+
+    $('#btnEntrenar').addEventListener('click', () => {
+      if (partida?.viva) { partida.abandonar(); partida = null; pintarEntrenar(); return; }
+      empezarPartida(recetaDePractica(gestoElegido, 10));
+    });
+
+    /* --- hoja de receta --- */
+    $('#veloHoja').addEventListener('click', () => abrirHoja(false));
+    $('[data-cerrar-hoja]').addEventListener('click', () => abrirHoja(false));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape') abrirHoja(false); });
   }
 
-  function hudPortada() {
-    const r = Libreta.resumen();
-    return `
-      <div class="portada">
-        <h1 class="portada__titulo oro">MixLab</h1>
-        <p class="portada__lema">La app te dice qué hacer.<br>La coctelera entiende cómo lo hiciste.</p>
-        <div class="filete portada__filete"><span>◆</span></div>
-        <p class="medidor__pie" style="justify-content:center;gap:18px;margin-top:12px">
-          <span>${r.partidas} servicio${r.partidas === 1 ? '' : 's'}</span>
-          <span class="estrellas" style="font-size:.8rem">${r.estrellasTotales}/${r.estrellasPosibles} ★</span>
-        </p>
-      </div>`;
-  }
-
-  function hudReceta() {
-    const r = recetaPorId.get(recetaElegida);
-    const total = r.pasos.reduce((a, p) => a + p.seg, 0);
-    return `
-      <div>
-        <div class="filete"><span>◆</span></div>
-        <h2 class="gesto__nombre serif" style="text-align:center;margin:10px 0 2px">${esc(r.nombre)}</h2>
-        <p class="gesto__pista" style="text-align:center;margin-bottom:10px">${esc(r.nota)} · ${total} s</p>
-        <ol class="receta-pasos">
-          ${r.pasos.map(p => {
-            const c = CLASES.find(x => x.id === p.clase);
-            return `<li><b>${esc(c ? c.label : p.clase)}</b><time>${p.seg} s</time></li>`;
-          }).join('')}
-        </ol>
-      </div>`;
-  }
-
-  function hudGesto() {
-    const c = CLASES.find(x => x.id === gestoElegido);
-    return `
-      <div class="gesto">
-        <p class="gesto__paso versalita">Practica</p>
-        <h2 class="gesto__nombre oro">${esc(c.label)}</h2>
-        <p class="gesto__pista">${esc(c.desc)}</p>
-        <div class="medidor" id="medidor">
-          <div class="medidor__marco"><div class="medidor__liquido" id="medidorLiquido"></div></div>
-          <div class="medidor__pie"><span id="medidorQue">confianza</span><span id="medidorNum">0 %</span></div>
-        </div>
-      </div>`;
-  }
-
-  function hudJuegoBase() {
-    return `
-      <div class="gesto">
-        <p class="gesto__paso versalita" id="jPaso">—</p>
-        <h2 class="gesto__nombre oro" id="jGesto">Listo</h2>
-        <p class="gesto__pista" id="jTexto">Pulsa «Servir» para empezar</p>
-        <div class="medidor" id="medidor">
-          <div class="medidor__marco"><div class="medidor__liquido" id="medidorLiquido"></div></div>
-          <div class="medidor__pie"><span id="medidorQue">confianza</span><span id="medidorNum">0 %</span></div>
-        </div>
-        <div class="marcador">
-          <span class="crono" id="jCrono">0.0</span>
-          <span class="estrellas" id="jEstrellas">${pintarEstrellas(0)}</span>
-        </div>
-        <div class="pasos" id="jPasos"></div>
-      </div>`;
-  }
-
-  function hudLibreta() {
-    const r = Libreta.resumen();
-    if (r.global === null) {
-      return `<div class="cifra">
-                <span class="cifra__num oro">—</span>
-                <span class="cifra__pie">Todavía no has servido nada.<br>Empieza por una receta fácil.</span>
-              </div>`;
+  function abrirHoja(si) {
+    const hoja = $('#hojaReceta');
+    if (si) {
+      const r = recetaPorId.get(recetaElegida);
+      const total = r.pasos.reduce((a, p) => a + p.seg, 0);
+      $('#hojaTitulo').textContent = r.nombre;
+      $('#hojaNota').textContent = `${r.nota} · ${total} s en total`;
+      $('#hojaPasos').innerHTML = r.pasos.map((p, k) => filaPaso(p, k)).join('');
+      $('#btnServirHoja').disabled = !transporte;
+      $('#btnServirHoja').textContent = transporte ? '▶ Servir' : 'Conecta la placa';
     }
-    return `
-      <div class="cifra">
-        <span class="cifra__num oro">${Math.round(r.global * 100)}%</span>
-        <span class="cifra__pie">precisión media en ${r.partidas} servicio${r.partidas === 1 ? '' : 's'}</span>
-        <p class="estrellas" style="margin:10px 0 0">${r.estrellasTotales}/${r.estrellasPosibles} ★</p>
-        ${r.flojo ? `<p class="gesto__pista" style="margin-top:8px">Tu punto flaco: <b>${esc(r.flojo.label)}</b> (${Math.round(r.flojo.media * 100)} %)</p>` : ''}
-      </div>`;
+    hoja.hidden = !si;
+    $('#veloHoja').hidden = !si;
+    if (si) $('#btnServirHoja').focus();
   }
 
-  /* --- medidor compartido: lo usan entrenar, jugar e inferencia --- */
+  function empezarPartida(receta) {
+    if (!transporte) { recado('Conecta la placa o arranca el simulador'); return; }
+
+    ultimaActa = null;
+    partida = new Partida(receta, {
+      onPaso: (p, i, total) => {
+        const c = CLASES.find(x => x.id === p.clase);
+        if ($('#jGesto')) $('#jGesto').textContent = c ? c.label : p.clase;
+        if ($('#jTexto')) $('#jTexto').textContent = p.texto;
+        if ($('#jPaso'))  $('#jPaso').textContent = receta.practica ? 'Practica' : `Paso ${i + 1} de ${total}`;
+        refrescarLista();
+      },
+
+      onTick: (t) => {
+        const crono = $('#jCrono');
+        if (crono) crono.textContent = t.restanteS.toFixed(1);
+
+        const linea = $('#jAroLinea');
+        if (linea) {
+          // El aro se vacía con el tiempo: el hueco crece según lo gastado.
+          const gastado = 1 - (t.restanteS / t.paso.seg);
+          linea.style.strokeDashoffset = (VUELTA * gastado).toFixed(1);
+        }
+        $('#jAro')?.classList.toggle('es-poco', t.restanteS < 2);
+
+        moverMedidor(t.conf, t.acierto, t.acierto ? '¡así!' : (t.detectado ? 'otro gesto' : 'sin señal'));
+      },
+
+      onFin: (acta) => {
+        partida = null;
+        ultimaActa = acta;
+        if (receta.practica) {
+          recado(`${acta.nombre}: ${Math.round(acta.precision * 100)} % de precisión`);
+          ultimaActa = null;
+          irA('entrenar');
+        } else {
+          recado(`${acta.puntos} puntos · ${acta.estrellas} estrella${acta.estrellas === 1 ? '' : 's'}`);
+          irA('jugar');
+        }
+      },
+    });
+
+    // Montar la pantalla ANTES de arrancar: arrancar() dispara onPaso de
+    // inmediato, y si el DOM no está el primer gesto se queda sin pintar.
+    irA('jugar');
+    partida.arrancar();
+  }
+
   function moverMedidor(conf, bien, etiqueta) {
     const liq = $('#medidorLiquido');
     if (!liq) return;
@@ -197,261 +440,6 @@
   }
 
   /* ==========================================================================
-     PANTALLA INFERIOR — las vistas
-     ======================================================================== */
-  function pintarVista() {
-    if (vista === 'recetas')  pintarRecetas();
-    if (vista === 'entrenar') pintarEntrenar();
-    if (vista === 'jugar')    pintarJugar();
-    if (vista === 'progreso') pintarProgreso();
-  }
-
-  function pintarRecetas() {
-    const d = Libreta.resumen();
-    $('#listaRecetas').innerHTML = d.recetas.map(r => `
-      <button class="ficha ${r.id === recetaElegida ? 'es-elegida' : ''}" type="button" data-receta="${r.id}">
-        <span>
-          <span class="ficha__nombre">${esc(r.nombre)}</span>
-          <span class="ficha__nota">${esc(r.nota)}</span>
-        </span>
-        <span class="ficha__dcha">
-          <span class="grados">${'◆'.repeat(r.grado)}<span class="apagado">${'◆'.repeat(3 - r.grado)}</span></span><br>
-          <span class="ficha__estrellas">${r.marca ? pintarEstrellas(r.marca.estrellas) : '<span class="apagada">★★★</span>'}</span>
-        </span>
-      </button>`).join('');
-
-    $('#pieRecetas').innerHTML =
-      `<button class="btn btn--laton btn--bloque" type="button" data-servir>Servir este cóctel</button>`;
-  }
-
-  function pintarEntrenar() {
-    $('#listaGestos').innerHTML = GESTOS.map(c => `
-      <button class="ficha ${c.id === gestoElegido ? 'es-elegida' : ''}" type="button" data-gesto="${c.id}">
-        <span>
-          <span class="ficha__nombre">${esc(c.label)}</span>
-          <span class="ficha__nota">${esc(c.desc)}</span>
-        </span>
-      </button>`).join('');
-
-    $('#demoEntrenar').innerHTML = cajaDemo();
-    $('#btnEntrenar').disabled = !transporte;
-    $('#btnEntrenar').textContent = partida?.viva ? 'Dejarlo' : 'Empezar práctica';
-  }
-
-  /* Con el simulador no hay muñeca que mover: estos botones cambian el gesto
-     que la "placa" está fingiendo, para poder jugar y enseñar el flujo. */
-  function cajaDemo() {
-    if (transporte?.nombre !== 'sim') return '';
-    return `<div class="demo">
-      <span class="demo__txt">Modo simulador: elige qué gesto está haciendo la coctelera.</span>
-      ${GESTOS.map(c => `<button class="demo__btn" type="button" data-simgesto="${c.id}"
-        aria-pressed="${transporte.gesto === c.id}">${esc(c.label)}</button>`).join('')}
-    </div>`;
-  }
-
-  function pintarJugar() {
-    const cuerpo = $('#cuerpoJugar');
-    const pie = $('#pieJugar');
-    const r = recetaPorId.get(recetaElegida);
-    $('#tituloJugar').textContent = r ? r.nombre : 'Servicio';
-
-    if (partida?.viva) {
-      // La pantalla táctil lleva la receta entera con el paso en curso
-      // marcado: arriba va el gesto grande, aquí el sitio donde estás.
-      cuerpo.innerHTML = `
-        <ol class="receta-pasos" id="jLista">
-          ${r.pasos.map((p, k) => {
-            const c = CLASES.find(x => x.id === p.clase);
-            return `<li class="${k < partida.idx ? 'es-hecho' : k === partida.idx ? 'es-actual' : ''}">
-                      <b>${esc(c ? c.label : p.clase)}</b> ${esc(p.texto)}<time>${p.seg} s</time>
-                    </li>`;
-          }).join('')}
-        </ol>
-        ${cajaDemo()}`;
-      pie.innerHTML = `<button class="btn btn--bloque" type="button" data-abandonar>Abandonar el servicio</button>`;
-      return;
-    }
-
-    if (ultimaActa && ultimaActa.recetaId === recetaElegida) {
-      cuerpo.innerHTML = `
-        <div class="acta">
-          <div class="acta__estrellas">${pintarEstrellas(ultimaActa.estrellas)}</div>
-          <p class="acta__pts serif oro">${ultimaActa.puntos}</p>
-          <p class="acta__pie">${Math.round(ultimaActa.precision * 100)} % de precisión</p>
-          <div class="acta__detalle barras">
-            ${ultimaActa.pasos.map(p => {
-              const c = CLASES.find(x => x.id === p.clase);
-              return barraHtml(c ? c.label : p.clase, p.precision);
-            }).join('')}
-          </div>
-        </div>`;
-      pie.innerHTML = `
-        <button class="btn btn--laton btn--bloque" type="button" data-servir>Repetir</button>
-        <button class="btn btn--bloque btn--fantasma" type="button" data-ir="recetas" style="margin-top:7px">Elegir otra receta</button>`;
-      return;
-    }
-
-    cuerpo.innerHTML = `
-      ${transporte ? '' : '<p class="aviso">Sin placa conectada no hay juego: el modelo corre en el Arduino y la app solo lee lo que él decide. Conecta desde el <b>Taller</b>, o arranca el <b>simulador</b>.</p>'}
-      <ol class="receta-pasos">
-        ${r.pasos.map(p => {
-          const c = CLASES.find(x => x.id === p.clase);
-          return `<li><b>${esc(c ? c.label : p.clase)}</b> ${esc(p.texto)}<time>${p.seg} s</time></li>`;
-        }).join('')}
-      </ol>
-      ${cajaDemo()}`;
-    pie.innerHTML = `<button class="btn btn--laton btn--bloque" type="button" data-servir ${transporte ? '' : 'disabled'}>Servir</button>`;
-  }
-
-  function barraHtml(etiqueta, v) {
-    const pct = Math.round(v * 100);
-    return `<div class="barra ${v < 0.5 ? 'es-flojo' : ''}">
-      <span>${esc(etiqueta)}</span>
-      <span class="barra__via"><span class="barra__lleno" style="width:${pct}%"></span></span>
-      <span class="barra__n">${pct}%</span>
-    </div>`;
-  }
-
-  function pintarProgreso() {
-    const r = Libreta.resumen();
-
-    if (!r.partidas && r.gestos.every(g => !g.intentos)) {
-      $('#cuerpoProgreso').innerHTML = '<p class="vacio">La libreta está en blanco.<br>Sirve tu primer cóctel.</p>';
-      $('#pieProgreso').innerHTML = '<button class="btn btn--laton btn--bloque" type="button" data-ir="recetas">Ver la carta</button>';
-      return;
-    }
-
-    /* Precisión por gesto: la misma medida repetida entre categorías, así que
-       va en un solo tono. Una paleta categórica aquí daría a entender que el
-       color significa algo. */
-    $('#cuerpoProgreso').innerHTML = `
-      <p class="versalita" style="color:var(--laton-hondo);margin:0 0 8px">Precisión por gesto</p>
-      <div class="barras">
-        ${r.gestos.map(g => g.media === null
-          ? `<div class="barra"><span>${esc(g.label)}</span><span class="barra__via"></span><span class="barra__n">—</span></div>`
-          : barraHtml(g.label, g.media)).join('')}
-      </div>
-
-      <p class="versalita" style="color:var(--laton-hondo);margin:16px 0 8px">Marcas</p>
-      <table class="libreta">
-        <thead><tr><th>Cóctel</th><th>★</th><th>Mejor</th></tr></thead>
-        <tbody>
-          ${r.recetas.map(x => `<tr>
-            <td>${esc(x.nombre)}</td>
-            <td class="ficha__estrellas">${x.marca ? pintarEstrellas(x.marca.estrellas) : '<span class="apagada">★★★</span>'}</td>
-            <td>${x.marca ? x.marca.mejorPts : '—'}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>`;
-
-    $('#pieProgreso').innerHTML =
-      '<button class="btn btn--bloque btn--fantasma" type="button" data-borrar-libreta>Borrar la libreta</button>';
-  }
-
-  /* ==========================================================================
-     ACCIONES DEL SALÓN
-     ======================================================================== */
-  function initAcciones() {
-    document.addEventListener('click', (e) => {
-      const rec = e.target.closest('[data-receta]');
-      if (rec) { recetaElegida = rec.dataset.receta; pintarRecetas(); pintarHud(); return; }
-
-      const ges = e.target.closest('[data-gesto]');
-      if (ges) { gestoElegido = ges.dataset.gesto; pintarEntrenar(); pintarHud(); return; }
-
-      const sim = e.target.closest('[data-simgesto]');
-      if (sim) {
-        transporte?.setGesto?.(sim.dataset.simgesto);
-        $$('[data-simgesto]').forEach(b => b.setAttribute('aria-pressed', String(b === sim)));
-        return;
-      }
-
-      if (e.target.closest('[data-servir]'))    { empezarPartida(recetaPorId.get(recetaElegida)); return; }
-      if (e.target.closest('[data-abandonar]')) { partida?.abandonar(); partida = null; irA('jugar'); return; }
-
-      if (e.target.closest('[data-borrar-libreta]')) {
-        if (!confirm('¿Borrar todas tus marcas? No se puede deshacer.')) return;
-        Libreta.borrar();
-        ultimaActa = null;
-        pintarProgreso(); pintarHud();
-        recado('Libreta en blanco');
-        return;
-      }
-    });
-
-    $('#btnEntrenar').addEventListener('click', () => {
-      if (partida?.viva) { partida.abandonar(); partida = null; pintarEntrenar(); pintarHud(); return; }
-      empezarPartida(recetaDePractica(gestoElegido, 10), 'entrenar');
-    });
-
-    $('#btnConectarRapido').addEventListener('click', () => {
-      if (transporte) { desconectar(); return; }
-      abrirTaller(true);
-    });
-  }
-
-  function empezarPartida(receta, destino = 'jugar') {
-    if (!transporte) { recado('Conecta la placa o arranca el simulador'); return; }
-
-    ultimaActa = null;
-    irA(destino);
-
-    partida = new Partida(receta, {
-      onPaso: (p, i, total) => {
-        const c = CLASES.find(x => x.id === p.clase);
-        $('#jGesto')  && ($('#jGesto').textContent = c ? c.label : p.clase);
-        $('#jTexto')  && ($('#jTexto').textContent = p.texto);
-        $('#jPaso')   && ($('#jPaso').textContent = receta.practica ? 'Practica' : `Paso ${i + 1} de ${total}`);
-        const pasos = $('#jPasos');
-        if (pasos) {
-          pasos.innerHTML = Array.from({ length: total }, (_, k) =>
-            `<span class="pasos__pieza ${k < i ? 'es-hecho' : k === i ? 'es-actual' : ''}"></span>`).join('');
-        }
-        // En «entrenar» el HUD es el del gesto: hay que cambiarlo al de juego.
-        if (destino === 'entrenar' && !$('#jGesto')) {
-          $('#hudCuerpo').innerHTML = hudJuegoBase();
-        }
-
-        // Repintar solo las clases de la lista de abajo. Rehacer la vista
-        // entera destruiría los botones del simulador a media partida.
-        $$('#jLista li').forEach((li, k) => {
-          li.classList.toggle('es-hecho',  k < i);
-          li.classList.toggle('es-actual', k === i);
-        });
-      },
-
-      onTick: (t) => {
-        const crono = $('#jCrono');
-        if (crono) {
-          crono.textContent = t.restanteS.toFixed(1);
-          crono.classList.toggle('es-poco', t.restanteS < 2);
-        }
-        moverMedidor(t.conf, t.acierto, t.acierto ? '¡así!' : (t.detectado ? 'otro gesto' : 'sin señal'));
-        const est = $('#jEstrellas');
-        if (est) est.innerHTML = pintarEstrellas(estrellasDe(t.precision));
-      },
-
-      onFin: (acta) => {
-        partida = null;
-        ultimaActa = acta;
-        if (receta.practica) {
-          recado(`${acta.nombre}: ${Math.round(acta.precision * 100)} % de precisión`);
-          irA('entrenar');
-        } else {
-          recado(`${acta.puntos} puntos · ${acta.estrellas} estrella${acta.estrellas === 1 ? '' : 's'}`);
-          irA('jugar');
-        }
-      },
-    });
-
-    // El HUD de juego hace falta también cuando la práctica arranca desde
-    // «entrenar», donde el HUD por defecto es el del gesto elegido.
-    $('#hudCuerpo').innerHTML = hudJuegoBase();
-    partida.arrancar();
-    pintarVista();
-  }
-
-  /* ==========================================================================
      CONEXIÓN
      ======================================================================== */
   function initConexion() {
@@ -461,9 +449,8 @@
     if (location.protocol === 'https:') $('#avisoMixto').hidden = false;
 
     $('#simGesto').innerHTML = CLASES.map(c => `<option value="${c.id}">${esc(c.label)} — ${esc(c.desc)}</option>`).join('');
-
     $$('[data-conectar]').forEach(b => b.addEventListener('click', () => conectar(b.dataset.conectar)));
-    $('#btnDesconectar').addEventListener('click', desconectar);
+    $('#chapaPlaca').addEventListener('click', () => { if (transporte) desconectar(); else irA('taller'); });
   }
 
   function marcarSinSoporte(t) {
@@ -494,7 +481,6 @@
       hz.marcas.length = 0;
       t0Reloj = performance.now();
 
-      $('#btnDesconectar').hidden = false;
       $$('.enchufe').forEach(c => c.classList.toggle('es-viva', c.dataset.enchufe === tipo));
       $('#btnGrabar').disabled = false;
       $('#pistaGrabar').textContent = 'Listo para grabar.';
@@ -505,7 +491,7 @@
       transporte = null;
       // Cerrar el diálogo del navegador no es un error que reportar.
       const cancelado = err?.name === 'NotFoundError' || /User cancelled|cancelad/i.test(err?.message || '');
-      pintarEstado(cancelado ? 'off' : 'err', cancelado ? 'Sin conexión' : (err.message || 'Falló la conexión'));
+      pintarEstado(cancelado ? 'off' : 'err', cancelado ? 'Sin placa' : (err.message || 'Falló'));
       if (!cancelado) recado(err.message || 'No se pudo conectar');
     }
   }
@@ -517,21 +503,20 @@
     recorder.cancelar();
     partida?.abandonar();
     partida = null;
-    $('#btnDesconectar').hidden = true;
     $$('.enchufe').forEach(c => c.classList.remove('es-viva'));
     $('#btnGrabar').disabled = true;
     $('#pistaGrabar').textContent = 'Conecta una fuente para empezar.';
-    pintarEstado('off', 'Sin conexión');
+    pintarEstado('off', 'Sin placa');
     pintarVista();
   }
 
+  const LUZ = { on: '🟢', wait: '🟡', err: '🔴', off: '⚫' };
+
   function pintarEstado(estado, msg) {
-    $('#punto').dataset.estado = estado;
-    $('#luz').dataset.estado = estado;
-    $('#estadoTaller').textContent = msg;
-    $('#hudEstado').textContent = msg;
-    $('#pieEstado').textContent = estado === 'on' ? msg : 'sin placa';
-    $('#btnConectarRapido').textContent = estado === 'on' ? 'Desconectar' : 'Conectar placa';
+    $('#chapaPunto').textContent = LUZ[estado] || LUZ.off;
+    // En la chapa cabe poco: el mensaje largo va al title, no cortado.
+    $('#chapaTxt').textContent = estado === 'on' ? 'Conectada' : msg;
+    $('#chapaPlaca').title = msg;
   }
 
   /* ==========================================================================
@@ -541,19 +526,15 @@
     const m = parseLine(linea);
     if (!m) return;
 
-    if (m.tipo === 'hola') {
-      pintarEstado('on', `${m.placa}${m.hz ? ` · ${m.hz} Hz` : ''}`);
-      return;
-    }
+    if (m.tipo === 'hola') { pintarEstado('on', `${m.placa}${m.hz ? ` · ${m.hz} Hz` : ''}`); return; }
 
     if (m.tipo === 'inferencia') {
       partida?.alimentar(m);
       pintarInferencia(m);
       // Fuera de partida, el medidor de «entrenar» sigue vivo como espejo.
       if (!partida?.viva && vista === 'entrenar') {
-        moverMedidor(m.clase === gestoElegido ? m.confianza : 0,
-                     m.clase === gestoElegido && m.confianza >= UMBRAL_CONF,
-                     m.clase === gestoElegido ? 'confianza' : 'otro gesto');
+        const suyo = m.clase === gestoElegido;
+        moverMedidor(suyo ? m.confianza : 0, suyo && m.confianza >= UMBRAL_CONF, suyo ? 'confianza' : 'otro gesto');
       }
       return;
     }
@@ -570,7 +551,7 @@
   }
 
   /* ==========================================================================
-     TALLER — gráficas en vivo
+     TALLER — gráficas
      ======================================================================== */
   function initGraficas() {
     lienzoAcc = new StreamChart($('#lienzoAcc'), { unidad: 'g',   decimales: 2, readout: $('#readoutAcc') });
@@ -610,8 +591,8 @@
     if (ts - ultimoDibujo < 33) return;          // 30 fps bastan
     ultimoDibujo = ts;
 
-    if (!document.body.classList.contains('es-taller')) return;
-    if (pausado || !$('#p-vivo').classList.contains('es-activa')) return;
+    if (vista !== 'taller' || pausado) return;
+    if (!$('#p-vivo').classList.contains('es-activa')) return;
 
     const ventana = Number($('#selVentana').value) * 1000;
     const ult = buffer.last();
@@ -673,7 +654,7 @@
         });
         if (take) recado(`Toma guardada · ${take.n} muestras a ${take.hzReal} Hz`);
       } finally {
-        $('#btnGrabar').textContent = 'Grabar toma';
+        $('#btnGrabar').textContent = '⏺ Grabar toma';
       }
     });
 
@@ -701,8 +682,8 @@
 
   function pintarTablado(ev) {
     const caja = $('#tablado');
-    caja.classList.toggle('es-contando',  ev.fase === 'cuenta');
-    caja.classList.toggle('es-grabando',  ev.fase === 'grabando');
+    caja.classList.toggle('es-contando', ev.fase === 'cuenta');
+    caja.classList.toggle('es-grabando', ev.fase === 'grabando');
 
     if (ev.fase === 'cuenta') {
       $('#tabladoN').textContent = Math.ceil(ev.restante);
@@ -748,12 +729,12 @@
     $('#tomas').innerHTML = takes.slice().reverse().map(t => {
       const label = CLASES.find(c => c.id === t.clase)?.label || t.clase;
       const hora = new Date(t.fecha).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' });
-      return `<div class="toma">
+      return `<div class="panel toma">
         <div>
           <div class="toma__n">${esc(label)} · ${esc(t.quien)}</div>
           <div class="toma__m">${t.n} muestras · ${(t.duracionMs / 1000).toFixed(1)} s · ${t.hzReal} Hz · ${hora}</div>
         </div>
-        <button class="btn btn--mini" type="button" data-dl="${t.id}">CSV</button>
+        <button class="pieza" type="button" data-dl="${t.id}">CSV</button>
         <button class="toma__x" type="button" data-del="${t.id}" aria-label="Borrar toma">✕</button>
       </div>`;
     }).join('');
@@ -806,24 +787,16 @@
 
   addEventListener('beforeunload', () => { try { transporte?.disconnect(); } catch {} });
 
-  /* La portada enlaza a consola.html#recetas, #jugar, #taller… Entrar por
-     el menú cuando el usuario ya eligió sería devolverle un paso atrás. */
-  function entradaPorEnlace() {
-    const destino = (location.hash || '').replace('#', '');
-    if (destino === 'taller') { abrirTaller(true); return; }
-    if (['recetas', 'entrenar', 'jugar', 'progreso'].includes(destino)) irA(destino);
-  }
-
   function init() {
     initNavegacion();
     initAcciones();
     initConexion();
     initGraficas();
     initGrabador();
-    pintarVista();
-    pintarHud();
-    entradaPorEnlace();
-    addEventListener('hashchange', entradaPorEnlace);
+
+    // La portada enlaza a consola.html#recetas, #jugar, #taller…
+    const destino = (location.hash || '').replace('#', '');
+    irA(['recetas', 'entrenar', 'jugar', 'progreso', 'taller'].includes(destino) ? destino : 'recetas');
   }
 
   document.readyState === 'loading'

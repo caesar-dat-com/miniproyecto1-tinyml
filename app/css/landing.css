@@ -1,115 +1,9 @@
 /* ============================================================================
-   MixLab — portada
-   Foto de bar de fondo, controles gordos de juego encima. Pensada para dedo:
-   nada por debajo de 56 px, sin estados que dependan del hover y con los
-   márgenes de seguridad de iPhone/iPad respetados.
+   landing.css — solo lo propio de la portada
+   Los tokens, el fondo y las piezas gordas viven en base.css.
    ========================================================================== */
 
-:root {
-  color-scheme: dark;
-
-  --ambar:     #f0a32a;
-  --ambar-osc: #a8660d;
-  --verde:     #35a06a;
-  --verde-osc: #1d6742;
-  --rojo:      #d9564a;
-  --rojo-osc:  #96301f;
-  --azul:      #3f88c5;
-  --azul-osc:  #235a8c;
-  --dorado:    #f5b942;
-  --oro-osc:   #96700f;
-
-  --crema:     #fff8ec;
-  --humo:      rgba(255, 248, 236, .74);
-  --noche:     #120c07;
-
-  /* Fuente redondeada: en iPad y iPhone sale la del sistema, que es justo
-     el tipo gordito que pide esta interfaz. */
-  --redonda: ui-rounded, "SF Pro Rounded", -apple-system, "Segoe UI Variable Display",
-             "Hiragino Maru Gothic ProN", "Arial Rounded MT Bold", system-ui, sans-serif;
-
-  --borde:  3px;
-  --r-card: 26px;
-
-  --seg-t: env(safe-area-inset-top, 0px);
-  --seg-b: env(safe-area-inset-bottom, 0px);
-  --seg-l: env(safe-area-inset-left, 0px);
-  --seg-r: env(safe-area-inset-right, 0px);
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-
-/* El atributo [hidden] vale display:none en la hoja del navegador, que
-   pierde contra cualquier regla de clase con display propio: un
-   .btn { display:inline-flex } deja el botón a la vista aunque el JS le
-   ponga hidden. Esta regla lo zanja para toda la hoja. */
-[hidden] { display: none !important; }
-
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
-}
-
-html, body { height: 100%; }
-
-body {
-  margin: 0;
-  background: var(--noche);
-  color: var(--crema);
-  font-family: var(--redonda);
-  font-size: 16px;
-  line-height: 1.4;
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
-  overflow: hidden;                 /* la portada cabe entera; no hay scroll */
-  overscroll-behavior: none;
-}
-
-a { text-decoration: none; color: inherit; }
-button { font: inherit; color: inherit; }
-
-:where(a, button):focus-visible {
-  outline: 3px solid var(--dorado);
-  outline-offset: 3px;
-}
-
-/* Relieve de texto: el mismo truco de los juegos de cocina — contorno oscuro
-   para que el texto claro se lea sobre cualquier zona de la foto. */
-.relieve {
-  text-shadow:
-    0 2px 0 rgba(0,0,0,.55),
-    0 0 1px rgba(0,0,0,.9),
-    0 6px 18px rgba(0,0,0,.6);
-}
-
-/* ============================================================ fondo */
-.fondo { position: fixed; inset: 0; z-index: 0; }
-
-.fondo img {
-  width: 100%; height: 100%;
-  object-fit: cover;
-  /* En vertical la foto es mucho más ancha que la pantalla: se recorta por
-     los lados. Este punto deja a la vista la estantería y el neón. */
-  object-position: 62% 42%;
-  /* Miniatura borrosa de 200 bytes detrás: evita el fogonazo negro mientras
-     baja la foto de verdad. */
-  background: url("data:image/webp;base64,UklGRo4AAABXRUJQVlA4IIIAAABQBACdASoYAA4APuleqE0pJSQiMAgBIB0JaACdMoRwH1bAWuM3Esww0NkAAP40BphqmTl1DmMrD+8ZZIi8yHwDQJWrKyhc+wbtFFvr//E3A8+Dcdb4Q1GzwTOkuchz1foCh1IsrPYcdhnso30h2Veeu16Y0jJ0zd49Etzqs4caQgAA") center/cover no-repeat;
-}
-
-/* Velo: sin blur a propósito. Un backdrop-filter a pantalla completa cuesta
-   caro en iPad; un par de degradados dan el mismo contraste gratis. */
-.fondo__velo {
-  position: absolute; inset: 0;
-  background:
-    linear-gradient(180deg, rgba(10,6,3,.74) 0%, rgba(10,6,3,.20) 28%, rgba(10,6,3,.40) 64%, rgba(10,6,3,.88) 100%),
-    radial-gradient(120% 80% at 50% 38%, transparent 38%, rgba(10,6,3,.48) 100%);
-}
-
-/* En vertical estrecho la foto se recorta mucho por los lados: este encuadre
-   deja la estantería iluminada detrás de las tarjetas, no el mueble oscuro. */
-@media (orientation: portrait) and (max-width: 620px) {
-  .fondo img { object-position: 57% 32%; }
-}
+body { overflow: hidden; }
 
 /* ============================================================ HUD */
 .hud {
@@ -119,44 +13,7 @@ button { font: inherit; color: inherit; }
   right: calc(var(--seg-r) + 14px);
   display: flex; align-items: center; gap: 12px;
 }
-
-/* chapita de estrellas */
-.chapa {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 8px 16px 8px 12px;
-  border-radius: 999px;
-  border: var(--borde) solid rgba(255,255,255,.92);
-  background: linear-gradient(180deg, #ffd978, var(--dorado) 48%, var(--oro-osc));
-  color: #40290a;
-  font-weight: 800; font-size: 1.05rem;
-  box-shadow: 0 4px 0 rgba(0,0,0,.35), 0 10px 22px rgba(0,0,0,.45),
-              inset 0 2px 0 rgba(255,255,255,.6);
-}
-.chapa__ico { font-size: 1.1rem; filter: drop-shadow(0 1px 0 rgba(255,255,255,.5)); }
-.chapa__n small { opacity: .62; font-size: .8em; }
-
-/* botones circulares */
 .redondos { display: flex; gap: 10px; margin-left: auto; }
-
-.redondo {
-  width: 56px; height: 56px; flex: none;
-  display: grid; place-items: center;
-  border-radius: 50%;
-  border: var(--borde) solid rgba(255,255,255,.92);
-  font-size: 1.35rem; cursor: pointer;
-  color: #fff;
-  box-shadow: 0 5px 0 rgba(0,0,0,.38), 0 10px 22px rgba(0,0,0,.45),
-              inset 0 3px 0 rgba(255,255,255,.42);
-  transition: transform .12s ease, box-shadow .12s ease;
-  touch-action: manipulation;
-}
-.redondo span { filter: drop-shadow(0 1px 1px rgba(0,0,0,.45)); line-height: 1; }
-.redondo:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(0,0,0,.38), 0 4px 10px rgba(0,0,0,.4), inset 0 3px 0 rgba(255,255,255,.42); }
-
-.redondo--verde  { background: linear-gradient(180deg, #5fc994, var(--verde) 46%, var(--verde-osc)); }
-.redondo--azul   { background: linear-gradient(180deg, #78b6e8, var(--azul) 46%, var(--azul-osc)); }
-.redondo--dorado { background: linear-gradient(180deg, #ffd978, var(--dorado) 46%, var(--oro-osc)); color: #40290a; }
-.redondo--rojo   { background: linear-gradient(180deg, #ef8b7e, var(--rojo) 46%, var(--rojo-osc)); font-weight: 900; }
 
 /* ============================================================ salón */
 .salon {
@@ -176,8 +33,8 @@ button { font: inherit; color: inherit; }
 .marca__copa {
   width: clamp(52px, 9dvh, 80px); height: auto;
   color: var(--dorado);
-  /* El neón de la foto, repetido en el logo. Dos sombras: uno cerca y
-     saturado, otro lejos y difuso. */
+  /* El neón de la foto, repetido en el logo. Dos sombras: una cerca y
+     saturada, otra lejos y difusa. */
   filter: drop-shadow(0 0 5px rgba(245,185,66,.9)) drop-shadow(0 0 18px rgba(240,140,30,.55));
 }
 
@@ -186,10 +43,7 @@ button { font: inherit; color: inherit; }
   font-size: clamp(2.6rem, 9.5vw, 4.4rem);
   font-weight: 800; letter-spacing: -.01em; line-height: 1;
   color: var(--crema);
-  text-shadow:
-    0 2px 0 rgba(0,0,0,.5),
-    0 0 18px rgba(245,185,66,.5),
-    0 8px 26px rgba(0,0,0,.65);
+  text-shadow: 0 2px 0 rgba(0,0,0,.5), 0 0 18px rgba(245,185,66,.5), 0 8px 26px rgba(0,0,0,.65);
 }
 
 .marca__lema {
@@ -206,77 +60,7 @@ button { font: inherit; color: inherit; }
   width: 100%; max-width: 560px;
 }
 
-.plato {
-  position: relative;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 2px;
-  min-height: 116px; padding: 14px 10px 12px;
-  border-radius: var(--r-card);
-  border: var(--borde) solid rgba(255,255,255,.9);
-  /* El relieve gordo: sombra dura abajo + brillo dentro arriba. Al pulsar
-     la tarjeta baja y la sombra se acorta, como una tecla de verdad. */
-  box-shadow: 0 6px 0 rgba(0,0,0,.4), 0 14px 30px rgba(0,0,0,.5),
-              inset 0 3px 0 rgba(255,255,255,.5);
-  transition: transform .12s ease, box-shadow .12s ease;
-  touch-action: manipulation;
-}
-.plato:active { transform: translateY(5px); box-shadow: 0 1px 0 rgba(0,0,0,.4), 0 6px 14px rgba(0,0,0,.45), inset 0 3px 0 rgba(255,255,255,.5); }
-
-.plato--ambar { background: linear-gradient(180deg, #f8c163, var(--ambar) 46%, var(--ambar-osc)); color: #3a2405; }
-.plato--verde { background: linear-gradient(180deg, #62c894, var(--verde) 46%, var(--verde-osc)); color: #062416; }
-.plato--rojo  { background: linear-gradient(180deg, #ef8b7e, var(--rojo) 46%, var(--rojo-osc)); color: #370d07; }
-.plato--azul  { background: linear-gradient(180deg, #7bb8e9, var(--azul) 46%, var(--azul-osc)); color: #06223a; }
-
-.plato__ico { font-size: clamp(1.7rem, 6vw, 2.2rem); line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,.3)); }
-.plato__nombre { font-size: clamp(1rem, 4vw, 1.2rem); font-weight: 800; line-height: 1.1; text-shadow: 0 1px 0 rgba(255,255,255,.35); }
-.plato__nota { font-size: clamp(.72rem, 2.8vw, .82rem); font-weight: 600; opacity: .72; line-height: 1.2; }
-
-/* medallas: tres estrellas arriba, como en los juegos de recetas */
-.plato__medallas {
-  position: absolute; top: 8px; left: 0; right: 0;
-  display: flex; justify-content: center; gap: 3px;
-  font-size: .72rem; line-height: 1;
-}
-.plato__medallas i { font-style: normal; opacity: .3; }
-.plato__medallas i.on { opacity: 1; color: #fff8d0; text-shadow: 0 0 6px rgba(255,230,140,.95), 0 1px 1px rgba(0,0,0,.4); }
-
-.plato__candado {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-  border-radius: calc(var(--r-card) - var(--borde));
-  background: rgba(8,5,3,.62);
-  text-align: center; padding: 0 10px;
-}
-.plato__candado-ico { font-size: 1.7rem; line-height: 1; }
-.plato__candado b { font-size: .74rem; font-weight: 700; color: var(--humo); line-height: 1.2; }
-
-/* El candado tapa la tarjeta entera: si el contenido de debajo sigue
-   visible, el icono se monta sobre el nombre y se lee «Li🔒ta». */
-.plato.es-bloqueado { filter: saturate(.5); }
-.plato.es-bloqueado > :not(.plato__candado) { visibility: hidden; }
-
-/* --- botón grande --- */
-.grande {
-  display: inline-flex; align-items: center; justify-content: center; gap: 12px;
-  width: 100%; max-width: 560px; min-height: 68px;
-  padding: 16px 30px;
-  border: var(--borde) solid rgba(255,255,255,.95);
-  border-radius: 999px; cursor: pointer;
-  background: linear-gradient(180deg, #ffd978, var(--dorado) 46%, var(--oro-osc));
-  color: #3a2405;
-  font-size: clamp(1.1rem, 4.6vw, 1.4rem); font-weight: 800;
-  box-shadow: 0 7px 0 rgba(0,0,0,.42), 0 16px 34px rgba(0,0,0,.5),
-              inset 0 3px 0 rgba(255,255,255,.62);
-  transition: transform .12s ease, box-shadow .12s ease;
-  touch-action: manipulation;
-}
-.grande:active { transform: translateY(6px); box-shadow: 0 1px 0 rgba(0,0,0,.42), 0 6px 14px rgba(0,0,0,.45), inset 0 3px 0 rgba(255,255,255,.62); }
-.grande__ico { font-size: .9em; }
-.grande--suave {
-  background: linear-gradient(180deg, #4a423a, #2a241e 46%, #17120e);
-  color: var(--crema); border-color: rgba(255,255,255,.35);
-  margin-top: 4px;
-}
+.grande { max-width: 560px; }
 
 /* --- firma --- */
 .firma {
@@ -288,33 +72,10 @@ button { font: inherit; color: inherit; }
 .firma__punto[data-estado="on"] { background: #57d39a; box-shadow: 0 0 10px rgba(87,211,154,.9); }
 
 /* ============================================================ hoja de ayuda */
-.velo {
-  position: fixed; inset: 0; z-index: 8;
-  background: rgba(6,4,2,.66);
-  animation: entrar .18s ease;
-}
-@keyframes entrar { from { opacity: 0; } }
-
-.hoja {
-  position: fixed; z-index: 9;
-  left: 0; right: 0; bottom: 0;
-  max-height: 88dvh; overflow-y: auto;
-  padding: 14px calc(var(--seg-r) + 22px) calc(var(--seg-b) + 22px) calc(var(--seg-l) + 22px);
-  border-radius: 30px 30px 0 0;
-  border-top: var(--borde) solid rgba(255,255,255,.3);
-  background: linear-gradient(180deg, #221a13, #14100c);
-  box-shadow: 0 -16px 50px rgba(0,0,0,.7);
-  animation: subir .26s cubic-bezier(.22,1,.36,1);
-}
-@keyframes subir { from { transform: translateY(100%); } }
-
-.hoja__asa { width: 44px; height: 5px; border-radius: 3px; background: rgba(255,255,255,.28); margin: 0 auto 14px; }
-.hoja__titulo { margin: 0 0 16px; font-size: 1.35rem; font-weight: 800; text-align: center; }
-
-.pasos { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; text-align: left; }
-.pasos li { display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: start; font-size: .93rem; color: var(--humo); }
-.pasos b { color: var(--crema); }
-.pasos__n {
+.pasos-ayuda { margin: 0; padding: 0; list-style: none; display: grid; gap: 14px; text-align: left; }
+.pasos-ayuda li { display: grid; grid-template-columns: 38px 1fr; gap: 12px; align-items: start; font-size: .93rem; color: var(--humo); }
+.pasos-ayuda b { color: var(--crema); }
+.pasos-ayuda__n {
   width: 38px; height: 38px; display: grid; place-items: center;
   border-radius: 50%; font-weight: 800; color: #3a2405;
   background: linear-gradient(180deg, #ffd978, var(--dorado) 50%, var(--oro-osc));
@@ -348,14 +109,10 @@ button { font: inherit; color: inherit; }
   .platos { grid-template-columns: repeat(4, minmax(0, 1fr)); max-width: 880px; gap: 16px; }
   .plato { min-height: 152px; border-radius: 30px; }
   .grande { max-width: 440px; min-height: 76px; }
-  .redondo { width: 62px; height: 62px; font-size: 1.5rem; }
   .salon { gap: 30px; }
-  .hoja { left: 50%; right: auto; bottom: 50%; transform: translate(-50%, 50%);
-          width: min(620px, 92vw); border-radius: 30px; border: var(--borde) solid rgba(255,255,255,.3); }
-  @keyframes subir { from { transform: translate(-50%, 60%); opacity: 0; } }
 }
 
-/* Teléfonos estrechos: que el botón grande nunca quede fuera de pantalla. */
+/* Teléfonos bajos: que el botón grande nunca quede fuera de pantalla. */
 @media (max-height: 680px) and (orientation: portrait) {
   .salon { gap: 12px; padding-top: calc(var(--seg-t) + 80px); }
   .marca__copa { width: 46px; }
