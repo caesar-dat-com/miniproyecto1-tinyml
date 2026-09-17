@@ -41,6 +41,33 @@ python3 -m http.server 8080
 # http://localhost:8080  ← localhost cuenta como contexto seguro: BLE y Serial funcionan
 ```
 
+## Dos páginas
+
+| | |
+|---|---|
+| `index.html` | **Portada.** Foto de bar de fondo y controles gordos de juego. Es la puerta de entrada y está pensada para dedo. |
+| `consola.html` | **La consola.** El salón de doble pantalla y, detrás, el taller. |
+
+### La portada
+
+Pensada para **iPad y teléfono**: nada por debajo de 56 px, sin nada que dependa
+del hover, con los márgenes de seguridad de iPhone respetados y sin scroll en
+ninguna orientación. En apaisado las cuatro tarjetas pasan a una fila.
+
+La foto de fondo pesaba **1,5 MB en PNG**. Va servida en cuatro anchos
+(640/960/1280/1672) en WebP con JPEG de reserva: el teléfono se baja **20 KB** y
+el iPad 33 KB, un 96 % menos. Detrás hay una miniatura borrosa de 200 bytes
+incrustada en el CSS para que no haya un fogonazo negro mientras baja la foto.
+
+El velo que oscurece la foto son dos degradados, **no un `backdrop-filter`**: un
+filtro a pantalla completa cuesta caro en iPad y aquí da el mismo contraste
+gratis.
+
+Las medallas de cada tarjeta salen de la **libreta real** — la portada carga
+`game.js` en vez de reimplementar el formato de guardado. La Libreta aparece con
+candado hasta que haya algo que anotar, y al tocarla lleva a la carta, que es lo
+que hay que hacer para abrirla.
+
 ## El salón
 
 La carta tiene cinco platos:

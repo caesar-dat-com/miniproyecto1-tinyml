@@ -1,0 +1,108 @@
+/* ============================================================================
+   landing.js — portada
+   Lee las marcas reales de la Libreta (js/game.js) y pinta las medallas.
+   ========================================================================== */
+(function () {
+  'use strict';
+
+  const $ = (s) => document.querySelector(s);
+
+  /* ---------------------------------------------------------- medallas ---
+     Tres estrellas por tarjeta. Cada zona tiene su propio listón: lo que
+     mide "progreso" no es lo mismo en recetas que en entrenamiento. */
+  function medallas(el, ganadas) {
+    if (!el) return;
+    el.innerHTML = [0, 1, 2].map(i => `<i class="${i < ganadas ? 'on' : ''}">★</i>`).join('');
+  }
+
+  function escalon(valor, listones) {
+    return listones.reduce((n, l) => valor >= l ? n + 1 : n, 0);
+  }
+
+  function pintar() {
+    const r = Libreta.resumen();
+
+    $('#nEstrellas').textContent = r.estrellasTotales;
+
+    // Recetas: cuántas tienen al menos una estrella.
+    const conMarca = r.recetas.filter(x => x.marca && x.marca.estrellas > 0).length;
+    medallas($('#med-recetas'), escalon(conMarca, [1, 3, 5]));
+
+    // Entrenar: gestos con precisión media decente.
+    const gestosOk = r.gestos.filter(g => g.media !== null && g.media >= 0.65).length;
+    medallas($('#med-entrenar'), escalon(gestosOk, [1, 3, 5]));
+
+    // Servicio: servicios completados.
+    medallas($('#med-jugar'), escalon(r.partidas, [1, 5, 12]));
+
+    // Libreta: se abre sola en cuanto hay algo que anotar. Mostrarla vacía
+    // no aporta nada, y el candado explica por qué todavía no.
+    const hayDatos = r.partidas > 0 || r.gestos.some(g => g.intentos > 0);
+    medallas($('#med-libreta'), hayDatos ? escalon(r.global || 0, [0.4, 0.65, 0.85]) : 0);
+
+    const libreta = $('#platoLibreta');
+    libreta.classList.toggle('es-bloqueado', !hayDatos);
+    libreta.querySelector('.plato__candado').hidden = hayDatos;
+    libreta.setAttribute('aria-label',
+      hayDatos ? 'Libreta, tus marcas' : 'Libreta bloqueada: sirve un cóctel primero');
+
+    // Un candado que no lleva a ninguna parte frustra. Lleva a la carta, que
+    // es justo lo que hay que hacer para desbloquearlo.
+    libreta.href = hayDatos ? 'consola.html#progreso' : 'consola.html#recetas';
+  }
+
+  /* ------------------------------------------------------ pantalla completa */
+  function initPantalla() {
+    const btn = $('#btnPantalla');
+    const raiz = document.documentElement;
+    const puede = raiz.requestFullscreen || raiz.webkitRequestFullscreen;
+
+    if (!puede) {
+      // Safari en iPhone no deja pantalla completa por API. La salida real
+      // es «Añadir a pantalla de inicio», que además abre sin barras.
+      btn.addEventListener('click', () => {
+        alert('En iPhone la pantalla completa se consigue añadiendo MixLab a la pantalla de inicio: Compartir → Añadir a pantalla de inicio.');
+      });
+      return;
+    }
+
+    btn.addEventListener('click', async () => {
+      try {
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          await (document.exitFullscreen?.() ?? document.webkitExitFullscreen?.());
+        } else {
+          await (raiz.requestFullscreen?.() ?? raiz.webkitRequestFullscreen?.());
+        }
+      } catch { /* el navegador puede negarlo sin motivo visible */ }
+    });
+  }
+
+  /* -------------------------------------------------------- hoja de ayuda */
+  function initHoja() {
+    const hoja = $('#hojaComo');
+    const velo = $('#veloHoja');
+    const btn  = $('#btnComo');
+
+    const abrir = (si) => {
+      hoja.hidden = !si;
+      velo.hidden = !si;
+      btn.setAttribute('aria-expanded', String(si));
+      document.body.style.overflow = si ? 'hidden' : '';
+      if (si) hoja.querySelector('[data-cerrar-hoja]').focus();
+      else btn.focus();
+    };
+
+    btn.addEventListener('click', () => abrir(hoja.hidden));
+    velo.addEventListener('click', () => abrir(false));
+    hoja.querySelector('[data-cerrar-hoja]').addEventListener('click', () => abrir(false));
+    addEventListener('keydown', (e) => { if (e.key === 'Escape' && !hoja.hidden) abrir(false); });
+  }
+
+  /* Al volver de la consola la portada sigue en memoria (bfcache): sin esto
+     las medallas se quedarían con las marcas de antes de jugar. */
+  addEventListener('pageshow', pintar);
+
+  pintar();
+  initPantalla();
+  initHoja();
+})();

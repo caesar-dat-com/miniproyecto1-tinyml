@@ -70,6 +70,13 @@
 /* ============================================================ base */
 *, *::before, *::after { box-sizing: border-box; }
 
+/* El atributo [hidden] vale display:none en la hoja del navegador, que
+   pierde contra cualquier regla de clase con display propio: un
+   .btn { display:inline-flex } deja el botón a la vista aunque el JS le
+   ponga hidden. Esta regla lo zanja para toda la hoja. */
+[hidden] { display: none !important; }
+
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
 }
@@ -490,11 +497,11 @@ a { color: var(--laton-claro); }
   font-size: .72rem; color: var(--crema-3);
   display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
 }
-.sala-pie button {
+.sala-pie button, .sala-pie a {
   background: none; border: 0; cursor: pointer; color: var(--crema-3);
   text-decoration: underline; text-underline-offset: 3px; font-size: inherit; padding: 0;
 }
-.sala-pie button:hover { color: var(--laton-claro); }
+.sala-pie button:hover, .sala-pie a:hover { color: var(--laton-claro); }
 
 /* ============================================================ el taller */
 body.es-taller .escena { display: none; }

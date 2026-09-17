@@ -4,403 +4,165 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MixLab · Coctelería TinyML</title>
-<meta name="description" content="Bar de autor en una consola de doble pantalla: aprende los gestos de coctelería con un sensor inercial y TinyML.">
-<meta name="theme-color" content="#0a0807">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2317110d'/%3E%3Cpath d='M16 18h32L34 34v12h8v4H22v-4h8V34z' fill='%23c9a227'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/app.css">
+<meta name="description" content="La coctelera que te enseña: gestos de bartender reconocidos con un sensor inercial y TinyML.">
+<meta name="theme-color" content="#120c07">
+
+<!-- Pantalla completa al añadir a la pantalla de inicio en iPad y iPhone -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MixLab">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23120c07'/%3E%3Cpath d='M15 17h34L36 33v13h9v4H19v-4h9V33z' fill='none' stroke='%23f5b942' stroke-width='3.4' stroke-linejoin='round'/%3E%3C/svg%3E">
+
+<!-- La foto de fondo se precarga: es lo primero que se ve y lo único pesado -->
+<link rel="preload" as="image" href="img/bar-1280.webp"
+      imagesrcset="img/bar-640.webp 640w, img/bar-960.webp 960w, img/bar-1280.webp 1280w, img/bar-1672.webp 1672w"
+      imagesizes="100vw">
+<link rel="stylesheet" href="css/landing.css">
 </head>
+
 <body>
 
-<div class="atmosfera" aria-hidden="true"></div>
-
-<!-- ══════════════════════════════════════════════════════════════
-     LA SALA — consola de doble pantalla
-     ══════════════════════════════════════════════════════════════ -->
-<div class="escena">
-  <div>
-
-    <div class="consola">
-      <div class="consola__placa">
-        <span class="consola__marca oro">MixLab <small>mod. DS-01</small></span>
-        <span class="consola__tornillos" aria-hidden="true">
-          <i class="tornillo"></i><i class="tornillo"></i>
-        </span>
-      </div>
-
-      <!-- ─────────── pantalla superior: el escaparate ─────────── -->
-      <section class="pantalla pantalla--sup" aria-label="Pantalla de información">
-        <div class="pantalla__lienzo">
-          <div class="hud" id="hud">
-            <div class="hud__cinta">
-              <span class="versalita" id="hudLugar">Salón</span>
-              <span class="versalita" id="hudEstado">Sin conexión</span>
-            </div>
-            <div class="hud__cuerpo" id="hudCuerpo"></div>
-          </div>
-        </div>
-      </section>
-
-      <div class="bisagra" aria-hidden="true">
-        <span class="bisagra__rejilla"></span>
-        <span class="bisagra__luz" id="luz" data-estado="off"></span>
-        <span class="bisagra__rejilla"></span>
-      </div>
-
-      <!-- ─────────── pantalla inferior: la barra ─────────── -->
-      <section class="pantalla pantalla--inf" aria-label="Pantalla táctil">
-        <div class="pantalla__lienzo">
-          <div class="tactil">
-
-            <!-- ···· LA CARTA ···· -->
-            <div class="vista es-activa" data-vista="menu">
-              <div class="vista__cabeza">
-                <h2 class="vista__titulo serif">La carta</h2>
-                <span class="versalita" style="color:var(--laton-hondo)">Casa fundada en 2026</span>
-              </div>
-              <div class="vista__cuerpo">
-                <nav class="carta">
-                  <button class="carta__linea" type="button" data-ir="recetas">
-                    <span class="carta__num">I</span>
-                    <span><span class="carta__nombre">Recetas</span><span class="carta__nota">La carta de cócteles de la casa</span></span>
-                    <span class="carta__flecha" aria-hidden="true">›</span>
-                  </button>
-                  <button class="carta__linea" type="button" data-ir="entrenar">
-                    <span class="carta__num">II</span>
-                    <span><span class="carta__nombre">Entrenar</span><span class="carta__nota">Un gesto a la vez, con el maestro mirando</span></span>
-                    <span class="carta__flecha" aria-hidden="true">›</span>
-                  </button>
-                  <button class="carta__linea" type="button" data-ir="jugar">
-                    <span class="carta__num">III</span>
-                    <span><span class="carta__nombre">Servicio</span><span class="carta__nota">Prepara la receta completa contra reloj</span></span>
-                    <span class="carta__flecha" aria-hidden="true">›</span>
-                  </button>
-                  <button class="carta__linea" type="button" data-ir="progreso">
-                    <span class="carta__num">IV</span>
-                    <span><span class="carta__nombre">Libreta</span><span class="carta__nota">Tus marcas y en qué gesto flojeas</span></span>
-                    <span class="carta__flecha" aria-hidden="true">›</span>
-                  </button>
-                  <button class="carta__linea" type="button" data-taller>
-                    <span class="carta__num">V</span>
-                    <span><span class="carta__nombre">Taller</span><span class="carta__nota">Sensores, dataset y exportación</span></span>
-                    <span class="carta__flecha" aria-hidden="true">›</span>
-                  </button>
-                </nav>
-              </div>
-            </div>
-
-            <!-- ···· RECETAS ···· -->
-            <div class="vista" data-vista="recetas">
-              <div class="vista__cabeza">
-                <button class="btn btn--fantasma volver" type="button" data-ir="menu" aria-label="Volver a la carta">‹</button>
-                <h2 class="vista__titulo serif">Recetas</h2>
-              </div>
-              <div class="vista__cuerpo">
-                <div class="fichas" id="listaRecetas"></div>
-              </div>
-              <div class="vista__pie" id="pieRecetas"></div>
-            </div>
-
-            <!-- ···· ENTRENAR ···· -->
-            <div class="vista" data-vista="entrenar">
-              <div class="vista__cabeza">
-                <button class="btn btn--fantasma volver" type="button" data-ir="menu" aria-label="Volver a la carta">‹</button>
-                <h2 class="vista__titulo serif">Entrenar</h2>
-              </div>
-              <div class="vista__cuerpo">
-                <div class="fichas" id="listaGestos"></div>
-              </div>
-              <div class="vista__pie">
-                <div id="demoEntrenar"></div>
-                <button class="btn btn--laton btn--bloque" id="btnEntrenar" type="button" disabled>Empezar práctica</button>
-              </div>
-            </div>
-
-            <!-- ···· SERVICIO (jugar) ···· -->
-            <div class="vista" data-vista="jugar">
-              <div class="vista__cabeza">
-                <button class="btn btn--fantasma volver" type="button" data-ir="menu" aria-label="Volver a la carta">‹</button>
-                <h2 class="vista__titulo serif" id="tituloJugar">Servicio</h2>
-              </div>
-              <div class="vista__cuerpo" id="cuerpoJugar"></div>
-              <div class="vista__pie" id="pieJugar"></div>
-            </div>
-
-            <!-- ···· LIBRETA ···· -->
-            <div class="vista" data-vista="progreso">
-              <div class="vista__cabeza">
-                <button class="btn btn--fantasma volver" type="button" data-ir="menu" aria-label="Volver a la carta">‹</button>
-                <h2 class="vista__titulo serif">Libreta</h2>
-              </div>
-              <div class="vista__cuerpo" id="cuerpoProgreso"></div>
-              <div class="vista__pie" id="pieProgreso"></div>
-            </div>
-
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <p class="sala-pie">
-      <button type="button" data-taller>Taller de sensores</button>
-      <button type="button" id="btnConectarRapido">Conectar placa</button>
-      <span id="pieEstado">sin placa</span>
-    </p>
-
-  </div>
+<!-- ══════════════ FONDO ══════════════ -->
+<div class="fondo" aria-hidden="true">
+  <picture>
+    <source type="image/webp"
+            srcset="img/bar-640.webp 640w, img/bar-960.webp 960w, img/bar-1280.webp 1280w, img/bar-1672.webp 1672w"
+            sizes="100vw">
+    <img src="img/bar-1280.jpg"
+         srcset="img/bar-640.jpg 640w, img/bar-960.jpg 960w, img/bar-1280.jpg 1280w, img/bar-1672.jpg 1672w"
+         sizes="100vw" alt="" decoding="async" fetchpriority="high">
+  </picture>
+  <div class="fondo__velo"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════════════════
-     EL TALLER — banco de trabajo, fuera de la consola
-     ══════════════════════════════════════════════════════════════ -->
-<div class="taller" id="taller">
+<!-- ══════════════ HUD SUPERIOR ══════════════ -->
+<header class="hud">
+  <div class="chapa" id="chapaEstrellas" title="Estrellas conseguidas">
+    <span class="chapa__ico" aria-hidden="true">★</span>
+    <span class="chapa__n"><span id="nEstrellas">0</span><small>/15</small></span>
+  </div>
 
-  <header class="taller__top">
-    <button class="btn btn--mini" type="button" data-salir-taller>‹ Volver al salón</button>
-    <span class="taller__marca oro">Taller</span>
-    <span class="taller__estado">
-      <span class="punto" id="punto" data-estado="off"></span>
-      <span id="estadoTaller" role="status" aria-live="polite">Sin conexión</span>
-      <button class="btn btn--mini" id="btnDesconectar" type="button" hidden>Desconectar</button>
-    </span>
-  </header>
+  <nav class="redondos" aria-label="Accesos">
+    <a class="redondo redondo--verde" href="consola.html#taller" aria-label="Taller de sensores" data-tip="Taller">
+      <span aria-hidden="true">🔧</span>
+    </a>
+    <a class="redondo redondo--azul" href="consola.html#progreso" aria-label="Tu libreta" data-tip="Libreta">
+      <span aria-hidden="true">📓</span>
+    </a>
+    <button class="redondo redondo--dorado" type="button" id="btnPantalla" aria-label="Pantalla completa" data-tip="Pantalla">
+      <span aria-hidden="true">⛶</span>
+    </button>
+    <button class="redondo redondo--rojo" type="button" id="btnComo" aria-label="Cómo funciona"
+            aria-expanded="false" aria-controls="hojaComo" data-tip="Ayuda">
+      <span aria-hidden="true">?</span>
+    </button>
+  </nav>
+</header>
 
-  <nav class="taller__nav" aria-label="Secciones del taller">
-    <button class="pest es-activa" type="button" data-pest="conectar" aria-selected="true">Conectar</button>
-    <button class="pest" type="button" data-pest="vivo"     aria-selected="false">En vivo</button>
-    <button class="pest" type="button" data-pest="capturar" aria-selected="false">Capturar</button>
-    <button class="pest" type="button" data-pest="inferir"  aria-selected="false">Inferencia</button>
+<!-- ══════════════ CONTENIDO ══════════════ -->
+<main class="salon">
+
+  <div class="marca">
+    <svg class="marca__copa" viewBox="0 0 120 130" aria-hidden="true">
+      <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 20h92L60 70v44"/>
+        <path d="M34 114h52"/>
+        <path d="M96 12 78 34"/>
+      </g>
+      <circle cx="60" cy="44" r="7" fill="#9bcf4a"/>
+    </svg>
+    <h1 class="marca__nombre">MixLab</h1>
+    <p class="marca__lema">La coctelera que entiende cómo lo hiciste</p>
+  </div>
+
+  <!-- tarjetas grandes, pensadas para dedo -->
+  <nav class="platos" aria-label="Modos de juego">
+
+    <a class="plato plato--ambar" href="consola.html#recetas">
+      <span class="plato__medallas" id="med-recetas" aria-hidden="true"></span>
+      <span class="plato__ico" aria-hidden="true">🍸</span>
+      <span class="plato__nombre">Recetas</span>
+      <span class="plato__nota">La carta de la casa</span>
+    </a>
+
+    <a class="plato plato--verde" href="consola.html#entrenar">
+      <span class="plato__medallas" id="med-entrenar" aria-hidden="true"></span>
+      <span class="plato__ico" aria-hidden="true">🤲</span>
+      <span class="plato__nombre">Entrenar</span>
+      <span class="plato__nota">Un gesto a la vez</span>
+    </a>
+
+    <a class="plato plato--rojo" href="consola.html#jugar">
+      <span class="plato__medallas" id="med-jugar" aria-hidden="true"></span>
+      <span class="plato__ico" aria-hidden="true">⏱️</span>
+      <span class="plato__nombre">Servicio</span>
+      <span class="plato__nota">La receta contra reloj</span>
+    </a>
+
+    <a class="plato plato--azul" href="consola.html#progreso" id="platoLibreta">
+      <span class="plato__medallas" id="med-libreta" aria-hidden="true"></span>
+      <span class="plato__ico" aria-hidden="true">📓</span>
+      <span class="plato__nombre">Libreta</span>
+      <span class="plato__nota">Tus marcas</span>
+      <span class="plato__candado" hidden aria-hidden="true">
+        <span class="plato__candado-ico">🔒</span>
+        <b>Sirve un cóctel primero</b>
+      </span>
+    </a>
+
   </nav>
 
-  <!-- ─────────── CONECTAR ─────────── -->
-  <section class="panel es-activa" id="p-conectar">
-    <div class="marco">
+  <a class="grande" href="consola.html">
+    <span class="grande__ico" aria-hidden="true">▶</span>
+    <span class="grande__txt">Entrar al bar</span>
+  </a>
 
-      <div class="nota nota--aviso" id="avisoSeguro" hidden>
-        <strong>Esta página no está en contexto seguro.</strong>
-        Web Bluetooth y Web Serial solo funcionan sobre <code>https://</code> o en
-        <code>localhost</code>. Ábrela por HTTPS o usa el simulador.
-      </div>
+  <p class="firma">
+    <span class="firma__punto" id="puntoPlaca" data-estado="off" aria-hidden="true"></span>
+    <span id="textoPlaca">Sin placa · el simulador está en el Taller</span>
+  </p>
 
-      <h1 class="t1">Conectar la placa</h1>
-      <p class="bajada">
-        Cuatro caminos, un solo formato de línea. Se puede cambiar de transporte
-        sin tocar el firmware.
-      </p>
+</main>
 
-      <div class="rejilla">
-        <article class="tarjeta enchufe" data-enchufe="ble">
-          <header><span class="enchufe__icono" aria-hidden="true">📡</span><h3>Bluetooth LE</h3></header>
-          <p>Nano 33 BLE, o Uno con módulo HM-10. Sin cables: es el camino de la demo.</p>
-          <p class="enchufe__meta">Servicio UART Nordic · notificaciones</p>
-          <button class="btn btn--laton btn--bloque" type="button" data-conectar="ble">Buscar dispositivo</button>
-          <p class="chico" data-sin-soporte hidden>Este navegador no trae Web Bluetooth. Usa Chrome o Edge de escritorio, o Chrome en Android.</p>
-        </article>
+<!-- ══════════════ HOJA: CÓMO FUNCIONA ══════════════ -->
+<div class="velo" id="veloHoja" hidden></div>
 
-        <article class="tarjeta enchufe" data-enchufe="wifi">
-          <header><span class="enchufe__icono" aria-hidden="true">📶</span><h3>WiFi</h3></header>
-          <p>Uno R4 WiFi o ESP32 sirviendo un WebSocket en la red local.</p>
-          <label class="campo">
-            <span class="campo__et">Dirección del WebSocket</span>
-            <input type="text" id="wsUrl" value="ws://192.168.1.50:81" spellcheck="false" autocomplete="off">
-          </label>
-          <button class="btn btn--laton btn--bloque" type="button" data-conectar="wifi">Conectar</button>
-          <p class="chico" id="avisoMixto" hidden>
-            Página en HTTPS: el navegador bloquea <code>ws://</code> sin cifrar.
-            Sirve la app por HTTP local o pon el WebSocket detrás de TLS.
-          </p>
-        </article>
+<section class="hoja" id="hojaComo" role="dialog" aria-modal="true" aria-labelledby="hojaTitulo" hidden>
+  <div class="hoja__asa" aria-hidden="true"></div>
+  <h2 class="hoja__titulo" id="hojaTitulo">Cómo funciona</h2>
 
-        <article class="tarjeta enchufe" data-enchufe="serial">
-          <header><span class="enchufe__icono" aria-hidden="true">🔌</span><h3>Serial USB</h3></header>
-          <p>Cable directo. Cómodo para desarrollo y calibración.</p>
-          <p class="enchufe__meta">115200 baudios · 8N1</p>
-          <button class="btn btn--laton btn--bloque" type="button" data-conectar="serial">Elegir puerto</button>
-          <p class="chico" data-sin-soporte hidden>Este navegador no trae Web Serial. Usa Chrome o Edge de escritorio.</p>
-          <p class="chico">
-            Ojo: la guía exige que la placa <strong>no esté conectada al PC</strong> durante
-            la entrega, ni por datos ni por energía. Esta vía es solo para desarrollar.
-          </p>
-        </article>
+  <ol class="pasos">
+    <li>
+      <span class="pasos__n">1</span>
+      <span><b>Conecta la coctelera.</b> Lleva un Arduino con sensor de movimiento.
+      ¿No la tienes a mano? En el <b>Taller</b> hay un simulador que finge los gestos.</span>
+    </li>
+    <li>
+      <span class="pasos__n">2</span>
+      <span><b>Elige un cóctel.</b> Cada paso de la receta es un gesto de bartender:
+      agitar, remover, servir, macerar o colar.</span>
+    </li>
+    <li>
+      <span class="pasos__n">3</span>
+      <span><b>Prepáralo.</b> La placa reconoce el gesto y manda el resultado.
+      La app cronometra, puntúa y reparte estrellas.</span>
+    </li>
+  </ol>
 
-        <article class="tarjeta enchufe" data-enchufe="sim">
-          <header><span class="enchufe__icono" aria-hidden="true">🎲</span><h3>Simulador</h3></header>
-          <p>Gestos sintéticos con ruido. Sirve para jugar, probar la interfaz y los exports sin hardware.</p>
-          <label class="campo">
-            <span class="campo__et">Gesto a simular</span>
-            <select id="simGesto"></select>
-          </label>
-          <button class="btn btn--laton btn--bloque" type="button" data-conectar="sim">Arrancar simulador</button>
-        </article>
-      </div>
+  <p class="hoja__pie">
+    El modelo corre <b>dentro del Arduino</b>, no aquí: esta app solo representa
+    lo que la placa decide.
+  </p>
 
-      <h2 class="t2">Formato que espera la app</h2>
-      <p class="bajada">Una línea de texto por muestra, terminada en <code>\n</code>:</p>
-      <pre class="codigo"><code>D,&lt;t_ms&gt;,&lt;ax&gt;,&lt;ay&gt;,&lt;az&gt;,&lt;gx&gt;,&lt;gy&gt;,&lt;gz&gt;   ← muestra con marca de tiempo
-&lt;ax&gt;,&lt;ay&gt;,&lt;az&gt;,&lt;gx&gt;,&lt;gy&gt;,&lt;gz&gt;                 ← muestra suelta (el reloj lo pone la app)
-I,&lt;clase&gt;,&lt;confianza&gt;                        ← resultado de inferencia (0..1)
-H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo opcional al conectar</code></pre>
-      <p class="bajada">
-        Aceleración en <strong>g</strong>, giro en <strong>°/s</strong>. Los sketches de
-        <code>firmware/</code> ya emiten exactamente esto.
-      </p>
-    </div>
-  </section>
+  <button class="grande grande--suave" type="button" data-cerrar-hoja>Entendido</button>
+</section>
 
-  <!-- ─────────── EN VIVO ─────────── -->
-  <section class="panel" id="p-vivo">
-    <div class="marco">
-      <div class="placas">
-        <div class="placa"><span class="placa__et">Muestras</span><span class="placa__n" id="nMuestras">0</span></div>
-        <div class="placa"><span class="placa__et">Frecuencia real</span><span class="placa__n"><span id="nHz">0</span> <small>Hz</small></span></div>
-        <div class="placa"><span class="placa__et">|Aceleración|</span><span class="placa__n"><span id="nAcc">0.00</span> <small>g</small></span></div>
-        <div class="placa"><span class="placa__et">|Giro|</span><span class="placa__n"><span id="nGyr">0</span> <small>°/s</small></span></div>
-      </div>
-
-      <div class="barra-util">
-        <label class="campo campo--linea">
-          <span class="campo__et">Ventana</span>
-          <select id="selVentana">
-            <option value="2">2 s</option>
-            <option value="5" selected>5 s</option>
-            <option value="10">10 s</option>
-          </select>
-        </label>
-        <button class="btn btn--mini" id="btnPausa" type="button" aria-pressed="false">Pausar</button>
-        <button class="btn btn--mini" id="btnTabla" type="button" aria-pressed="false" aria-controls="tablaVivo">Ver tabla</button>
-      </div>
-
-      <figure class="figura viz-root">
-        <figcaption>
-          <h3>Acelerómetro</h3>
-          <p>Aceleración por eje, en g. La gravedad aporta 1 g constante al eje vertical.</p>
-        </figcaption>
-        <div class="leyenda" id="leyendaAcc"></div>
-        <div class="lienzo-holder">
-          <canvas id="lienzoAcc" role="img" aria-label="Gráfica en vivo de aceleración en los ejes X, Y y Z"></canvas>
-          <div class="readout" id="readoutAcc" hidden></div>
-        </div>
-      </figure>
-
-      <figure class="figura viz-root">
-        <figcaption>
-          <h3>Giroscopio</h3>
-          <p>Velocidad angular por eje, en grados por segundo.</p>
-        </figcaption>
-        <div class="leyenda" id="leyendaGyr"></div>
-        <div class="lienzo-holder">
-          <canvas id="lienzoGyr" role="img" aria-label="Gráfica en vivo de velocidad angular en los ejes X, Y y Z"></canvas>
-          <div class="readout" id="readoutGyr" hidden></div>
-        </div>
-      </figure>
-
-      <div id="tablaVivo" hidden>
-        <h3 class="t3">Últimas 12 muestras</h3>
-        <table class="datos">
-          <caption class="sr-only">Valores numéricos recientes del sensor</caption>
-          <thead>
-            <tr><th scope="col">t (ms)</th>
-                <th scope="col">aX</th><th scope="col">aY</th><th scope="col">aZ</th>
-                <th scope="col">gX</th><th scope="col">gY</th><th scope="col">gZ</th></tr>
-          </thead>
-          <tbody id="cuerpoTablaVivo"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- ─────────── CAPTURAR ─────────── -->
-  <section class="panel" id="p-capturar">
-    <div class="marco">
-      <h1 class="t1">Grabar dataset</h1>
-      <p class="bajada">
-        Cada toma queda etiquetada y se exporta en CSV listo para subir a Edge Impulse.
-        Graba varias repeticiones por clase y, si pueden, que grabe cada integrante:
-        el modelo generaliza mejor con más de una mano.
-      </p>
-
-      <div class="grabar">
-        <div class="tarjeta">
-          <label class="campo">
-            <span class="campo__et">Clase</span>
-            <select id="recClase"></select>
-          </label>
-          <div class="dos">
-            <label class="campo">
-              <span class="campo__et">Duración (s)</span>
-              <input type="number" id="recDur" value="3" min="1" max="20" step="1" inputmode="numeric">
-            </label>
-            <label class="campo">
-              <span class="campo__et">Cuenta atrás (s)</span>
-              <input type="number" id="recEspera" value="3" min="0" max="10" step="1" inputmode="numeric">
-            </label>
-          </div>
-          <label class="campo">
-            <span class="campo__et">Quién graba <span class="campo__opt">(va en el nombre del archivo)</span></span>
-            <input type="text" id="recQuien" placeholder="cesar" spellcheck="false" autocomplete="off">
-          </label>
-          <button class="btn btn--laton btn--bloque" id="btnGrabar" type="button" disabled>Grabar toma</button>
-          <p class="chico" id="pistaGrabar">Conecta una fuente para empezar.</p>
-        </div>
-
-        <div class="tarjeta tablado" id="tablado">
-          <div class="tablado__n" id="tabladoN">—</div>
-          <div class="tablado__t" id="tabladoT">Sin grabar</div>
-          <div class="tablado__via"><div class="tablado__lleno" id="tabladoLleno"></div></div>
-        </div>
-      </div>
-
-      <h2 class="t2">Tomas guardadas <span class="pastilla" id="nTomas">0</span></h2>
-      <div class="equilibrio" id="equilibrio" aria-label="Tomas por clase"></div>
-
-      <div class="barra-util">
-        <button class="btn btn--mini" id="btnCsv" type="button" disabled>Exportar todo (CSV)</button>
-        <button class="btn btn--mini" id="btnJson" type="button" disabled>Exportar todo (JSON)</button>
-        <button class="btn btn--mini btn--fantasma" id="btnBorrarTomas" type="button" hidden>Borrar todas las tomas</button>
-      </div>
-
-      <div class="tomas" id="tomas"></div>
-      <p class="vacio" id="tomasVacio">Todavía no hay tomas. Graba la primera arriba.</p>
-    </div>
-  </section>
-
-  <!-- ─────────── INFERENCIA ─────────── -->
-  <section class="panel" id="p-inferir">
-    <div class="marco">
-      <h1 class="t1">Inferencia en la placa</h1>
-      <p class="bajada">
-        Lo que llega en líneas <code>I,&lt;clase&gt;,&lt;confianza&gt;</code>. El modelo corre en el
-        Arduino: la app solo representa el resultado.
-      </p>
-
-      <div class="infiere">
-        <div class="tarjeta infiere__ahora">
-          <span class="infiere__et">Gesto detectado</span>
-          <span class="infiere__cl serif" id="infClase">—</span>
-          <div class="medidor" id="medidorTaller">
-            <div class="medidor__marco"><div class="medidor__liquido" id="infLleno"></div></div>
-            <div class="medidor__pie"><span>confianza</span><span id="infConf">0 %</span></div>
-          </div>
-          <span class="infiere__edad" id="infEdad">Sin datos de inferencia</span>
-        </div>
-
-        <div class="tarjeta">
-          <h3 class="t3">Historial</h3>
-          <ol class="historia" id="infHistoria"></ol>
-          <p class="vacio" id="infVacio">Aún no llega ninguna inferencia.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-</div>
-
-<div class="recado" id="recado" role="status" aria-live="polite" hidden></div>
-
+<!-- protocol.js y game.js traen CLASES, RECETAS y la Libreta: la portada
+     lee las marcas de ahí en vez de reimplementar el formato de guardado. -->
 <script src="js/protocol.js"></script>
-<script src="js/transports.js"></script>
-<script src="js/chart.js"></script>
-<script src="js/recorder.js"></script>
 <script src="js/game.js"></script>
-<script src="js/main.js"></script>
+<script src="js/landing.js"></script>
 </body>
 </html>

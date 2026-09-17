@@ -806,6 +806,14 @@
 
   addEventListener('beforeunload', () => { try { transporte?.disconnect(); } catch {} });
 
+  /* La portada enlaza a consola.html#recetas, #jugar, #taller… Entrar por
+     el menú cuando el usuario ya eligió sería devolverle un paso atrás. */
+  function entradaPorEnlace() {
+    const destino = (location.hash || '').replace('#', '');
+    if (destino === 'taller') { abrirTaller(true); return; }
+    if (['recetas', 'entrenar', 'jugar', 'progreso'].includes(destino)) irA(destino);
+  }
+
   function init() {
     initNavegacion();
     initAcciones();
@@ -814,6 +822,8 @@
     initGrabador();
     pintarVista();
     pintarHud();
+    entradaPorEnlace();
+    addEventListener('hashchange', entradaPorEnlace);
   }
 
   document.readyState === 'loading'
