@@ -127,6 +127,63 @@ Lo mismo aplica al **comodín de la app móvil**: si la app cuenta como parte ob
 
 ---
 
+## 💻 Software del repo
+
+Dos piezas, hechas para encajar: hablan el **mismo protocolo de línea**, así que
+se puede cambiar de placa o de transporte sin tocar la otra mitad.
+
+### [`app/`](app/) — webapp de captura
+
+Sin build ni dependencias. Cuatro formas de conectar:
+
+| Transporte | Para qué |
+|---|---|
+| **Bluetooth LE** | Nano 33 BLE o Uno + HM-10. El camino de la demo. |
+| **WiFi** | WebSocket desde un Uno R4 WiFi o un ESP32. |
+| **Serial USB** | Solo desarrollo — la entrega prohíbe el cable. |
+| **Simulador** | Las seis clases sintéticas: se puede mostrar el flujo sin hardware. |
+
+Qué hace: gráficas en vivo de acelerómetro y giroscopio con frecuencia real
+medida, **grabador de tomas etiquetadas** con cuenta atrás y balance por clase, y
+exportación a **CSV** y al **JSON de adquisición de Edge Impulse** (en `.zip`
+cuando hay varias tomas). El nombre de archivo empieza por la clase porque es de
+ahí de donde Edge Impulse saca la etiqueta.
+
+> ⚠️ Web Bluetooth y Web Serial solo corren en **contexto seguro** (`https://` o
+> `localhost`). Y una página HTTPS no puede abrir un `ws://` sin cifrar: el
+> camino WiFi va por HTTP local. La app avisa de las dos cosas sola.
+
+### [`firmware/`](firmware/) — sketches
+
+| Sketch | Placa | Enlace |
+|---|---|---|
+| `nano33ble_imu_ble` | Nano 33 BLE / Rev2 | BLE (UART de Nordic) |
+| `uno_mpu6050_hm10_ble` | Uno + MPU6050 + HM-10 | BLE |
+| `uno_r4_wifi_imu` | Uno R4 WiFi + MPU6050 | WebSocket en `:81` |
+
+Protocolo, una línea por evento:
+
+```text
+D,<t_ms>,<ax>,<ay>,<az>,<gx>,<gy>,<gz>    muestra (g y °/s)
+I,<clase>,<confianza>                     inferencia (0..1)
+H,<placa>,<hz>                            saludo al conectar
+```
+
+### Dos trampas de hardware que conviene saber antes de comprar
+
+1. **Un Arduino Uno R3 no puede ser el corazón del proyecto.** No tiene IMU, ni
+   BLE, ni WiFi, y con 2 KB de RAM sin FPU el clasificador no le cabe. Sirve para
+   capturar dataset; la inferencia a bordo necesita el Nano 33 BLE. El Uno R4
+   WiFi tiene músculo pero **tampoco trae IMU**.
+2. **Un HC-05 no sirve para la app.** Habla Bluetooth Classic (SPP) y ningún
+   navegador puede abrir SPP — Web Bluetooth solo habla BLE. El módulo BLE
+   equivalente es el **HM-10** (o HM-19 / AT-09 / CC2541).
+
+Detalle completo en [`firmware/README.md`](firmware/README.md) y
+[`app/README.md`](app/README.md).
+
+---
+
 ## 🧠 Pipeline TinyML
 
 ```text
@@ -174,6 +231,8 @@ La investigación previa está en [`research/estado-del-arte.md`](research/estad
 ## 🗂️ Estructura
 
 ```text
+📁 app/        Webapp de captura, visualizacion e inferencia
+📁 firmware/   Sketches de Arduino (BLE, WiFi, Serial)
 📁 docs/       Requisitos + materiales y presupuesto
 📁 ideas/      Propuestas originales + diseño ganador
 📁 research/   Estado del arte y referencias

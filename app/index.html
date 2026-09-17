@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MixLab · Captura de movimiento</title>
+<meta name="description" content="Webapp de captura, visualización e inferencia de movimiento para el Miniproyecto 1 de TinyML.">
+<meta name="theme-color" content="#14161a">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314161a'/%3E%3Cpath d='M12 40c6-16 10 8 16-8s10 14 16-4 8 6 8 6' stroke='%233987e5' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<a class="skip-link" href="#main">Saltar al contenido</a>
+
+<header class="top">
+  <div class="top__brand">
+    <span class="top__logo" aria-hidden="true">〰</span>
+    <div>
+      <strong>MixLab</strong>
+      <span class="top__sub">Captura de movimiento · TinyML</span>
+    </div>
+  </div>
+
+  <div class="top__status">
+    <span class="dot" id="statusDot" data-state="off" aria-hidden="true"></span>
+    <span id="statusText" role="status" aria-live="polite">Sin conexión</span>
+  </div>
+
+  <div class="top__actions">
+    <button class="btn btn--ghost btn--sm" id="themeBtn" type="button" aria-label="Cambiar tema">◐</button>
+    <button class="btn btn--danger btn--sm" id="disconnectBtn" type="button" hidden>Desconectar</button>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Secciones">
+  <button class="tab is-active" type="button" data-tab="conectar" aria-selected="true">Conectar</button>
+  <button class="tab" type="button" data-tab="vivo"     aria-selected="false">En vivo</button>
+  <button class="tab" type="button" data-tab="capturar" aria-selected="false">Capturar</button>
+  <button class="tab" type="button" data-tab="inferir"  aria-selected="false">Inferencia</button>
+</nav>
+
+<main id="main">
+
+<!-- ══════════════ CONECTAR ══════════════ -->
+<section class="panel is-active" id="tab-conectar">
+  <div class="wrap">
+
+    <div class="note note--warn" id="secureWarn" hidden>
+      <strong>Esta página no está en contexto seguro.</strong>
+      Web Bluetooth y Web Serial solo funcionan sobre <code>https://</code> o en
+      <code>localhost</code>. Ábrela por HTTPS o usa el modo Simulador.
+    </div>
+
+    <h1 class="h1">Conectar la placa</h1>
+    <p class="lead">
+      Elige cómo llega el movimiento. La app acepta el mismo formato de línea por
+      los cuatro caminos, así que puedes cambiar de transporte sin tocar el firmware.
+    </p>
+
+    <div class="cards">
+
+      <article class="card conn" data-transport="ble">
+        <header><span class="card__icon" aria-hidden="true">📡</span><h2>Bluetooth LE</h2></header>
+        <p>Nano 33 BLE, o Uno con módulo HM-10. Sin cables: es el camino de la demo.</p>
+        <p class="card__meta">Servicio UART Nordic · notificaciones</p>
+        <button class="btn btn--primary btn--block" type="button" data-connect="ble">Buscar dispositivo</button>
+        <p class="card__unsupported" hidden>Este navegador no trae Web Bluetooth. Usa Chrome o Edge de escritorio, o Chrome en Android.</p>
+      </article>
+
+      <article class="card conn" data-transport="wifi">
+        <header><span class="card__icon" aria-hidden="true">📶</span><h2>WiFi</h2></header>
+        <p>Uno R4 WiFi o ESP32 sirviendo un WebSocket en la red local.</p>
+        <label class="field">
+          <span class="field__label">Dirección del WebSocket</span>
+          <input type="text" id="wsUrl" value="ws://192.168.1.50:81" spellcheck="false" autocomplete="off">
+        </label>
+        <button class="btn btn--primary btn--block" type="button" data-connect="wifi">Conectar</button>
+        <p class="card__note" id="wsMixedWarn" hidden>
+          Página en HTTPS: el navegador bloquea <code>ws://</code> sin cifrar.
+          Sirve la app por HTTP local o pon el WebSocket detrás de TLS.
+        </p>
+      </article>
+
+      <article class="card conn" data-transport="serial">
+        <header><span class="card__icon" aria-hidden="true">🔌</span><h2>Serial USB</h2></header>
+        <p>Cable directo. Cómodo para desarrollo y calibración.</p>
+        <p class="card__meta">115200 baudios · 8N1</p>
+        <button class="btn btn--primary btn--block" type="button" data-connect="serial">Elegir puerto</button>
+        <p class="card__unsupported" hidden>Este navegador no trae Web Serial. Usa Chrome o Edge de escritorio.</p>
+        <p class="card__note note--warn">
+          Ojo: la guía exige que la placa <strong>no esté conectada al PC</strong> durante
+          la entrega, ni por datos ni por energía. Esta vía es solo para desarrollar.
+        </p>
+      </article>
+
+      <article class="card conn" data-transport="sim">
+        <header><span class="card__icon" aria-hidden="true">🎲</span><h2>Simulador</h2></header>
+        <p>Genera gestos sintéticos con ruido. Sirve para probar la interfaz y los exports sin hardware.</p>
+        <label class="field">
+          <span class="field__label">Gesto a simular</span>
+          <select id="simGesture"></select>
+        </label>
+        <button class="btn btn--primary btn--block" type="button" data-connect="sim">Arrancar simulador</button>
+      </article>
+
+    </div>
+
+    <h2 class="h2">Formato que espera la app</h2>
+    <p class="lead">
+      Una línea de texto por muestra, terminada en <code>\n</code>. El parser tolera
+      espacios y acepta las tres formas:
+    </p>
+    <pre class="code"><code>D,&lt;t_ms&gt;,&lt;ax&gt;,&lt;ay&gt;,&lt;az&gt;,&lt;gx&gt;,&lt;gy&gt;,&lt;gz&gt;   ← muestra con marca de tiempo
+&lt;ax&gt;,&lt;ay&gt;,&lt;az&gt;,&lt;gx&gt;,&lt;gy&gt;,&lt;gz&gt;                 ← muestra suelta (el reloj lo pone la app)
+I,&lt;clase&gt;,&lt;confianza&gt;                        ← resultado de inferencia (0..1)
+H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo opcional al conectar</code></pre>
+    <p class="lead">
+      Aceleración en <strong>g</strong>, giro en <strong>°/s</strong>. Los sketches de
+      <code>firmware/</code> ya emiten exactamente esto.
+    </p>
+
+  </div>
+</section>
+
+<!-- ══════════════ EN VIVO ══════════════ -->
+<section class="panel" id="tab-vivo">
+  <div class="wrap">
+
+    <div class="tiles">
+      <div class="tile">
+        <span class="tile__lbl">Muestras</span>
+        <span class="tile__num" id="statCount">0</span>
+      </div>
+      <div class="tile">
+        <span class="tile__lbl">Frecuencia real</span>
+        <span class="tile__num"><span id="statHz">0</span> <small>Hz</small></span>
+      </div>
+      <div class="tile">
+        <span class="tile__lbl">|Aceleración|</span>
+        <span class="tile__num"><span id="statAccMag">0.00</span> <small>g</small></span>
+      </div>
+      <div class="tile">
+        <span class="tile__lbl">|Giro|</span>
+        <span class="tile__num"><span id="statGyrMag">0</span> <small>°/s</small></span>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <label class="field field--inline">
+        <span class="field__label">Ventana</span>
+        <select id="windowSel">
+          <option value="2">2 s</option>
+          <option value="5" selected>5 s</option>
+          <option value="10">10 s</option>
+        </select>
+      </label>
+      <button class="btn btn--ghost btn--sm" id="pauseBtn" type="button" aria-pressed="false">Pausar</button>
+      <button class="btn btn--ghost btn--sm" id="tableBtn" type="button" aria-pressed="false" aria-controls="liveTable">Ver tabla</button>
+    </div>
+
+    <figure class="chart-fig viz-root">
+      <figcaption>
+        <h3>Acelerómetro</h3>
+        <p>Aceleración por eje, en g. La gravedad aporta 1 g constante al eje vertical.</p>
+      </figcaption>
+      <div class="legend" id="legendAcc"></div>
+      <div class="chart-holder">
+        <canvas id="chartAcc" role="img" aria-label="Gráfica en vivo de aceleración en los ejes X, Y y Z"></canvas>
+        <div class="readout" id="readoutAcc" hidden></div>
+      </div>
+    </figure>
+
+    <figure class="chart-fig viz-root">
+      <figcaption>
+        <h3>Giroscopio</h3>
+        <p>Velocidad angular por eje, en grados por segundo.</p>
+      </figcaption>
+      <div class="legend" id="legendGyr"></div>
+      <div class="chart-holder">
+        <canvas id="chartGyr" role="img" aria-label="Gráfica en vivo de velocidad angular en los ejes X, Y y Z"></canvas>
+        <div class="readout" id="readoutGyr" hidden></div>
+      </div>
+    </figure>
+
+    <div class="table-wrap" id="liveTable" hidden>
+      <h3 class="h3">Últimas 12 muestras</h3>
+      <table class="data">
+        <caption class="sr-only">Valores numéricos recientes del sensor</caption>
+        <thead>
+          <tr><th scope="col">t (ms)</th>
+              <th scope="col">aX</th><th scope="col">aY</th><th scope="col">aZ</th>
+              <th scope="col">gX</th><th scope="col">gY</th><th scope="col">gZ</th></tr>
+        </thead>
+        <tbody id="liveTableBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════ CAPTURAR ══════════════ -->
+<section class="panel" id="tab-capturar">
+  <div class="wrap">
+    <h1 class="h1">Grabar dataset</h1>
+    <p class="lead">
+      Cada toma queda etiquetada y se exporta en CSV listo para subir a Edge Impulse.
+      Graba varias repeticiones por clase y, si pueden, que grabe cada integrante:
+      el modelo generaliza mejor con más de una mano.
+    </p>
+
+    <div class="rec">
+      <div class="rec__controls card">
+        <label class="field">
+          <span class="field__label">Clase</span>
+          <select id="recClass"></select>
+        </label>
+
+        <div class="grid-2">
+          <label class="field">
+            <span class="field__label">Duración (s)</span>
+            <input type="number" id="recDur" value="3" min="1" max="20" step="1" inputmode="numeric">
+          </label>
+          <label class="field">
+            <span class="field__label">Cuenta atrás (s)</span>
+            <input type="number" id="recDelay" value="3" min="0" max="10" step="1" inputmode="numeric">
+          </label>
+        </div>
+
+        <label class="field">
+          <span class="field__label">Quién graba <span class="field__opt">(va en el nombre del archivo)</span></span>
+          <input type="text" id="recWho" placeholder="cesar" spellcheck="false" autocomplete="off">
+        </label>
+
+        <button class="btn btn--primary btn--block" id="recBtn" type="button" disabled>Grabar toma</button>
+        <p class="rec__hint" id="recHint">Conecta una fuente para empezar.</p>
+      </div>
+
+      <div class="rec__stage card" id="recStage">
+        <div class="rec__big" id="recBig">—</div>
+        <div class="rec__meta" id="recMeta">Sin grabar</div>
+        <div class="rec__bar"><div class="rec__fill" id="recFill"></div></div>
+      </div>
+    </div>
+
+    <div class="rec__summary">
+      <h2 class="h2">Tomas guardadas <span class="pill" id="takeCount">0</span></h2>
+      <div class="balance" id="balance" aria-label="Tomas por clase"></div>
+
+      <div class="toolbar">
+        <button class="btn btn--ghost btn--sm" id="exportAllBtn" type="button" disabled>Exportar todo (CSV)</button>
+        <button class="btn btn--ghost btn--sm" id="exportJsonBtn" type="button" disabled>Exportar todo (JSON)</button>
+        <button class="btn btn--quiet btn--sm" id="clearTakesBtn" type="button" hidden>Borrar todas las tomas</button>
+      </div>
+
+      <div class="takes" id="takes"></div>
+      <p class="empty" id="takesEmpty">Todavía no hay tomas. Graba la primera arriba.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ INFERENCIA ══════════════ -->
+<section class="panel" id="tab-inferir">
+  <div class="wrap">
+    <h1 class="h1">Inferencia en la placa</h1>
+    <p class="lead">
+      Lo que llega en líneas <code>I,&lt;clase&gt;,&lt;confianza&gt;</code>. El modelo corre en el
+      Arduino: la app solo representa el resultado.
+    </p>
+
+    <div class="infer">
+      <div class="infer__now card">
+        <span class="infer__lbl">Gesto detectado</span>
+        <span class="infer__class" id="inferClass">—</span>
+        <div class="conf">
+          <div class="conf__bar"><div class="conf__fill" id="inferFill"></div></div>
+          <span class="conf__num" id="inferConf">0 %</span>
+        </div>
+        <span class="infer__age" id="inferAge">Sin datos de inferencia</span>
+      </div>
+
+      <div class="card">
+        <h3 class="h3">Historial</h3>
+        <ol class="history" id="inferHistory"></ol>
+        <p class="empty" id="inferEmpty">Aún no llega ninguna inferencia.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="js/protocol.js"></script>
+<script src="js/transports.js"></script>
+<script src="js/chart.js"></script>
+<script src="js/recorder.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
