@@ -31,13 +31,13 @@ capturada por Sebastián con el IMU de bordo del Nano 33 BLE.
 El detalle de cada uno, con qué hay que decidir y qué comando correr, está en
 [`docs/pendientes-dataset.md`](../docs/pendientes-dataset.md). Resumen:
 
-| # | Hallazgo | Bloquea |
-|---|---|:-:|
-| [D1](../docs/pendientes-dataset.md#d1--las-etiquetas-del-export-vienen-por-toma) | Etiquetas por toma → 60 clases, no 6. Mitigado con `info-6clases.labels`, falta re-subir | 🔴 |
-| [D2](../docs/pendientes-dataset.md#d2--las-clases-capturadas-no-son-las-del-readme) | Falta `colar`, sobra `reposo_mano`. Solo hay 4 movimientos, el requisito pide 5 | 🔴 |
-| [D3](../docs/pendientes-dataset.md#d3--no-hay-particion-de-test) | Sin partición de test; el split por ventanas infla la accuracy | 🟡 |
-| [D4](../docs/pendientes-dataset.md#d4--duraciones-desparejas-entre-clases) | `remover` aporta ~2,5× menos ventanas que `macerar` | 🟡 |
-| [D5](../docs/pendientes-dataset.md#d5--el-magnetometro-sobra) | Dejar los 3 ejes `mag*` fuera del impulse | 🟡 |
+| # | Hallazgo | Issue | Bloquea |
+|---|---|:-:|:-:|
+| [D1](../docs/pendientes-dataset.md#d1--las-etiquetas-del-export-vienen-por-toma) | Etiquetas por toma → 60 clases, no 6. Mitigado con `info-6clases.labels`, falta re-subir | [#1](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/1) | 🔴 |
+| [D2](../docs/pendientes-dataset.md#d2--las-clases-capturadas-no-son-las-del-readme) | Falta `colar`, sobra `reposo_mano`. Solo hay 4 movimientos, el requisito pide 5 | [#2](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/2) | 🔴 |
+| [D3](../docs/pendientes-dataset.md#d3--no-hay-particion-de-test) | Sin partición de test; el split por ventanas infla la accuracy | [#3](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/3) | 🟡 |
+| [D4](../docs/pendientes-dataset.md#d4--duraciones-desparejas-entre-clases) | `remover` aporta ~2,5× menos ventanas que `macerar` | [#4](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/4) | 🟡 |
+| [D5](../docs/pendientes-dataset.md#d5--el-magnetometro-sobra) | Dejar los 3 ejes `mag*` fuera del impulse | [#5](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/5) | 🟡 |
 
 Re-subida con las etiquetas corregidas:
 

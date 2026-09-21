@@ -4,21 +4,25 @@ Revisión del export de Edge Impulse que está en
 [`edge-impulse/dataset/`](../edge-impulse/dataset/) (60 tomas, Nano 33 BLE,
 62,5 Hz, 9 ejes, 505 s).
 
+Cada hallazgo tiene su issue abierto en GitHub; la columna *Issue* enlaza.
+
 **Entrega: martes 22-sep-2026, 18:30.** D-1 al escribir esto, así que la columna
 *Bloquea* marca lo que impide entrenar hoy mismo.
 
-| # | Hallazgo | Bloquea | Estado |
-|---|---|:-:|:-:|
-| [D1](#d1--las-etiquetas-del-export-vienen-por-toma) | Las etiquetas del export vienen por toma → 60 clases, no 6 | 🔴 sí | ☑ mitigado |
-| [D2](#d2--las-clases-capturadas-no-son-las-del-readme) | Las clases capturadas no son las del README: falta `colar`, sobra `reposo_mano` | 🔴 sí | ☐ decisión del grupo |
-| [D3](#d3--no-hay-particion-de-test) | No hay partición de test: las 60 tomas están en `training/` | 🟡 no | ☐ |
-| [D4](#d4--duraciones-desparejas-entre-clases) | Duraciones desparejas: `remover` 4 s vs 10 s del resto | 🟡 no | ☐ |
-| [D5](#d5--el-magnetometro-sobra) | El magnetómetro (3 ejes `mag*`) sobra y puede meter sesgo de sitio | 🟡 no | ☐ |
-| [D6](#d6--requisitosmd-fila-2-lista-clases-de-otro-proyecto) | `docs/requisitos.md` fila 2 lista clases de otro proyecto | 🟢 doc | ☑ corregido |
+| # | Hallazgo | Issue | Bloquea | Estado |
+|---|---|:-:|:-:|:-:|
+| [D1](#d1--las-etiquetas-del-export-vienen-por-toma) | Las etiquetas del export vienen por toma → 60 clases, no 6 | [#1](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/1) | 🔴 sí | ☑ mitigado |
+| [D2](#d2--las-clases-capturadas-no-son-las-del-readme) | Las clases capturadas no son las del README: falta `colar`, sobra `reposo_mano` | [#2](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/2) | 🔴 sí | ☐ decisión del grupo |
+| [D3](#d3--no-hay-particion-de-test) | No hay partición de test: las 60 tomas están en `training/` | [#3](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/3) | 🟡 no | ☐ |
+| [D4](#d4--duraciones-desparejas-entre-clases) | Duraciones desparejas: `remover` 4 s vs 10 s del resto | [#4](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/4) | 🟡 no | ☐ |
+| [D5](#d5--el-magnetometro-sobra) | El magnetómetro (3 ejes `mag*`) sobra y puede meter sesgo de sitio | [#5](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/5) | 🟡 no | ☐ |
+| [D6](#d6--requisitosmd-fila-2-lista-clases-de-otro-proyecto) | `docs/requisitos.md` fila 2 lista clases de otro proyecto | – | 🟢 doc | ☑ corregido |
 
 ---
 
 ## D1 — Las etiquetas del export vienen por toma
+
+> Issue [#1](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/1)
 
 🔴 **Bloquea el entrenamiento.** ☑ Mitigado, falta re-subir.
 
@@ -41,6 +45,8 @@ confirmar que *Data acquisition* muestra 6 clases de 10 tomas.
 ---
 
 ## D2 — Las clases capturadas no son las del README
+
+> Issue [#2](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/2)
 
 🔴 **Bloquea.** ☐ Necesita decisión del grupo.
 
@@ -72,6 +78,8 @@ La primera es la única que cumple. Ver [`docs/requisitos.md`](requisitos.md) fi
 
 ## D3 — No hay partición de test
 
+> Issue [#3](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/3)
+
 🟡 No bloquea, pero infla el resultado. ☐
 
 Las 60 tomas están en `training/`; `testing/` no existe. Si se deja que Edge
@@ -86,6 +94,8 @@ del uploader.
 ---
 
 ## D4 — Duraciones desparejas entre clases
+
+> Issue [#4](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/4)
 
 🟡 No bloquea. ☐
 
@@ -109,6 +119,8 @@ por clase, no solo la accuracy global.
 ---
 
 ## D5 — El magnetómetro sobra
+
+> Issue [#5](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/5)
 
 🟡 No bloquea. ☐
 
