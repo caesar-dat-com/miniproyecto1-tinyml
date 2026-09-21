@@ -62,14 +62,20 @@ El foco principal ya no es mover servos o relés alrededor del vaso. El disposit
 
 Dataset propio con **5 clases + reposo**:
 
-| # | Clase | Movimiento | Firma esperada del IMU |
-|:-:|---|---|---|
-| 1 | `agitar` | Shake de coctelera | Oscilación fuerte y periódica |
-| 2 | `remover` | Stir con cuchara | Rotación suave y sostenida |
-| 3 | `servir` | Inclinar para verter | Inclinación mantenida y estable |
-| 4 | `macerar` | Golpes verticales cortos | Impactos repetidos sobre un eje dominante |
-| 5 | `colar` | Giro/inclinación final | Cambio angular marcado y parada |
-| 6 | `reposo` | Coctelera quieta | Varianza mínima; solo gravedad |
+| # | Clase | Movimiento | Firma esperada del IMU | Capturada |
+|:-:|---|---|---|:-:|
+| 1 | `agitar` | Shake de coctelera | Oscilación fuerte y periódica | ☑ 10 tomas |
+| 2 | `remover` | Stir con cuchara | Rotación suave y sostenida | ☑ 10 tomas |
+| 3 | `servir` | Inclinar para verter | Inclinación mantenida y estable | ☑ 10 tomas |
+| 4 | `macerar` | Golpes verticales cortos | Impactos repetidos sobre un eje dominante | ☑ 10 tomas |
+| 5 | `colar` | Giro/inclinación final | Cambio angular marcado y parada | ☐ **falta** |
+| 6 | `reposo` | Coctelera quieta | Varianza mínima; solo gravedad | ☑ 10 tomas |
+| – | `reposo_mano` | Coctelera quieta en la mano | Varianza baja con deriva de pulso | ⚠️ 10 tomas, fuera del plan |
+
+> ⚠️ **El dataset todavía no cumple el requisito de 5 movimientos + reposo:** hay
+> 4 movimientos capturados, falta `colar`, y sobra una segunda clase de reposo.
+> Ese y los demás hallazgos de la captura del 21-sep están en
+> [`docs/pendientes-dataset.md`](docs/pendientes-dataset.md).
 
 El principal riesgo de clasificación sigue siendo separar `agitar` de `macerar`; se trabajará con acelerómetro + giroscopio, eje dominante, frecuencia y ventanas de aproximadamente 1–2 s.
 
@@ -213,6 +219,11 @@ App móvil / tablet
 
 El proyecto de Edge Impulse debe quedar **público** y su enlace irá tanto en este repositorio como en el paper IEEE.
 
+La primera captura (21-sep, 60 tomas del Nano 33 BLE a 62,5 Hz) ya está en
+[`edge-impulse/dataset/`](edge-impulse/dataset/). **Antes de entrenar hay que leer
+[`docs/pendientes-dataset.md`](docs/pendientes-dataset.md):** el export llegó con las
+etiquetas rotas y le falta una clase.
+
 ---
 
 ## 🔬 Estado del arte
@@ -240,6 +251,7 @@ La investigación previa está en [`research/estado-del-arte.md`](research/estad
 ```text
 📁 app/        Webapp de captura, visualizacion e inferencia
 📁 firmware/   Sketches de Arduino (BLE, WiFi, Serial)
+📁 edge-impulse/ Dataset exportado + pendientes antes de entrenar
 📁 docs/       Requisitos + materiales y presupuesto
 📁 ideas/      Propuestas originales + diseño ganador
 📁 research/   Estado del arte y referencias
