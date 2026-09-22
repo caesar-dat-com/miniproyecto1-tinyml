@@ -414,9 +414,19 @@ body { overflow: hidden; overscroll-behavior: none; }
 .aro__linea, .aro.es-poco .aro__linea { filter: none; stroke-linecap: butt; }
 .aro__n, .tablado__n { font-family: var(--display); }
 .medidor__marco, .barra__via, .tablado__via { background: var(--panel-alto); border: 1px solid var(--filo); border-radius: 1px; box-shadow: none; }
-.medidor__liquido, .barra__lleno, .barra.es-flojo .barra__lleno { background: var(--dorado); border-radius: 0; }
+.medidor__liquido, .barra__lleno { border-radius: 0; }
+.medidor__liquido { background: var(--dorado); }
 .medidor.es-bueno .medidor__liquido { background: var(--verde); }
+/* La barra normal va en tinta y solo la que pide atención se tiñe: si las dos
+   usan el mismo rojo, el desbalance de clases deja de verse. */
+.barra__lleno { background: var(--humo); }
+.barra.es-flojo .barra__lleno { background: var(--dorado); }
+/* El ámbar claro sobre la vía marfil se quedaba en 1,2:1. */
+.tablado.es-contando .tablado__lleno { background: var(--ambar-osc); }
 .pasos__pieza { background: var(--panel-alto); border: 1px solid var(--filo); border-radius: 1px; }
+/* Los bordes blancos de la edición anterior desaparecían sobre el marfil. */
+.pasos__pieza.es-hecho  { background: var(--verde);  border-color: var(--verde-osc); }
+.pasos__pieza.es-actual { background: var(--dorado); border-color: var(--tinta); }
 .receta li { background: var(--panel); border: 1px solid var(--filo); padding-block: 13px; }
 .receta__n { border: 0; background: var(--panel-alto); color: var(--crema); border-radius: 1px; }
 .receta li.es-actual { background: var(--panel); }
@@ -429,6 +439,7 @@ body { overflow: hidden; overscroll-behavior: none; }
 .taller__nav .pieza { padding-inline: 8px; }
 .t1 { font: 700 2.5rem/1.1 var(--display); text-transform: uppercase; }
 .t2 { font: 700 1.8rem/1.1 var(--display); }
+.t3 { font: 700 1.25rem/1.2 var(--display); }
 .bajada { font-size: 1rem; }
 .rejilla-t { grid-template-columns: 1fr; gap: 18px; }
 .tarjeta { padding: 22px; }
@@ -437,7 +448,9 @@ body { overflow: hidden; overscroll-behavior: none; }
 .enchufe p { font-size: .94rem; }
 .enchufe .grande { margin-bottom: 4px; }
 .enchufe.es-viva { border-color: var(--verde); box-shadow: inset 4px 0 0 var(--verde); }
-.campo input, .campo select { background: var(--noche); border: 1px solid var(--filo); font-size: 16px; font-weight: 400; }
+/* El borde es lo único que dibuja el campo, así que no puede ir en --filo:
+   sobre el marfil se queda en 1,7:1 y WCAG pide 3:1 para un control. */
+.campo input, .campo select { background: var(--noche); border: 1px solid var(--humo-2); font-size: 16px; font-weight: 400; }
 .campo input:focus, .campo select:focus { border-color: var(--dorado); box-shadow: none; outline: 2px solid var(--dorado); outline-offset: 2px; }
 .codigo { background: var(--panel-alto); border: 1px solid var(--filo); }
 .nota--aviso { background: var(--panel); border: 1px solid var(--filo); border-left: 4px solid var(--dorado); }
