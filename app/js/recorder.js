@@ -100,8 +100,16 @@ class Recorder {
 
     // Intervalo real medido, no el nominal: si la placa entregó a 87 Hz
     // declarar 100 Hz descuadra el preprocesado del modelo.
+    //
+    // Pero el span puede salir 0: una placa que repite siempre la misma
+    // marca de tiempo (D,0,... en cada línea) lo consigue. Entonces el
+    // intervalo medido es 0, hzReal sale Infinity —que JSON.stringify
+    // convierte en null al guardar en localStorage, y la ficha de la toma
+    // acaba diciendo "null Hz"— y el JSON se va a Edge Impulse con
+    // interval_ms: 0. Si no hay span que medir, se cae al nominal.
     const span = filas[filas.length - 1][0];
-    const intervalo = filas.length > 1 ? span / (filas.length - 1) : 1000 / (a.hz || 100);
+    const medible = filas.length > 1 && span > 0;
+    const intervalo = medible ? span / (filas.length - 1) : 1000 / (a.hz || 100);
 
     const take = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
@@ -276,10 +284,13 @@ function exportarTakes(takes, formato) {
   if (!takes.length) return;
   const ext = formato === 'json' ? 'json' : 'csv';
   const aTexto = formato === 'json' ? takeAJson : takeACsv;
+  // El tipo real, no text/plain: quien abra la descarga desde el gestor del
+  // navegador o la suba a un formulario se encuentra el MIME que toca.
+  const mime = formato === 'json' ? 'application/json' : 'text/csv;charset=utf-8';
 
   if (takes.length === 1) {
     const t = takes[0];
-    descargar(new Blob([aTexto(t)], { type: 'text/plain' }), nombreArchivo(t, ext));
+    descargar(new Blob([aTexto(t)], { type: mime }), nombreArchivo(t, ext));
     return;
   }
 
