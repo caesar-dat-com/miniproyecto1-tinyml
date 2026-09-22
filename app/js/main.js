@@ -521,6 +521,7 @@
   }
 
   function moverMedidor(conf, bien, etiqueta, medible = true) {
+    if ($('#medidor')) $('#medidor').dataset.guided = String(!medible);
     const liq = $('#medidorLiquido');
     if (!liq) return;
     liq.style.width = `${Math.round(conf * 100)}%`;

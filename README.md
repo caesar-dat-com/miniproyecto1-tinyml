@@ -22,6 +22,9 @@ Profesor: Juan Camilo Giraldo Londoño
 
 # 🍸 Proyecto seleccionado: Bartender TinyML
 
+Estado de entrega y pendientes verificados contra la guía original:
+[Auditoría de clase](docs/auditoria-clase.md).
+
 La idea elegida es una **coctelera inteligente** que reconoce movimientos reales de coctelería con un sensor inercial y utiliza TinyML para identificar el gesto que está realizando el usuario.
 
 La experiencia se inspira en la lógica de juegos de cocina paso a paso: la app indica qué hacer, la coctelera mide **cómo se hizo** y el sistema muestra el resultado en tiempo real.

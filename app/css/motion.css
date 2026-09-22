@@ -1,0 +1,54 @@
+/* Final layer: editorial motion, shared by landing and console. */
+:root { --ease-out: cubic-bezier(.22,1,.36,1); }
+.panel, .enchufe, .plato, .receta li {
+  border-radius: 10px;
+  border-color: rgba(242,234,223,.14);
+}
+.plato__nota, .bajada { line-height: 1.55; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid #efb18d; outline-offset: 4px;
+}
+.grande, .pieza, .redondo, .plato {
+  transition: transform .24s var(--ease-out), border-color .24s ease, background-color .24s ease;
+}
+.grande:active:not(:disabled), .pieza:active:not(:disabled), .redondo:active {
+  transform: scale(.97);
+}
+.medidor__liquido, .barra__lleno { transition: width .35s var(--ease-out); }
+.aro__linea { transition: stroke-dashoffset .1s linear; }
+.receta li { transition: opacity .3s ease, background-color .3s ease, border-color .3s ease; }
+.medidor[data-guided="true"] .medidor__marco { display: none; }
+.medidor[data-guided="true"] { padding: 12px; border: 1px dashed var(--azul); border-radius: 8px; }
+@media (prefers-reduced-motion: no-preference) {
+  .vista.es-activa .plato, .platos .plato, .enchufe {
+    animation: mix-reveal .5s var(--ease-out) both;
+  }
+  .plato:nth-child(2), .enchufe:nth-child(2) { animation-delay: .05s; }
+  .plato:nth-child(3), .enchufe:nth-child(3) { animation-delay: .1s; }
+  .plato:nth-child(4), .enchufe:nth-child(4) { animation-delay: .15s; }
+  .plato:nth-child(5) { animation-delay: .2s; }
+  .coach__img { animation: mix-reveal .7s var(--ease-out) both; }
+  .enchufe.es-viva .enchufe__ico { animation: mix-connected 2.8s ease-in-out infinite; }
+  .acta__barras .barra { animation: mix-reveal .6s var(--ease-out) both; }
+  .acta__barras .barra:nth-child(2) { animation-delay: .1s; }
+  .acta__barras .barra:nth-child(3) { animation-delay: .2s; }
+  .pasos__pieza.es-actual { animation: mix-connected 2s ease-in-out infinite; }
+  .acta__estrellas { animation: mix-stars .8s var(--ease-out) both; }
+}
+@media (hover: hover) and (pointer: fine) {
+  .plato:hover .plato__ico { transform: translateY(-3px) rotate(-7deg); }
+  .plato__ico, .grande .icon, .pieza .icon { transition: transform .3s var(--ease-out); }
+  .grande:hover:not(:disabled) .icon, .pieza:hover:not(:disabled) .icon { transform: translateX(2px); }
+}
+@keyframes mix-reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes mix-connected { 50% { opacity: .65; } }
+@keyframes mix-stars { from { opacity: 0; transform: translateY(8px) scale(.8); } to { opacity: 1; transform: none; } }
+@media (max-width: 680px) {
+  .rejilla .plato { padding: 14px; min-height: 125px; }
+  .plato__nombre { font-size: .9rem; letter-spacing: .04em; }
+  .receta li { padding: 10px; gap: 8px; }
+  .coach__bubble { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
