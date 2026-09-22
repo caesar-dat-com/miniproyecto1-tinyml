@@ -25,6 +25,10 @@ class Transport {
   _emit(estado, msg) { this.conectado = estado === 'on'; this._state(estado, msg); }
   async connect()    { throw new Error('sin implementar'); }
   async disconnect() {}
+  /* Comandos hacia la placa: 'i' inferencia, 's' streaming, 'p' pausa,
+     'r' reanuda. Por defecto no hace nada: un transporte de solo lectura
+     (o el simulador) puede ignorarlos sin romper a quien los mande. */
+  async send(_texto) { return false; }
 }
 
 /* ------------------------------------------------------------
@@ -53,12 +57,28 @@ class BleTransport extends Transport {
     const service = await server.getPrimaryService(NUS.service);
     this.txChar   = await service.getCharacteristic(NUS.tx);
 
+    // RX es opcional: los sketches viejos solo notifican y no escuchan nada.
+    // Si no está, send() devuelve false en vez de reventar la conexión.
+    try { this.rxChar = await service.getCharacteristic(NUS.rx); } catch { this.rxChar = null; }
+
     this.decoder = new TextDecoder();
     this._onNotif = (e) => this._text(this.decoder.decode(e.target.value));
     this.txChar.addEventListener('characteristicvaluechanged', this._onNotif);
     await this.txChar.startNotifications();
 
     this._emit('on', `BLE · ${this.device.name || 'dispositivo'}`);
+  }
+
+  async send(texto) {
+    if (!this.rxChar) return false;
+    // writeValueWithoutResponse es la que soporta el servicio UART de Nordic;
+    // en navegadores viejos solo existe la genérica writeValue.
+    const datos = new TextEncoder().encode(texto);
+    try {
+      if (this.rxChar.writeValueWithoutResponse) await this.rxChar.writeValueWithoutResponse(datos);
+      else await this.rxChar.writeValue(datos);
+      return true;
+    } catch { return false; }
   }
 
   async disconnect() {

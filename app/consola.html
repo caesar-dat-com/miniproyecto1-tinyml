@@ -279,8 +279,15 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
     <div class="panel-t" id="p-inferir">
       <h1 class="t1">Inferencia en la placa</h1>
       <p class="bajada">
-        Lo que llega en líneas <code>I,&lt;clase&gt;,&lt;confianza&gt;</code>. El modelo corre
-        en el Arduino: la app solo representa el resultado.
+        Lo que llega en líneas <code>{"g":"agitar","p":0.87}</code> (o
+        <code>I,&lt;clase&gt;,&lt;confianza&gt;</code>). El modelo corre en el Arduino:
+        la app solo representa el resultado.
+      </p>
+
+      <p class="chico">
+        <button type="button" data-modo="i">Modo inferencia</button>
+        <button type="button" data-modo="s">Modo señal cruda</button>
+        <span id="modoPista">La placa arranca en inferencia.</span>
       </p>
 
       <div class="infiere">

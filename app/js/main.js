@@ -451,6 +451,21 @@
     $('#simGesto').innerHTML = CLASES.map(c => `<option value="${c.id}">${esc(c.label)} — ${esc(c.desc)}</option>`).join('');
     $$('[data-conectar]').forEach(b => b.addEventListener('click', () => conectar(b.dataset.conectar)));
     $('#chapaPlaca').addEventListener('click', () => { if (transporte) desconectar(); else irA('taller'); });
+    $$('[data-modo]').forEach(b => b.addEventListener('click', () => pedirModo(b.dataset.modo)));
+  }
+
+  /* Pide a la placa que cambie de modo: 'i' inferencia, 's' señal cruda.
+     Solo el sketch nano33ble_mixlab_inferencia entiende estos comandos; los
+     demás transportes devuelven false y aquí se dice sin drama. */
+  async function pedirModo(m) {
+    const pista = $('#modoPista');
+    if (!transporte) { if (pista) pista.textContent = 'Conecta la placa primero.'; return; }
+    const ok = await transporte.send(m);
+    if (pista) {
+      pista.textContent = ok
+        ? (m === 'i' ? 'Pedido: inferencia.' : 'Pedido: señal cruda a 50 Hz.')
+        : 'Esta fuente no acepta comandos.';
+    }
   }
 
   function marcarSinSoporte(t) {

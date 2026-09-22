@@ -33,8 +33,14 @@ function parseLine(linea) {
   if (s[0] === '{') {
     try {
       const o = JSON.parse(s);
-      if (o.clase !== undefined) {
-        return { tipo: 'inferencia', clase: String(o.clase), confianza: clamp01(Number(o.conf ?? o.confianza ?? 0)) };
+      // Inferencia. Dos nombres para lo mismo:
+      //   {"clase":"agitar","conf":0.87}   forma larga
+      //   {"g":"agitar","p":0.87}          la que emite nano33ble_mixlab_inferencia
+      // El firmware usa la corta porque una notificación BLE lleva 20 bytes
+      // útiles y la línea corta cabe en dos en vez de en tres.
+      const cls = o.clase ?? o.g;
+      if (cls !== undefined) {
+        return { tipo: 'inferencia', clase: String(cls), confianza: clamp01(Number(o.conf ?? o.confianza ?? o.p ?? 0)) };
       }
       const n = [o.ax, o.ay, o.az, o.gx, o.gy, o.gz].map(Number);
       if (n.every(Number.isFinite)) {
