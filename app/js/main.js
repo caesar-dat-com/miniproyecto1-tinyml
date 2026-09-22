@@ -152,6 +152,20 @@
   }
 
   const icono = (path) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
+  const ICON = {
+    play: icono('m9 7 8 5-8 5z'),
+    stop: icono('M7 7h10v10H7z'),
+    repeat: icono('M17 7h3v-3M20 7a8 8 0 1 0 1 7M7 17H4v3M4 17a8 8 0 0 0 1-7'),
+    menu: icono('M4 6h16M4 12h16M4 18h16'),
+    target: icono('M12 3a9 9 0 1 0 9 9M12 7a5 5 0 1 0 5 5M12 12l7-7'),
+    trash: icono('M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6'),
+    pause: icono('M8 5v14M16 5v14'),
+    table: icono('M4 5h16v14H4zM4 10h16M10 5v14'),
+    record: icono('M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z'),
+    download: icono('M12 3v12M8 11l4 4 4-4M5 20h14'),
+    close: icono('m6 6 12 12M18 6 6 18'),
+  };
+  const boton = (ico, texto) => `${ICON[ico] || ''}<span>${esc(texto)}</span>`;
   const ICON_COPA = icono('M4 3h16l-8 9zM12 12v7M8 21h8');
   const COPA = {
     mojito: icono('M5 4c7 0 11 4 11 11-7 0-11-4-11-11zm3 3 9 10M18 3v18'),
@@ -202,7 +216,9 @@
 
     $('#demoEntrenar').innerHTML = cajaDemo();
     $('#btnEntrenar').disabled = !transporte;
-    $('#btnEntrenar').textContent = transporte ? 'Empezar práctica' : 'Conecta la placa en el Taller';
+    $('#btnEntrenar').innerHTML = transporte
+      ? boton('target', 'Empezar práctica')
+      : boton('target', 'Conecta la placa en el Taller');
   }
 
   function escalon(v) { return v >= 0.85 ? 3 : v >= 0.65 ? 2 : v >= 0.4 ? 1 : 0; }
@@ -233,7 +249,7 @@
     // y la pantalla tiene que estar montada antes de eso.
     if (partida) {
       lienzo.innerHTML = pantallaJuego(partida.receta);
-      zocalo.innerHTML = `<button class="grande grande--suave" type="button" data-abandonar>Abandonar</button>`;
+      zocalo.innerHTML = `<button class="grande grande--suave" type="button" data-abandonar>${boton('stop', 'Abandonar')}</button>`;
       refrescarLista();
       return;
     }
@@ -252,8 +268,8 @@
           </div>
         </div>`;
       zocalo.innerHTML = `
-        <button class="grande grande--suave" type="button" data-ir="recetas" style="flex:0 0 auto">Carta</button>
-        <button class="grande" type="button" data-servir>▶ Repetir</button>`;
+        <button class="grande grande--suave" type="button" data-ir="recetas" style="flex:0 0 auto">${boton('menu', 'Carta')}</button>
+        <button class="grande" type="button" data-servir>${boton('repeat', 'Repetir')}</button>`;
       return;
     }
 
@@ -267,7 +283,7 @@
         </ol>
         ${cajaDemo()}
       </div>`;
-    zocalo.innerHTML = `<button class="grande" type="button" data-servir ${transporte ? '' : 'disabled'}>▶ Servir</button>`;
+    zocalo.innerHTML = `<button class="grande" type="button" data-servir ${transporte ? '' : 'disabled'}>${boton('play', 'Servir')}</button>`;
   }
 
   function filaPaso(p, k, clase = '') {
@@ -340,7 +356,7 @@
 
     if (!r.partidas && r.gestos.every(g => !g.intentos)) {
       lienzo.innerHTML = '<p class="vacio">La libreta está en blanco.<br>Sirve tu primer cóctel.</p>';
-      $('#zocaloProgreso').innerHTML = '<button class="grande" type="button" data-ir="recetas">Ver la carta</button>';
+      $('#zocaloProgreso').innerHTML = `<button class="grande" type="button" data-ir="recetas">${boton('menu', 'Ver la carta')}</button>`;
       return;
     }
 
@@ -372,7 +388,7 @@
       </table>`;
 
     $('#zocaloProgreso').innerHTML =
-      '<button class="grande grande--suave" type="button" data-borrar-libreta>Borrar la libreta</button>';
+      `<button class="grande grande--suave" type="button" data-borrar-libreta>${boton('trash', 'Borrar la libreta')}</button>`;
   }
 
   /* ==========================================================================
@@ -428,7 +444,7 @@
       $('#hojaNota').textContent = `${r.nota} · ${total} s en total`;
       $('#hojaPasos').innerHTML = r.pasos.map((p, k) => filaPaso(p, k)).join('');
       $('#btnServirHoja').disabled = !transporte;
-      $('#btnServirHoja').textContent = transporte ? '▶ Servir' : 'Conecta la placa';
+      $('#btnServirHoja').innerHTML = transporte ? boton('play', 'Servir') : boton('play', 'Conecta la placa');
     }
     hoja.hidden = !si;
     $('#veloHoja').hidden = !si;
@@ -633,14 +649,14 @@
     $('#btnPausa').addEventListener('click', (e) => {
       pausado = !pausado;
       e.currentTarget.setAttribute('aria-pressed', String(pausado));
-      e.currentTarget.textContent = pausado ? 'Reanudar' : 'Pausar';
+      e.currentTarget.innerHTML = pausado ? boton('play', 'Reanudar') : boton('pause', 'Pausar');
     });
 
     $('#btnTabla').addEventListener('click', (e) => {
       const ver = $('#tablaVivo').hidden;
       $('#tablaVivo').hidden = !ver;
       e.currentTarget.setAttribute('aria-pressed', String(ver));
-      e.currentTarget.textContent = ver ? 'Ocultar tabla' : 'Ver tabla';
+      e.currentTarget.innerHTML = boton('table', ver ? 'Ocultar tabla' : 'Ver tabla');
     });
 
     requestAnimationFrame(bucle);
@@ -713,7 +729,7 @@
       if (recorder.activa) { recorder.cancelar(); return; }
       if (!transporte) { recado('Conecta una fuente primero'); return; }
 
-      $('#btnGrabar').textContent = 'Cancelar';
+      $('#btnGrabar').innerHTML = boton('close', 'Cancelar');
       try {
         const take = await recorder.grabar({
           clase: $('#recClase').value,
@@ -724,7 +740,7 @@
         });
         if (take) recado(`Toma guardada · ${take.n} muestras a ${take.hzReal} Hz`);
       } finally {
-        $('#btnGrabar').textContent = 'Grabar toma';
+        $('#btnGrabar').innerHTML = boton('record', 'Grabar toma');
       }
     });
 
@@ -804,8 +820,8 @@
           <div class="toma__n">${esc(label)} · ${esc(t.quien)}</div>
           <div class="toma__m">${t.n} muestras · ${(t.duracionMs / 1000).toFixed(1)} s · ${t.hzReal} Hz · ${hora}</div>
         </div>
-        <button class="pieza" type="button" data-dl="${t.id}">CSV</button>
-        <button class="toma__x" type="button" data-del="${t.id}" aria-label="Borrar toma">✕</button>
+        <button class="pieza" type="button" data-dl="${t.id}">${ICON.download}<span>CSV</span></button>
+        <button class="toma__x" type="button" data-del="${t.id}" aria-label="Borrar toma">${ICON.trash}</button>
       </div>`;
     }).join('');
   }

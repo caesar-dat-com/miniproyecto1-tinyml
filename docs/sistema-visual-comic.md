@@ -45,3 +45,11 @@ El rediseño no modifica:
 - Las imágenes del coach están en WebP transparente y pesan menos de 1 MB en
   conjunto.
 - No se añadieron dependencias, fuentes remotas ni procesos de compilación.
+
+## Cobertura de iconos
+
+El sistema vectorial cubre navegación, recetas, gestos, pantalla completa,
+ayuda, reproducción, repetición, abandono, conexión BLE, WiFi, USB, simulador,
+telemetría en vivo, pausa, tabla, captura, exportación, eliminación y modos de
+inferencia/señal. Todos comparten `viewBox`, grosor, remates y un color semántico
+controlado por CSS.

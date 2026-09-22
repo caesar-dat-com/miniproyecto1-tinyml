@@ -96,6 +96,66 @@ body { overflow: hidden; overscroll-behavior: none; }
   .coach[data-mood="failed"], .coach[data-mood="good"], .coach[data-mood="perfect"] { opacity: .38; }
 }
 
+/* ============================================================ detalle de producto */
+.t1 { font-family: var(--display); font-size: clamp(1.65rem, 5vw, 2.3rem); font-weight: 500; letter-spacing: -.025em; }
+.t2 { font-family: var(--display); font-size: 1.35rem; font-weight: 500; letter-spacing: -.015em; }
+.t3 { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--humo); }
+.bajada { line-height: 1.65; color: var(--humo-2); }
+.rejilla-t { gap: 12px; }
+.enchufe { position: relative; min-height: 235px; padding: 20px; overflow: hidden; }
+.enchufe::after { content: ""; position: absolute; inset: 0 0 auto; height: 1px; background: linear-gradient(90deg, var(--azul), transparent 70%); opacity: .55; }
+.enchufe header { gap: 12px; }
+.enchufe h3 { font-family: var(--display); font-size: 1.12rem; font-weight: 500; }
+.enchufe__ico { width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(110,159,190,.28); border-radius: 50%; }
+.enchufe__ico .icon { width: 18px; height: 18px; }
+.enchufe .grande { margin-top: auto; min-height: 48px; font-size: .72rem; }
+.campo__et { letter-spacing: .06em; text-transform: uppercase; font-size: .64rem; }
+.campo input, .campo select { min-height: 46px; border: 1px solid var(--filo); border-radius: 4px; background: rgba(8,7,6,.54); font-weight: 450; }
+.campo input:focus, .campo select:focus { border-color: rgba(216,107,50,.68); box-shadow: 0 0 0 3px rgba(216,107,50,.1); }
+.codigo { border: 1px solid var(--filo); border-left: 2px solid var(--azul); border-radius: 4px; background: rgba(7,9,10,.66); color: rgba(198,216,226,.76); }
+
+.placas { gap: 10px; }
+.placa { padding: 15px 16px; border-radius: 4px; background: linear-gradient(145deg, rgba(28,24,20,.92), rgba(16,14,12,.9)); }
+.placa__et { font-size: .58rem; letter-spacing: .14em; }
+.placa__n { margin-top: 7px; font-family: var(--display); font-weight: 500; font-variant-numeric: lining-nums tabular-nums; }
+.barra-util { padding: 10px 0; border-top: 1px solid rgba(242,234,223,.07); border-bottom: 1px solid rgba(242,234,223,.07); }
+.figura { padding: 18px; }
+.figura h3 { font-family: var(--display); font-size: 1.08rem; font-weight: 500; }
+.leyenda__pastilla { width: 16px; height: 2px; border-radius: 99px; }
+.datos th { font-size: .62rem; text-transform: uppercase; letter-spacing: .08em; }
+
+.tablado { min-height: 260px; border-left: 2px solid var(--dorado); }
+.tablado__n { font-family: var(--display); font-weight: 500; }
+.tablado__via { height: 7px; border: 0; }
+.toma { border-left: 2px solid rgba(117,185,150,.56); }
+.toma__x { border-radius: 50%; color: rgba(200,77,59,.72); }
+.toma__x .icon { width: 17px; height: 17px; }
+.toma__x:hover { background: rgba(200,77,59,.08); }
+
+.infiere__ahora { border-left: 2px solid var(--morado); }
+.infiere__et { letter-spacing: .15em; }
+.infiere__cl { font-family: var(--display); font-style: normal; text-transform: none; text-shadow: none; font-weight: 500; }
+.historia li { border-bottom-color: rgba(242,234,223,.08); }
+.nota--aviso { border: 1px solid rgba(216,107,50,.25); border-left: 2px solid var(--dorado); background: rgba(216,107,50,.06); }
+.panel-t#p-inferir > .chico { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.panel-t#p-inferir > .chico button { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 8px 12px; border: 1px solid var(--filo); border-radius: 4px; background: rgba(24,20,17,.82); color: var(--humo); cursor: pointer; }
+.panel-t#p-inferir > .chico button:hover { color: var(--crema); border-color: rgba(147,128,169,.55); }
+.panel-t#p-inferir > .chico button .icon { width: 16px; height: 16px; color: var(--morado); }
+
+@media (max-width: 680px) {
+  .t1 { font-size: 1.55rem; }
+  .t2 { font-size: 1.15rem; }
+  .bajada { font-size: .8rem; line-height: 1.5; }
+  .rejilla-t { grid-template-columns: 1fr; }
+  .enchufe { min-height: auto; padding: 16px; }
+  .enchufe .grande { margin-top: 8px; }
+  .placas { grid-template-columns: 1fr 1fr; }
+  .placa { padding: 12px; }
+  .figura { padding: 12px; }
+  .lienzo-holder canvas { height: 170px; }
+  .grabar { gap: 10px; }
+}
+
 /* ============================================================ consola editorial */
 .vista.es-activa .lienzo > * { animation: editorial-in .32s ease-out both; }
 @keyframes editorial-in { from { opacity: 0; transform: translateY(10px); } }

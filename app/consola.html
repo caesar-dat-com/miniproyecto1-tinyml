@@ -87,7 +87,7 @@
     <div id="demoEntrenar"></div>
   </div>
   <div class="zocalo">
-    <button class="grande grande--verde" id="btnEntrenar" type="button" disabled>Empezar práctica</button>
+    <button class="grande grande--verde" id="btnEntrenar" type="button" disabled><svg class="icon" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9M12 7a5 5 0 1 0 5 5M12 12l7-7"/></svg><span>Empezar práctica</span></button>
   </div>
 </section>
 
@@ -107,10 +107,10 @@
 <section class="vista" data-vista="taller">
 
   <nav class="taller__nav" aria-label="Secciones del taller">
-    <button class="pieza es-activa" type="button" data-pest="conectar" aria-selected="true">Conectar</button>
-    <button class="pieza" type="button" data-pest="vivo"     aria-selected="false">En vivo</button>
-    <button class="pieza" type="button" data-pest="capturar" aria-selected="false">Capturar</button>
-    <button class="pieza" type="button" data-pest="inferir"  aria-selected="false">Inferencia</button>
+    <button class="pieza es-activa" type="button" data-pest="conectar" aria-selected="true"><svg class="icon" viewBox="0 0 24 24"><path d="M7 12h10M9 8l-4 4 4 4M15 8l4 4-4 4"/></svg>Conectar</button>
+    <button class="pieza" type="button" data-pest="vivo" aria-selected="false"><svg class="icon" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>En vivo</button>
+    <button class="pieza" type="button" data-pest="capturar" aria-selected="false"><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="9"/></svg>Capturar</button>
+    <button class="pieza" type="button" data-pest="inferir" aria-selected="false"><svg class="icon" viewBox="0 0 24 24"><path d="M8 4h8v4h4v8h-4v4H8v-4H4V8h4zM9 9h6v6H9z"/></svg>Inferencia</button>
   </nav>
 
   <div class="lienzo">
@@ -128,21 +128,21 @@
 
       <div class="rejilla-t">
         <article class="panel tarjeta enchufe" data-enchufe="ble">
-          <header><span class="enchufe__ico" aria-hidden="true">BLE</span><h3>Bluetooth LE</h3></header>
+          <header><span class="enchufe__ico" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="m8 3 8 7-8 7V3zm0 7 8 7-8 4V10M5 7l14 10M5 17 19 7"/></svg></span><h3>Bluetooth LE</h3></header>
           <p>Nano 33 BLE, o Uno con módulo HM-10. Sin cables: es el camino de la demo.</p>
           <p class="enchufe__meta">Servicio UART Nordic · notificaciones</p>
-          <button class="grande grande--chico" type="button" data-conectar="ble">Buscar dispositivo</button>
+          <button class="grande grande--chico" type="button" data-conectar="ble"><svg class="icon" viewBox="0 0 24 24"><path d="M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zm5 12 4 4"/></svg>Buscar dispositivo</button>
           <p class="chico" data-sin-soporte hidden>Este navegador no trae Web Bluetooth. Usa Chrome o Edge de escritorio, o Chrome en Android.</p>
         </article>
 
         <article class="panel tarjeta enchufe" data-enchufe="wifi">
-          <header><span class="enchufe__ico" aria-hidden="true">WS</span><h3>WiFi</h3></header>
+          <header><span class="enchufe__ico" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M3 9a14 14 0 0 1 18 0M6 13a9 9 0 0 1 12 0M9.5 17a4 4 0 0 1 5 0M12 20h.01"/></svg></span><h3>WiFi</h3></header>
           <p>Uno R4 WiFi o ESP32 sirviendo un WebSocket en la red local.</p>
           <label class="campo">
             <span class="campo__et">Dirección del WebSocket</span>
             <input type="text" id="wsUrl" value="ws://192.168.1.50:81" spellcheck="false" autocomplete="off">
           </label>
-          <button class="grande grande--chico" type="button" data-conectar="wifi">Conectar</button>
+          <button class="grande grande--chico" type="button" data-conectar="wifi"><svg class="icon" viewBox="0 0 24 24"><path d="M8 12h8M13 8l4 4-4 4M5 4v16"/></svg>Conectar</button>
           <p class="chico" id="avisoMixto" hidden>
             Página en HTTPS: el navegador bloquea <code>ws://</code> sin cifrar.
             Sirve la app por HTTP local o pon el WebSocket detrás de TLS.
@@ -150,10 +150,10 @@
         </article>
 
         <article class="panel tarjeta enchufe" data-enchufe="serial">
-          <header><span class="enchufe__ico" aria-hidden="true">USB</span><h3>Serial USB</h3></header>
+          <header><span class="enchufe__ico" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v14M9 6l3-3 3 3M12 12l-4 3M8 15H5M12 9l4 3M16 12h3v3"/></svg></span><h3>Serial USB</h3></header>
           <p>Cable directo. Cómodo para desarrollo y calibración.</p>
           <p class="enchufe__meta">115200 baudios · 8N1</p>
-          <button class="grande grande--chico" type="button" data-conectar="serial">Elegir puerto</button>
+          <button class="grande grande--chico" type="button" data-conectar="serial"><svg class="icon" viewBox="0 0 24 24"><path d="M6 4h12v12H6zM9 20h6M12 16v4"/></svg>Elegir puerto</button>
           <p class="chico" data-sin-soporte hidden>Este navegador no trae Web Serial. Usa Chrome o Edge de escritorio.</p>
           <p class="chico">
             Ojo: la guía exige que la placa <strong>no esté conectada al PC</strong> durante
@@ -162,13 +162,13 @@
         </article>
 
         <article class="panel tarjeta enchufe" data-enchufe="sim">
-          <header><span class="enchufe__ico" aria-hidden="true">SIM</span><h3>Simulador</h3></header>
+          <header><span class="enchufe__ico" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M5 5h14v14H5zM8 8h.01M16 8h.01M8 16h.01M16 16h.01M12 12h.01"/></svg></span><h3>Simulador</h3></header>
           <p>Gestos sintéticos con ruido. Sirve para jugar y probar sin hardware.</p>
           <label class="campo">
             <span class="campo__et">Gesto a simular</span>
             <select id="simGesto"></select>
           </label>
-          <button class="grande grande--chico" type="button" data-conectar="sim">Arrancar simulador</button>
+          <button class="grande grande--chico" type="button" data-conectar="sim"><svg class="icon" viewBox="0 0 24 24"><path d="m9 7 8 5-8 5z"/></svg>Arrancar simulador</button>
         </article>
       </div>
 
@@ -198,8 +198,8 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
             <option value="10">10 s</option>
           </select>
         </label>
-        <button class="pieza" id="btnPausa" type="button" aria-pressed="false">Pausar</button>
-        <button class="pieza" id="btnTabla" type="button" aria-pressed="false" aria-controls="tablaVivo">Ver tabla</button>
+        <button class="pieza" id="btnPausa" type="button" aria-pressed="false"><svg class="icon" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>Pausar</button>
+        <button class="pieza" id="btnTabla" type="button" aria-pressed="false" aria-controls="tablaVivo"><svg class="icon" viewBox="0 0 24 24"><path d="M4 5h16v14H4zM4 10h16M10 5v14"/></svg>Ver tabla</button>
       </div>
 
       <figure class="figura panel viz-root">
@@ -268,7 +268,7 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
             <span class="campo__et">Quién graba <span class="campo__opt">(va en el archivo)</span></span>
             <input type="text" id="recQuien" placeholder="cesar" spellcheck="false" autocomplete="off">
           </label>
-          <button class="grande btn-grabar" id="btnGrabar" type="button" disabled>Grabar toma</button>
+          <button class="grande btn-grabar" id="btnGrabar" type="button" disabled><svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/></svg><span>Grabar toma</span></button>
           <p class="chico" id="pistaGrabar">Conecta una fuente para empezar.</p>
         </div>
 
@@ -283,9 +283,9 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
       <div class="barras" id="equilibrio" aria-label="Tomas por clase"></div>
 
       <div class="barra-util">
-        <button class="pieza" id="btnCsv" type="button" disabled>⬇ CSV</button>
-        <button class="pieza" id="btnJson" type="button" disabled>⬇ JSON</button>
-        <button class="pieza" id="btnBorrarTomas" type="button" hidden>Borrar todas</button>
+        <button class="pieza" id="btnCsv" type="button" disabled><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M5 20h14"/></svg>CSV</button>
+        <button class="pieza" id="btnJson" type="button" disabled><svg class="icon" viewBox="0 0 24 24"><path d="M12 3v12M8 11l4 4 4-4M5 20h14"/></svg>JSON</button>
+        <button class="pieza pieza--danger" id="btnBorrarTomas" type="button" hidden><svg class="icon" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M7 7l1 14h8l1-14M10 11v6M14 11v6"/></svg>Borrar todas</button>
       </div>
 
       <div class="tomas" id="tomas"></div>
@@ -302,8 +302,8 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
       </p>
 
       <p class="chico">
-        <button type="button" data-modo="i">Modo inferencia</button>
-        <button type="button" data-modo="s">Modo señal cruda</button>
+        <button type="button" data-modo="i"><svg class="icon" viewBox="0 0 24 24"><path d="M8 4h8v4h4v8h-4v4H8v-4H4V8h4z"/></svg>Modo inferencia</button>
+        <button type="button" data-modo="s"><svg class="icon" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></svg>Modo señal cruda</button>
         <span id="modoPista">La placa arranca en inferencia.</span>
       </p>
 
@@ -339,8 +339,8 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
   <p class="hoja__nota" id="hojaNota"></p>
   <ol class="receta" id="hojaPasos" style="max-width:none"></ol>
   <div class="zocalo" style="max-width:none">
-    <button class="grande grande--suave grande--chico" type="button" data-cerrar-hoja style="flex:0 0 auto">Cerrar</button>
-    <button class="grande" type="button" id="btnServirHoja" data-servir>▶ Servir</button>
+    <button class="grande grande--suave grande--chico" type="button" data-cerrar-hoja style="flex:0 0 auto"><svg class="icon" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>Cerrar</button>
+    <button class="grande" type="button" id="btnServirHoja" data-servir><svg class="icon" viewBox="0 0 24 24"><path d="m9 7 8 5-8 5z"/></svg>Servir</button>
   </div>
 </section>
 
