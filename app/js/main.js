@@ -483,7 +483,7 @@
 
       splitter = new LineSplitter(procesarLinea);
       transporte.onText(txt => splitter.push(txt));
-      transporte.onState(pintarEstado);
+      transporte.onState(alEstado);
 
       await transporte.connect();
 
@@ -506,18 +506,50 @@
     }
   }
 
-  async function desconectar() {
+  /* Los transportes avisan de un corte por su cuenta: el 'gattserverdisconnected'
+     del BLE, el onclose del WebSocket, el reader que revienta en Serial. Hasta
+     ahora eso solo repintaba la chapa, así que la app seguía creyéndose
+     conectada: el botón de grabar activo, la tarjeta del transporte encendida,
+     la toma en curso corriendo hacia una toma vacía y el cronómetro del
+     servicio avanzando sin que llegue una sola inferencia.
+
+     cerrandoAdrede distingue el 'off' que pedimos del que sufrimos. */
+  let cerrandoAdrede = false;
+
+  function alEstado(estado, msg) {
+    pintarEstado(estado, msg);
+    if (cerrandoAdrede || !transporte) return;
+    if (estado !== 'off' && estado !== 'err') return;
+
+    const grabando = Boolean(recorder.activa);
+    const jugando  = Boolean(partida?.viva);
+    const motivo   = msg || 'Se perdió la conexión con la placa.';
+
+    desconectar(motivo, motivo);
+    recado(
+      grabando ? 'Se perdió la placa a mitad de la toma'
+      : jugando ? 'Se perdió la placa: servicio abandonado'
+      : motivo
+    );
+  }
+
+  async function desconectar(chapa = 'Sin placa', motivoToma = '') {
+    cerrandoAdrede = true;
     try { await transporte?.disconnect(); } catch {}
     transporte = null;
     splitter?.reset();
-    recorder.cancelar();
+    // El servicio abandonado no anota nada en la libreta: una partida a
+    // medias no es una marca, y premiarla falsearía la precisión.
+    recorder.cancelar(motivoToma);
     partida?.abandonar();
     partida = null;
     $$('.enchufe').forEach(c => c.classList.remove('es-viva'));
     $('#btnGrabar').disabled = true;
+    $('#btnGrabar').textContent = '⏺ Grabar toma';
     $('#pistaGrabar').textContent = 'Conecta una fuente para empezar.';
-    pintarEstado('off', 'Sin placa');
+    pintarEstado('off', chapa);
     pintarVista();
+    cerrandoAdrede = false;
   }
 
   const LUZ = { on: '●', wait: '◌', err: '!', off: '○' };
@@ -709,7 +741,7 @@
       $('#tabladoT').textContent =
           ev.fase === 'lista'     ? `${ev.take.n} muestras · ${ev.take.hzReal} Hz`
         : ev.fase === 'vacia'     ? 'No llegó ninguna muestra. ¿Sigue conectada la placa?'
-        : ev.fase === 'cancelada' ? 'Cancelada'
+        : ev.fase === 'cancelada' ? (ev.motivo || 'Cancelada')
         : 'Sin grabar';
       $('#tabladoLleno').style.width = '0%';
       if (ev.fase === 'lista') pintarTomas();

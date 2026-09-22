@@ -129,12 +129,14 @@ class Recorder {
     a._resolve(take);
   }
 
-  cancelar() {
+  /* El motivo es opcional: si la toma la corta el usuario no hay nada que
+     explicar, pero si la corta una placa que se cayó, sí. */
+  cancelar(motivo = '') {
     if (!this.activa) return;
     cancelAnimationFrame(this.activa._raf);
     const r = this.activa._resolve;
     this.activa = null;
-    this.onTick({ fase: 'cancelada' });
+    this.onTick({ fase: 'cancelada', motivo });
     r(null);
   }
 
