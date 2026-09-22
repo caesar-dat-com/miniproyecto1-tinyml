@@ -35,20 +35,18 @@
     // Servicio: servicios completados.
     medallas($('#med-jugar'), escalon(r.partidas, [1, 5, 12]));
 
-    // Libreta: se abre sola en cuanto hay algo que anotar. Mostrarla vacía
-    // no aporta nada, y el candado explica por qué todavía no.
+    // La libreta vacía también se puede consultar; explica cómo empezar.
     const hayDatos = r.partidas > 0 || r.gestos.some(g => g.intentos > 0);
     medallas($('#med-libreta'), hayDatos ? escalon(r.global || 0, [0.4, 0.65, 0.85]) : 0);
 
     const libreta = $('#platoLibreta');
-    libreta.classList.toggle('es-bloqueado', !hayDatos);
+    libreta.classList.toggle('es-vacia', !hayDatos);
     libreta.querySelector('.plato__candado').hidden = hayDatos;
     libreta.setAttribute('aria-label',
-      hayDatos ? 'Libreta, tus marcas' : 'Libreta bloqueada: sirve un cóctel primero');
+      hayDatos ? 'Libreta, tus marcas' : 'Libreta, todavía sin marcas');
 
-    // Un candado que no lleva a ninguna parte frustra. Lleva a la carta, que
-    // es justo lo que hay que hacer para desbloquearlo.
-    libreta.href = hayDatos ? 'consola.html#progreso' : 'consola.html#recetas';
+    // Mantener siempre el destino anunciado en la tarjeta.
+    libreta.href = 'consola.html#progreso';
   }
 
   /* ------------------------------------------------------ pantalla completa */
@@ -83,16 +81,19 @@
     const velo = $('#veloHoja');
     const btn  = $('#btnComo');
 
+    let origen = btn;
     const abrir = (si) => {
+      if (si) origen = document.activeElement;
       hoja.hidden = !si;
       velo.hidden = !si;
       btn.setAttribute('aria-expanded', String(si));
       document.body.style.overflow = si ? 'hidden' : '';
       if (si) hoja.querySelector('[data-cerrar-hoja]').focus();
-      else btn.focus();
+      else origen?.focus();
     };
 
     btn.addEventListener('click', () => abrir(hoja.hidden));
+    document.querySelector('[data-help]')?.addEventListener('click', () => abrir(true));
     velo.addEventListener('click', () => abrir(false));
     hoja.querySelector('[data-cerrar-hoja]').addEventListener('click', () => abrir(false));
     addEventListener('keydown', (e) => { if (e.key === 'Escape' && !hoja.hidden) abrir(false); });

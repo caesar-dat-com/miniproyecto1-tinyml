@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<symbol id="glass" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14h46L32 36v20M21 57h22M14 20h35M44 6 33 25"/><circle cx="32" cy="25" r="4"/></g></symbol>
+<symbol id="shake" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 24 24-7 10 34-25 7zM18 24l1-10 15-4 8 7M22 13l-2-7 9-3 3 8M21 31l23-7M28 49l5-1M6 25l-3 9 7-1-3 10M53 8l7-2-3 9M38 33l4 12"/></g></symbol>
+<symbol id="clock" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="32" cy="36" r="22"/><path d="M32 22v15l9 6M25 5h14M32 5v9M49 16l5-5M51 8l6 6M10 19l-4-4"/></g></symbol>
+<symbol id="book" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 9h35v47H16zM12 9h7v47h-7M25 22h17M25 29h17M25 42h9M7 18h9M7 29h9M7 42h9"/></g></symbol>
+<symbol id="tool" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><path d="M38 8a16 16 0 0 0-19 19L6 43a8 8 0 0 0 12 11l15-17A16 16 0 0 0 51 16L40 26l-9-9z"/><circle cx="14" cy="47" r="2"/></g></symbol>
+<symbol id="mojito" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><path d="m17 15 4 43h26l4-43zM20 28h29M39 46 44 4M26 35l9 3-3 9-8-3zM31 25C12 22 8 5 14 4c12 0 19 9 17 21zM31 25C27 12 32 3 39 4c3 9-1 16-8 21z"/></g></symbol>
+<symbol id="rocks" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><path d="m12 21 4 36h34l4-36zM14 34h38M24 30l13-3 4 15-14 3z"/><path d="M39 20A12 12 0 1 1 54 32M41 17l17 11M47 8l-1 13M58 14l-9 7"/></g></symbol>
+<symbol id="stir" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m14 29 4 29h31l4-29M33 43 43 5M36 20c19-1 21 14 7 17M22 38C3 34 8 20 27 20M23 15l5 5-5 5"/></g></symbol>
+<symbol id="pour" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><path d="m7 17 9-12 23 20-8 11zM31 36l10-5M40 30c9 8 7 10 7 14M33 44h24l-3 15H37zM3 29l7 6"/></g></symbol>
+<symbol id="muddle" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"><path d="m17 34 3 24h27l4-24M30 43 26 8l9-1 4 35zM22 47l7 4M39 51l5-5M10 24l5 5M48 25l6-6"/></g></symbol>
+<symbol id="strain" viewBox="0 0 64 64"><g fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M13 23a19 19 0 0 0 38 0zM32 4v19M18 29h28M21 34h23M27 45v5M37 44v7M31 54v5"/></g></symbol>
+</svg>

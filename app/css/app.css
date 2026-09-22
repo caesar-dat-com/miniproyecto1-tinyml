@@ -1,7 +1,7 @@
 /* ============================================================================
    app.css — la consola: salón y taller
-   Mismo lenguaje que la portada (ver base.css): foto de bar de fondo,
-   piezas gordas encima y nada por debajo de 48 px para el dedo.
+   Mismo lenguaje editorial que la portada: papel, tinta e ilustración.
+   Controles táctiles y navegación permanente entre las cinco vistas.
    ========================================================================== */
 
 body { overflow: hidden; overscroll-behavior: none; }
@@ -371,4 +371,118 @@ body { overflow: hidden; overscroll-behavior: none; }
   .medidor { flex: 1 1 240px; }
   .receta { max-width: none; grid-template-columns: repeat(2, 1fr); display: grid; }
   .acta__estrellas { font-size: 2rem; }
+}
+
+/* Edición gráfica: misma geometría y funciones, nuevas superficies. */
+.hud { background: var(--noche); border-bottom: 2px solid var(--tinta); padding-bottom: 12px; align-items: center; }
+.hud__dcha { align-items: center; gap: 6px; min-width: 0; }
+.hud .chapa { max-width: 130px; font-size: .72rem; padding: 8px; }
+#chapaTxt { overflow: hidden; text-overflow: ellipsis; }
+#chapaPlaca[data-estado='on'] .chapa__ico { color: var(--verde); }
+.titulo { padding: 0 2px; background: none; border: 0; box-shadow: none; }
+.titulo__txt { font: 700 1.6rem/1 var(--display); text-transform: uppercase; }
+.titulo__nota { font-weight: 400; }
+.theme-control { display: none; }
+.escenario { padding-top: calc(var(--seg-t) + 88px); padding-bottom: calc(var(--seg-b) + 94px); }
+.lienzo { max-width: 1120px; padding: 8px 8px 12px 4px; gap: 20px; }
+.lienzo > * { margin-block: 0; }
+.lienzo::-webkit-scrollbar-thumb { background: var(--filo); }
+.view-intro { padding: 10px 0 8px; }
+.view-intro .eyebrow { color: var(--humo-2); margin: 0 0 14px; }
+.view-intro h1 { font: 800 clamp(2.5rem, 7vw, 4.3rem)/.97 var(--display); margin: 0 0 16px; }
+.view-intro h1 em { color: var(--dorado); font-style: normal; }
+.view-intro > p:last-child { color: var(--humo); margin-bottom: 0; }
+.rejilla { grid-template-columns: 1fr; gap: 18px; padding: 5px 4px 8px; }
+.rejilla .plato { min-height: 218px; padding: 22px; }
+.rejilla .plato__ico .icon { width: 72px; height: 72px; }
+.rejilla .plato__nota { max-width: 24ch; }
+.plato.es-elegida { outline: 2px solid var(--dorado); outline-offset: 4px; }
+.plato__grados { font-size: .7rem; opacity: 1; color: var(--humo); }
+.console-nav { position: fixed; z-index: 10; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(5, 1fr); background: var(--panel); border-top: 2px solid var(--tinta); padding: 5px 8px calc(6px + var(--seg-b)); }
+.console-nav button { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px; min-height: 59px; background: none; border: 0; border-radius: 2px; font: 600 .64rem var(--redonda); cursor: pointer; }
+.console-nav button .icon { width: 25px; height: 25px; }
+.console-nav button[aria-current='page'] { background: var(--crema); color: var(--panel); }
+.zocalo { max-width: 1120px; padding: 0 5px 6px; }
+.hoja .zocalo { flex-wrap: wrap; }
+.hoja .receta { margin-top: 22px; }
+.hoja .grande { min-width: 130px; }
+.juego { padding: 24px 12px; gap: 18px; }
+.juego__gesto, .acta__pts, .cifra__n { font-family: var(--display); text-shadow: none; }
+.juego__gesto { font-size: clamp(3rem, 10vw, 5rem); text-transform: uppercase; }
+.juego__texto { font-weight: 400; }
+.aro__via { stroke: var(--panel-alto); }
+.aro__linea, .aro.es-poco .aro__linea { filter: none; stroke-linecap: butt; }
+.aro__n, .tablado__n { font-family: var(--display); }
+.medidor__marco, .barra__via, .tablado__via { background: var(--panel-alto); border: 1px solid var(--filo); border-radius: 1px; box-shadow: none; }
+.medidor__liquido, .barra__lleno, .barra.es-flojo .barra__lleno { background: var(--dorado); border-radius: 0; }
+.medidor.es-bueno .medidor__liquido { background: var(--verde); }
+.pasos__pieza { background: var(--panel-alto); border: 1px solid var(--filo); border-radius: 1px; }
+.receta li { background: var(--panel); border: 1px solid var(--filo); padding-block: 13px; }
+.receta__n { border: 0; background: var(--panel-alto); color: var(--crema); border-radius: 1px; }
+.receta li.es-actual { background: var(--panel); }
+.receta li.es-actual .receta__n { color: var(--panel); }
+.demo { background: var(--panel); border: 1px dashed var(--humo-2); }
+.acta { padding: 24px 8px; gap: 16px; }
+.acta__pts { font-size: 5rem; }
+.cifra { margin-top: 24px; }
+.taller__nav { max-width: 1120px; display: grid; grid-template-columns: repeat(2, 1fr); overflow: visible; padding: 2px; }
+.taller__nav .pieza { padding-inline: 8px; }
+.t1 { font: 700 2.5rem/1.1 var(--display); text-transform: uppercase; }
+.t2 { font: 700 1.8rem/1.1 var(--display); }
+.bajada { font-size: 1rem; }
+.rejilla-t { grid-template-columns: 1fr; gap: 18px; }
+.tarjeta { padding: 22px; }
+.enchufe { gap: 13px; }
+.enchufe h3 { font: 700 1.7rem var(--display); }
+.enchufe p { font-size: .94rem; }
+.enchufe .grande { margin-bottom: 4px; }
+.enchufe.es-viva { border-color: var(--verde); box-shadow: inset 4px 0 0 var(--verde); }
+.campo input, .campo select { background: var(--noche); border: 1px solid var(--filo); font-size: 16px; font-weight: 400; }
+.campo input:focus, .campo select:focus { border-color: var(--dorado); box-shadow: none; outline: 2px solid var(--dorado); outline-offset: 2px; }
+.codigo { background: var(--panel-alto); border: 1px solid var(--filo); }
+.nota--aviso { background: var(--panel); border: 1px solid var(--filo); border-left: 4px solid var(--dorado); }
+.placa__n { font-family: var(--display); font-size: 2rem; }
+#tablaVivo { overflow-x: auto; }
+.readout { background: #25231f; color: #f7f0df; }
+.readout__t { color: #c8bead; }
+.infiere__cl { font-family: var(--display); text-transform: uppercase; }
+.vista.es-activa { animation: panel-in .25s ease; }
+@media (min-width: 360px) { .rejilla { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rejilla .plato { padding: 18px; } }
+@media (min-width: 560px) {
+  .theme-control { display: grid; }
+  .taller__nav { grid-template-columns: repeat(4, 1fr); }
+  .rejilla-t { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hud { left: 24px; right: 24px; }
+  .escenario { padding-inline: 28px; }
+  .console-nav { left: 24px; right: 24px; bottom: 10px; border: 1.5px solid var(--tinta); padding: 5px; box-shadow: 4px 4px 0 var(--shadow); }
+  .console-nav button { flex-direction: row; gap: 10px; font-size: .8rem; min-height: 49px; }
+}
+@media (min-width: 950px) {
+  .hud { left: max(30px, calc((100% - 1120px)/2)); right: max(30px, calc((100% - 1120px)/2)); }
+  .console-nav { width: 760px; left: 50%; right: auto; transform: translateX(-50%); }
+  .rejilla { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .rejilla .plato { min-height: 270px; }
+  .view-intro { padding-block: 25px 14px; }
+  .rejilla .plato__ico .icon { width: 90px; height: 90px; }
+  .hud .chapa { max-width: 200px; font-size: .8rem; padding: 10px 14px; }
+}
+/* El cronómetro y el simulador caben juntos; el desglose sigue disponible. */
+.juego--activo { padding: 4px 8px; gap: 10px; }
+.juego--activo .juego__paso { margin: 0 0 5px; }
+.juego--activo .juego__gesto { font-size: 2.6rem; }
+.juego--activo .juego__texto { font-size: .9rem; margin-top: 6px; }
+.juego--activo .aro { width: 112px; }
+.juego--activo .aro__n { font-size: 2rem; }
+.juego--activo .demo { padding: 9px; }
+.juego--activo .demo__txt { font-size: .7rem; margin-bottom: 6px; }
+.juego--activo .demo__fila { gap: 5px; }
+.juego--activo .demo .pieza { padding: 8px 10px; font-size: .78rem; }
+.pasos-detalle { width: 100%; max-width: 480px; text-align: left; }
+.pasos-detalle summary { cursor: pointer; min-height: 44px; padding: 12px 0; color: var(--humo); font-size: .85rem; }
+.pasos-detalle .receta { margin-top: 0; }
+@media (min-width: 760px) and (min-height: 700px) {
+  .juego--activo { gap: 16px; }
+  .juego--activo .aro { width: 155px; }
+  .juego--activo .juego__gesto { font-size: 4rem; }
+  .juego--activo .demo .pieza { font-size: .9rem; padding-inline: 16px; }
 }

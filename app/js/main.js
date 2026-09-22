@@ -50,11 +50,15 @@
     if (partida?.viva && v !== 'jugar') { partida.abandonar(); partida = null; }
 
     vista = v;
+    $$('.console-nav [data-ir]').forEach(b => {
+      if (b.dataset.ir === v) b.setAttribute('aria-current', 'page');
+      else b.removeAttribute('aria-current');
+    });
     $$('.vista').forEach(el => el.classList.toggle('es-activa', el.dataset.vista === v));
 
     const [t, n] = ROTULO[v] || ROTULO.recetas;
     $('#tituloTxt').textContent = v === 'jugar' && recetaPorId.get(recetaElegida)
-      ? recetaPorId.get(recetaElegida).nombre : t;
+      ? (partida?.receta.nombre || recetaPorId.get(recetaElegida).nombre) : t;
     $('#tituloNota').textContent = n;
 
     $('#btnTaller').setAttribute('aria-pressed', String(v === 'taller'));
@@ -87,9 +91,9 @@
 
     $$('[data-pest]').forEach(p => {
       p.addEventListener('click', () => {
-        $$('[data-pest]').forEach(x => { x.classList.remove('es-activa'); x.setAttribute('aria-selected', 'false'); });
+        $$('[data-pest]').forEach(x => { x.classList.remove('es-activa'); x.setAttribute('aria-pressed', 'false'); });
         p.classList.add('es-activa');
-        p.setAttribute('aria-selected', 'true');
+        p.setAttribute('aria-pressed', 'true');
         $$('.panel-t').forEach(x => x.classList.remove('es-activa'));
         $(`#p-${p.dataset.pest}`).classList.add('es-activa');
         requestAnimationFrame(() => {
@@ -110,7 +114,8 @@
     if (vista === 'progreso') pintarProgreso();
   }
 
-  const COPA = { mojito: '🌿', daiquiri: '🍋', negroni: '🍊', 'old-fashioned': '🥃', margarita: '🧂' };
+  const icono = id => `<svg class="icon" aria-hidden="true"><use href="img/icons.svg#${id}"/></svg>`;
+  const COPA = { mojito: 'mojito', daiquiri: 'glass', negroni: 'rocks', 'old-fashioned': 'rocks', margarita: 'glass' };
 
   function pintarRecetas() {
     const d = Libreta.resumen();
@@ -118,7 +123,7 @@
       <button class="plato plato--${TONO[r.grado - 1] || 'ambar'} ${r.id === recetaElegida ? 'es-elegida' : ''}"
               type="button" data-receta="${r.id}">
         <span class="plato__medallas" aria-hidden="true">${medallas(r.marca ? r.marca.estrellas : 0)}</span>
-        <span class="plato__ico" aria-hidden="true">${COPA[r.id] || '🍸'}</span>
+        <span class="plato__ico" aria-hidden="true">${icono(COPA[r.id] || 'glass')}</span>
         <span class="plato__nombre">${esc(r.nombre)}</span>
         <span class="plato__nota">${esc(r.nota)}</span>
         <span class="plato__grados" aria-label="Dificultad ${r.grado} de 3">${'◆'.repeat(r.grado)}<span class="apagado">${'◆'.repeat(3 - r.grado)}</span></span>
@@ -129,7 +134,7 @@
     return [0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}">★</i>`).join('');
   }
 
-  const MANO = { agitar: '🫱', remover: '🌀', servir: '🫗', macerar: '🔨', colar: '🥄' };
+  const MANO = { agitar: 'shake', remover: 'stir', servir: 'pour', macerar: 'muddle', colar: 'strain' };
 
   function pintarEntrenar() {
     const d = Libreta.resumen();
@@ -137,9 +142,9 @@
       const g = d.gestos.find(x => x.id === c.id);
       const nota = g && g.media !== null ? `${Math.round(g.media * 100)} % de acierto` : c.desc;
       return `<button class="plato plato--${TONO[i % TONO.length]} ${c.id === gestoElegido ? 'es-elegida' : ''}"
-                      type="button" data-gesto="${c.id}">
+                      type="button" data-gesto="${c.id}" aria-pressed="${c.id === gestoElegido}">
         <span class="plato__medallas" aria-hidden="true">${medallas(g && g.media !== null ? escalon(g.media) : 0)}</span>
-        <span class="plato__ico" aria-hidden="true">${MANO[c.id] || '🤲'}</span>
+        <span class="plato__ico" aria-hidden="true">${icono(MANO[c.id] || 'shake')}</span>
         <span class="plato__nombre">${esc(c.label)}</span>
         <span class="plato__nota">${esc(nota)}</span>
       </button>`;
@@ -226,7 +231,7 @@
 
   function pantallaJuego(receta) {
     return `
-      <div class="juego">
+      <div class="juego juego--activo">
         <div class="juego__cabeza">
           <p class="juego__paso" id="jPaso">—</p>
           <h2 class="juego__gesto" id="jGesto">—</h2>
@@ -251,8 +256,8 @@
         </div>
 
         <div class="pasos" id="jPasos"></div>
-        <ol class="receta" id="jLista">${receta.pasos.map((p, k) => filaPaso(p, k)).join('')}</ol>
         ${cajaDemo()}
+        <details class="pasos-detalle"><summary>Ver todos los pasos</summary><ol class="receta" id="jLista">${receta.pasos.map((p, k) => filaPaso(p, k)).join('')}</ol></details>
       </div>`;
   }
 
@@ -332,7 +337,7 @@
       if (rec) { recetaElegida = rec.dataset.receta; pintarRecetas(); abrirHoja(true); return; }
 
       const ges = e.target.closest('[data-gesto]');
-      if (ges) { gestoElegido = ges.dataset.gesto; pintarEntrenar(); return; }
+      if (ges) { gestoElegido = ges.dataset.gesto; pintarEntrenar(); $(`[data-gesto="${gestoElegido}"]`).focus({ preventScroll: true }); return; }
 
       const sim = e.target.closest('[data-simgesto]');
       if (sim) {
@@ -358,6 +363,8 @@
       empezarPartida(recetaDePractica(gestoElegido, 10));
     });
 
+    $('#btnConectarHoja').addEventListener('click', () => { abrirHoja(false); irA('taller'); });
+
     /* --- hoja de receta --- */
     $('#veloHoja').addEventListener('click', () => abrirHoja(false));
     $('[data-cerrar-hoja]').addEventListener('click', () => abrirHoja(false));
@@ -372,12 +379,15 @@
       $('#hojaTitulo').textContent = r.nombre;
       $('#hojaNota').textContent = `${r.nota} · ${total} s en total`;
       $('#hojaPasos').innerHTML = r.pasos.map((p, k) => filaPaso(p, k)).join('');
+      $('#btnConectarHoja').hidden = !!transporte;
+      $('#btnServirHoja').hidden = !transporte;
       $('#btnServirHoja').disabled = !transporte;
       $('#btnServirHoja').textContent = transporte ? '▶ Servir' : 'Conecta la placa';
     }
     hoja.hidden = !si;
     $('#veloHoja').hidden = !si;
-    if (si) $('#btnServirHoja').focus();
+    if (si) $('[data-cerrar-hoja]').focus();
+    else $(`[data-receta="${recetaElegida}"]`)?.focus({ preventScroll: true });
   }
 
   function empezarPartida(receta) {
@@ -510,12 +520,13 @@
     pintarVista();
   }
 
-  const LUZ = { on: '🟢', wait: '🟡', err: '🔴', off: '⚫' };
+  const LUZ = { on: '●', wait: '◌', err: '!', off: '○' };
 
   function pintarEstado(estado, msg) {
     $('#chapaPunto').textContent = LUZ[estado] || LUZ.off;
+    $('#chapaPlaca').dataset.estado = estado;
     // En la chapa cabe poco: el mensaje largo va al title, no cortado.
-    $('#chapaTxt').textContent = estado === 'on' ? 'Conectada' : msg;
+    $('#chapaTxt').textContent = estado === 'on' ? (transporte?.nombre === 'sim' ? 'Simulador' : 'Conectada') : msg;
     $('#chapaPlaca').title = msg;
   }
 
