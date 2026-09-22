@@ -13,6 +13,14 @@ const UMBRAL_CONF = 0.60;
    enviar, el contador no puede seguir premiando el último valor recibido. */
 const VIDA_INFERENCIA_MS = 1500;
 
+/* Una clase puede seguir formando parte de la experiencia aunque todavía no
+   exista en el modelo. En ese caso el paso avanza por tiempo, no se compara
+   con la inferencia y queda fuera de precisión, estrellas y libreta. */
+function pasoEsMedible(paso) {
+  const clase = CLASES.find(c => c.id === paso.clase);
+  return paso.medible !== false && clase?.medible !== false;
+}
+
 const RECETAS = [
   {
     id: 'mojito', nombre: 'Mojito', grado: 1,
@@ -135,8 +143,9 @@ class Partida {
     const inf = this.ultimaInf;
     const fresca = inf && (ahora - inf.ts) < VIDA_INFERENCIA_MS;
 
-    this.acierto = Boolean(fresca && inf.clase === p.clase && inf.confianza >= UMBRAL_CONF);
-    this.conf = fresca && inf.clase === p.clase ? inf.confianza : 0;
+    const medible = pasoEsMedible(p);
+    this.acierto = medible && Boolean(fresca && inf.clase === p.clase && inf.confianza >= UMBRAL_CONF);
+    this.conf = medible && fresca && inf.clase === p.clase ? inf.confianza : 0;
 
     if (this.acierto) this.aciertoMs += dt;
     this.restanteMs -= dt;
@@ -150,6 +159,7 @@ class Partida {
       acierto: this.acierto,
       conf: this.conf,
       detectado: fresca ? inf.clase : null,
+      medible,
     });
 
     if (this.restanteMs <= 0) this._cerrarPaso();
@@ -157,9 +167,11 @@ class Partida {
 
   _cerrarPaso() {
     const p = this.receta.pasos[this.idx];
+    const medible = pasoEsMedible(p);
     this.resultados.push({
       clase: p.clase,
-      precision: Math.min(1, this.aciertoMs / (p.seg * 1000)),
+      medible,
+      precision: medible ? Math.min(1, this.aciertoMs / (p.seg * 1000)) : null,
     });
 
     this.idx++;
@@ -171,14 +183,17 @@ class Partida {
     clearInterval(this._timer);
     this.viva = false;
 
-    const media = this.resultados.reduce((a, r) => a + r.precision, 0) / this.resultados.length;
+    const medidos = this.resultados.filter(r => r.medible && Number.isFinite(r.precision));
+    const media = medidos.length
+      ? medidos.reduce((a, r) => a + r.precision, 0) / medidos.length
+      : null;
     const acta = {
       recetaId: this.receta.id,
       nombre: this.receta.nombre,
       practica: Boolean(this.receta.practica),
       precision: media,
-      estrellas: estrellasDe(media),
-      puntos: puntosDe(media, this.receta.grado || 1),
+      estrellas: media === null ? 0 : estrellasDe(media),
+      puntos: media === null ? 0 : puntosDe(media, this.receta.grado || 1),
       pasos: this.resultados,
       fecha: Date.now(),
     };
@@ -230,6 +245,7 @@ const Libreta = {
     // La precisión por gesto se acumula paso a paso, no por partida: así una
     // receta larga no pesa más que una corta al juzgar un gesto concreto.
     for (const p of acta.pasos) {
+      if (!p.medible || !Number.isFinite(p.precision)) continue;
       const g = d.gestos[p.clase] || { intentos: 0, suma: 0, mejor: 0 };
       g.intentos++;
       g.suma += p.precision;
@@ -286,6 +302,6 @@ function recetaDePractica(claseId, seg = 10) {
     nombre: c ? c.label : claseId,
     grado: 1,
     practica: true,
-    pasos: [{ clase: claseId, seg, texto: c ? c.desc : 'Repite el gesto' }],
+    pasos: [{ clase: claseId, seg, texto: c ? c.desc : 'Repite el gesto', medible: c?.medible !== false }],
   };
 }

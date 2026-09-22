@@ -408,6 +408,10 @@ body[data-mood="perfect"] .comic-atmosphere__burst { background: repeating-conic
   background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.14);
 }
 .receta b { color: var(--crema); }
+.receta__guia {
+  display: block; margin-top: 4px; font-family: var(--mono); font-size: .66rem;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--azul);
+}
 .receta time { font-family: var(--mono); font-size: .78rem; color: var(--humo-2); }
 .receta li.es-actual { border-color: var(--dorado); background: rgba(245,185,66,.14); color: var(--crema); }
 .receta li.es-actual .receta__n { background: var(--dorado); color: #3a2405; border-color: #fff; }
@@ -443,6 +447,8 @@ body[data-mood="perfect"] .comic-atmosphere__burst { background: repeating-conic
   display: block; height: 14px; border-radius: 999px; overflow: hidden;
   background: rgba(0,0,0,.5); border: 2px solid rgba(255,255,255,.18);
 }
+.barra--guia .barra__via { border-style: dashed; opacity: .7; }
+.barra--guia .barra__n { color: var(--azul); font-family: var(--mono); font-size: .7rem; text-transform: uppercase; }
 /* Magnitud comparada entre categorías: un solo tono. Aquí las clases no son
    identidades que haya que distinguir, es la misma medida repetida. */
 .barra__lleno { display: block; height: 100%; background: linear-gradient(90deg, var(--oro-osc), var(--dorado)); }

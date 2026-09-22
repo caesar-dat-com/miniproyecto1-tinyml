@@ -204,7 +204,9 @@
     const d = Libreta.resumen();
     $('#rejillaGestos').innerHTML = GESTOS.map((c, i) => {
       const g = d.gestos.find(x => x.id === c.id);
-      const nota = g && g.media !== null ? `${Math.round(g.media * 100)} % de acierto` : c.desc;
+      const nota = c.medible === false
+        ? 'Práctica guiada · sin medición'
+        : (g && g.media !== null ? `${Math.round(g.media * 100)} % de acierto` : c.desc);
       return `<button class="plato plato--${TONO[i % TONO.length]} ${c.id === gestoElegido ? 'es-elegida' : ''}"
                       type="button" data-gesto="${c.id}">
         <span class="plato__medallas" aria-hidden="true">${medallas(g && g.media !== null ? escalon(g.media) : 0)}</span>
@@ -263,7 +265,9 @@
           <div class="acta__barras barras">
             ${ultimaActa.pasos.map(p => {
               const c = CLASES.find(x => x.id === p.clase);
-              return barra(c ? c.label : p.clase, p.precision);
+              return p.medible && Number.isFinite(p.precision)
+                ? barra(c ? c.label : p.clase, p.precision)
+                : barraSinMedir(c ? c.label : p.clase);
             }).join('')}
           </div>
         </div>`;
@@ -288,9 +292,10 @@
 
   function filaPaso(p, k, clase = '') {
     const c = CLASES.find(x => x.id === p.clase);
+    const medible = p.medible !== false && c?.medible !== false;
     return `<li class="${clase}">
       <span class="receta__n">${k + 1}</span>
-      <span><b>${esc(c ? c.label : p.clase)}</b> · ${esc(p.texto)}</span>
+      <span><b>${esc(c ? c.label : p.clase)}</b> · ${esc(p.texto)}${medible ? '' : '<small class="receta__guia">Paso guiado · sin medición</small>'}</span>
       <time>${p.seg} s</time>
     </li>`;
   }
@@ -346,6 +351,14 @@
       <span>${esc(etiqueta)}</span>
       <span class="barra__via"><span class="barra__lleno" style="width:${pct}%"></span></span>
       <span class="barra__n">${pct}%</span>
+    </div>`;
+  }
+
+  function barraSinMedir(etiqueta) {
+    return `<div class="barra barra--guia">
+      <span>${esc(etiqueta)}</span>
+      <span class="barra__via"><span class="barra__lleno"></span></span>
+      <span class="barra__n">guía</span>
     </div>`;
   }
 
@@ -458,9 +471,10 @@
     partida = new Partida(receta, {
       onPaso: (p, i, total) => {
         const c = CLASES.find(x => x.id === p.clase);
+        const medible = p.medible !== false && c?.medible !== false;
         if ($('#jGesto')) $('#jGesto').textContent = c ? c.label : p.clase;
         if ($('#jTexto')) $('#jTexto').textContent = p.texto;
-        if ($('#jPaso'))  $('#jPaso').textContent = receta.practica ? 'Practica' : `Paso ${i + 1} de ${total}`;
+        if ($('#jPaso'))  $('#jPaso').textContent = `${receta.practica ? 'Práctica' : `Paso ${i + 1} de ${total}`}${medible ? '' : ' · sin medición'}`;
         refrescarLista();
       },
 
@@ -476,14 +490,21 @@
         }
         $('#jAro')?.classList.toggle('es-poco', t.restanteS < 2);
 
-        moverMedidor(t.conf, t.acierto, t.acierto ? '¡así!' : (t.detectado ? 'otro gesto' : 'sin señal'));
+        moverMedidor(
+          t.conf,
+          t.acierto,
+          t.medible ? (t.acierto ? '¡así!' : (t.detectado ? 'otro gesto' : 'sin señal')) : 'paso guiado · sin medición',
+          t.medible,
+        );
       },
 
       onFin: (acta) => {
         partida = null;
         ultimaActa = acta;
         if (receta.practica) {
-          recado(`${acta.nombre}: ${Math.round(acta.precision * 100)} % de precisión`);
+          recado(acta.precision === null
+            ? `${acta.nombre}: práctica guiada completada · sin medición`
+            : `${acta.nombre}: ${Math.round(acta.precision * 100)} % de precisión`);
           ultimaActa = null;
           irA('entrenar');
         } else {
@@ -499,13 +520,13 @@
     partida.arrancar();
   }
 
-  function moverMedidor(conf, bien, etiqueta) {
+  function moverMedidor(conf, bien, etiqueta, medible = true) {
     const liq = $('#medidorLiquido');
     if (!liq) return;
     liq.style.width = `${Math.round(conf * 100)}%`;
     $('#medidor')?.classList.toggle('es-bueno', Boolean(bien));
     const num = $('#medidorNum');
-    if (num) num.textContent = `${Math.round(conf * 100)} %`;
+    if (num) num.textContent = medible ? `${Math.round(conf * 100)} %` : '—';
     const que = $('#medidorQue');
     if (que && etiqueta) que.textContent = etiqueta;
   }

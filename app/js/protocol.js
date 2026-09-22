@@ -9,7 +9,9 @@ const CLASES = [
   { id: 'remover', label: 'Remover', desc: 'Stir con cuchara' },
   { id: 'servir',  label: 'Servir',  desc: 'Inclinar para verter' },
   { id: 'macerar', label: 'Macerar', desc: 'Golpes verticales cortos' },
-  { id: 'colar',   label: 'Colar',   desc: 'Giro e inclinación final' },
+  /* Todavía no existe esta salida en el modelo desplegado. Se conserva como
+     paso guiado para no recortar las recetas, pero nunca entra al puntaje. */
+  { id: 'colar',   label: 'Colar',   desc: 'Giro e inclinación final', medible: false },
   { id: 'reposo',  label: 'Reposo',  desc: 'Coctelera quieta' },
 ];
 

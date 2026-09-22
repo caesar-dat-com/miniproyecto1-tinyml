@@ -93,7 +93,7 @@ dataset y con la app.
 | `servir` | 10 | ✅ | ✅ | 0,97 | Lista para probar en el vaso |
 | `reposo` | 10 | ✅ | ✅ | 1,00 | Clase de rechazo/reposo |
 | `reposo_mano` | 10 | ✅ | ❌ | 1,00 | El modelo la emite, pero la app no la muestra como clase conocida |
-| `colar` | **0** | **❌** | ✅ | — | La app la pide en recetas, pero el modelo no puede reconocerla |
+| `colar` | **0** | **❌** | ✅ | — | Paso guiado: conserva la receta, avanza por tiempo y no se puntúa |
 
 **Conclusión de la revisión:** los datos sí están marcados correctamente cuando
 se usa [`edge-impulse/dataset/info-6clases.labels`](edge-impulse/dataset/info-6clases.labels):
@@ -108,11 +108,12 @@ orden real de salida es:
 agitar, macerar, remover, reposo, reposo_mano, servir
 ```
 
-> **Bloqueo funcional actual:** cualquier paso `colar` de una receta nunca puede
-> aprobarse con el Arduino real, porque esa salida no existe en el modelo. Hay
-> que grabar y reentrenar `colar`, o retirarla temporalmente de las recetas. Del
-> mismo modo, conviene decidir si `reposo_mano` se conserva como clase separada
-> o se combina con `reposo` antes del entrenamiento final.
+> **Solución temporal aplicada:** `colar` se conserva en todas las recetas como
+> paso guiado. Su temporizador avanza normalmente, pero no consulta la
+> inferencia y queda fuera de la precisión, los puntos, las estrellas y la
+> libreta. Cuando se grabe y reentrene esa clase basta marcarla nuevamente como
+> medible. También conviene decidir si `reposo_mano` se conserva como clase
+> separada o se combina con `reposo` antes del entrenamiento final.
 
 ---
 
