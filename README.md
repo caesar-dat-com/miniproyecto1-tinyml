@@ -79,6 +79,117 @@ Dataset propio con **5 clases + reposo**:
 
 El principal riesgo de clasificación sigue siendo separar `agitar` de `macerar`; se trabajará con acelerómetro + giroscopio, eje dominante, frecuencia y ventanas de aproximadamente 1–2 s.
 
+### Estado verificado de las clases entrenadas
+
+Esta tabla no describe lo planeado: describe **lo que está hoy dentro del
+modelo que se carga en el Arduino** (`modelo_via_b.h`) y lo compara con el
+dataset y con la app.
+
+| Clase | Tomas etiquetadas | En el modelo/Arduino | En la app | Recall CV de la Vía B | Estado |
+|---|---:|:---:|:---:|---:|---|
+| `agitar` | 10 | ✅ | ✅ | 1,00 | Lista para probar en el vaso |
+| `macerar` | 10 | ✅ | ✅ | 0,97 | Lista para probar en el vaso |
+| `remover` | 10 | ✅ | ✅ | 1,00 | Entrenada, pero aporta solo 60 ventanas; sigue desbalanceada |
+| `servir` | 10 | ✅ | ✅ | 0,97 | Lista para probar en el vaso |
+| `reposo` | 10 | ✅ | ✅ | 1,00 | Clase de rechazo/reposo |
+| `reposo_mano` | 10 | ✅ | ❌ | 1,00 | El modelo la emite, pero la app no la muestra como clase conocida |
+| `colar` | **0** | **❌** | ✅ | — | La app la pide en recetas, pero el modelo no puede reconocerla |
+
+**Conclusión de la revisión:** los datos sí están marcados correctamente cuando
+se usa [`edge-impulse/dataset/info-6clases.labels`](edge-impulse/dataset/info-6clases.labels):
+hay 60 archivos, 10 por cada una de las seis etiquetas entrenadas. No se debe
+usar `info.labels`, porque convierte cada toma en una clase diferente.
+
+El modelo exportado también está sincronizado: `notebooks/via_b_int8.h` y
+`firmware/nano33ble_mixlab_inferencia/modelo_via_b.h` son copias idénticas. Su
+orden real de salida es:
+
+```text
+agitar, macerar, remover, reposo, reposo_mano, servir
+```
+
+> **Bloqueo funcional actual:** cualquier paso `colar` de una receta nunca puede
+> aprobarse con el Arduino real, porque esa salida no existe en el modelo. Hay
+> que grabar y reentrenar `colar`, o retirarla temporalmente de las recetas. Del
+> mismo modo, conviene decidir si `reposo_mano` se conserva como clase separada
+> o se combina con `reposo` antes del entrenamiento final.
+
+---
+
+## Qué se carga en el Arduino, qué queda en el PC y cómo se conecta
+
+### 1. Arduino Nano 33 BLE: firmware + modelo
+
+Al Arduino se sube **un solo sketch**, y el modelo viaja compilado dentro de él:
+
+```text
+firmware/nano33ble_mixlab_inferencia/
+├── nano33ble_mixlab_inferencia.ino   firmware, IMU, TinyML y BLE
+└── modelo_via_b.h                    modelo int8 + normalización + etiquetas
+```
+
+No se copian al Arduino los `.cbor`, los notebooks, la web ni el archivo
+`.tflite` suelto. `modelo_via_b.h` ya contiene el `.tflite` convertido a un
+array C, junto con `MEDIA`, `DESV`, `VENTANA`, `N_EJES` y `CLASES_C`.
+
+Después de volver a entrenar el modelo:
+
+```bash
+./firmware/tools/sync_modelo.sh
+arduino-cli compile -b arduino:mbed_nano:nano33ble firmware/nano33ble_mixlab_inferencia
+arduino-cli board list
+arduino-cli upload -b arduino:mbed_nano:nano33ble -p /dev/ttyACM0 firmware/nano33ble_mixlab_inferencia
+```
+
+Cambia `/dev/ttyACM0` por el puerto que muestre `arduino-cli board list`. Para
+una Nano 33 BLE Rev2 también hay que seleccionar `USAR_BMI270` al principio del
+sketch; la revisión original usa `USAR_LSM9DS1`.
+
+### 2. PC: app, entrenamiento y dataset
+
+En el PC quedan tres cosas con funciones distintas:
+
+| Carpeta | Se usa para | ¿Hace falta durante la demo? |
+|---|---|:---:|
+| [`app/`](app/) | Mostrar recetas, conectarse por BLE, recibir clase/confianza, graficar y puntuar | ✅ |
+| [`notebooks/`](notebooks/) | Entrenar, validar y exportar un modelo nuevo | ❌ |
+| [`edge-impulse/dataset/`](edge-impulse/dataset/) | Guardar las tomas etiquetadas con las que se entrena | ❌ |
+
+La app **no vuelve a clasificar en el PC**. El Arduino ejecuta el modelo y manda
+el nombre de la clase y la confianza. El PC solo interpreta el resultado.
+
+Para abrir la app localmente:
+
+```bash
+cd app
+python3 -m http.server 8000
+```
+
+Luego abre `http://localhost:8000` en Chrome o Edge. `localhost` cuenta como
+contexto seguro para Web Bluetooth; abrir `index.html` con doble clic no.
+
+### 3. Conexión Arduino → app
+
+1. Sube `nano33ble_mixlab_inferencia` al Nano 33 BLE.
+2. Desconecta el USB y alimenta la placa con batería o power bank para la demo.
+3. Abre la app en Chrome o Edge y entra a **Taller → Conectar → Bluetooth LE**.
+4. Selecciona el dispositivo llamado **`MixLab`**.
+5. La placa arranca en modo inferencia y envía unas 2,5 predicciones por segundo.
+6. En **Inferencia** se debe ver la clase y la confianza recibidas.
+
+El recorrido de los datos es:
+
+```text
+IMU → ventana de 125 muestras → modelo int8 en Arduino
+    → {"g":"agitar","p":0.87} por BLE
+    → app en el PC/teléfono → precisión, progreso y animaciones
+```
+
+La conexión usa el servicio UART de Nordic. La app escribe `i` para inferencia,
+`s` para señal cruda, `p` para pausar y `r` para reanudar. Si llegan líneas
+`D,...` pero no cambia el medidor, la placa está en modo señal cruda: vuelve a
+**Modo inferencia**.
+
 ---
 
 ## 📱 Concepto de la app
