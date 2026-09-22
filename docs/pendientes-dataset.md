@@ -17,6 +17,7 @@ Cada hallazgo tiene su issue abierto en GitHub; la columna *Issue* enlaza.
 | [D4](#d4--duraciones-desparejas-entre-clases) | Duraciones desparejas: `remover` 4 s vs 10 s del resto | [#4](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/4) | 🟡 no | ☐ |
 | [D5](#d5--el-magnetometro-sobra) | El magnetómetro (3 ejes `mag*`) sobra y puede meter sesgo de sitio | [#5](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/5) | 🟡 no | ☐ |
 | [D6](#d6--requisitosmd-fila-2-lista-clases-de-otro-proyecto) | `docs/requisitos.md` fila 2 lista clases de otro proyecto | – | 🟢 doc | ☑ corregido |
+| [D7](#d7--remover-no-tiene-movimiento-capturado) | `remover` no tiene movimiento capturado: `std_acc` 0,06, casi igual que `reposo` | – | 🔴 sí | ☐ hay que regrabar |
 
 ---
 
@@ -116,6 +117,11 @@ clasificador tenderá a no predecir `remover`.
 balanceo de clases en el bloque de aprendizaje y mirar la matriz de confusión
 por clase, no solo la accuracy global.
 
+No basta con alargar las tomas: las de `remover` además **no tienen movimiento
+real dentro** — ver [D7](#d7--remover-no-tiene-movimiento-capturado). Es el mismo
+problema de fondo, y regrabar la clase con gesto real y 10 s por toma cierra los
+dos hallazgos de una vez.
+
 ---
 
 ## D5 — El magnetómetro sobra
@@ -147,3 +153,28 @@ La fila 2 de [`docs/requisitos.md`](requisitos.md) decía
 `flexion, extension, pronacion, supinacion, puno + reposo` — clases de un
 proyecto de gestos de mano, no de coctelería. Quedaron de una versión anterior
 del documento. Actualizada a las clases reales del Bartender.
+
+---
+
+## D7 — `remover` no tiene movimiento capturado
+
+🔴 **Bloquea.** Afecta la validez del modelo entregado. ☐ Hay que regrabar la clase.
+
+Medido en [`notebooks/01_datos_exploracion.ipynb`](../notebooks/01_datos_exploracion.ipynb):
+las 10 tomas de `remover` tienen **`std_acc` ≈ 0,06**, del mismo orden que
+`reposo` (≈ 0,03). La señal está prácticamente plana: **no hay movimiento real
+capturado**, solo la coctelera quieta.
+
+Lo único que separa `remover` de `reposo` es el **vector gravedad medio**, es
+decir la **orientación** en la que quedó la coctelera durante la grabación — no
+el gesto.
+
+**Riesgo concreto:** el **0,90 de recall** que la Vía B saca sobre esa clase
+(ver [`notebooks/README.md`](../notebooks/README.md)) no mide el gesto, mide la
+postura. No sobrevive a la demo en vivo: basta con que el usuario sostenga la
+coctelera de otra forma para que la predicción se caiga.
+
+**Qué hacer:** regrabar las 10 tomas de `remover` **con movimiento real** y con
+duración de **10 s**, como el resto de las clases. Eso arregla de paso el
+desbalance de [D4](#d4--duraciones-desparejas-entre-clases): hoy `remover` aporta
+**60 de 1020 ventanas (5,9 %)**, **3,5× menos** que `macerar`.
