@@ -4,9 +4,10 @@ Proyecto **Bartender**: clasificar gestos de coctelería con el IMU de un
 Arduino Nano 33 BLE Sense.
 
 Tres notebooks, pensados para ejecutarse en **Google Colab de principio a fin**.
-Los tres están **ejecutados con salidas guardadas** (corrida del 21-sep-2026,
-Python 3.12 / TensorFlow 2.21 / Keras 3.15), así que los números que aparecen en
-el texto son medidos, no inventados.
+Los tres están **ejecutados con salidas guardadas** (corrida del 21-sep-2026 por
+la tarde, **con las 10 tomas de `remover` ya regrabadas**; Python 3.12 /
+TensorFlow 2.21 / Keras 3.15), así que los números que aparecen en el texto son
+medidos, no inventados.
 
 | Notebook | Qué hace |
 |---|---|
@@ -77,9 +78,9 @@ cambiando solo cómo se parte.
 
 | | exactitud test |
 |---|--:|
-| split aleatorio **por ventana** (incorrecto) | **0,973** |
-| split **por toma** (correcto) | **0,839** |
-| | **+13,3 pp de inflado artificial** |
+| split aleatorio **por ventana** (incorrecto) | **0,980** |
+| split **por toma** (correcto) | **0,886** |
+| | **+9,4 pp de inflado artificial** |
 
 `GroupShuffleSplit` no estratifica, así que un split único reparte mal las
 tomas. Por eso el resultado que se cita es el de **validación cruzada agrupada
@@ -88,26 +89,31 @@ exactamente una vez.
 
 ### Ejes: **solo acelerómetro (3)**
 
-`mag*` fuera por diseño (issue #5) y `gyr*` fuera **por medición**:
+`mag*` fuera por diseño (issue #5) y `gyr*` fuera **por la Vía A** — en la B
+la medición ahora lo pide, y se explica abajo:
 
 | Ejes | Vía A (CV agrupada) | Vía B (CV agrupada) |
 |---|--:|--:|
-| **acc (3)** | **0,927 ± 0,044** | **0,986 ± 0,011** |
-| acc + gyr (6) | 0,904 ± 0,037 | 0,968 ± 0,035 |
-| acc + gyr + mag (9) | 0,99 (split único) | 0,978 ± 0,040 |
+| **acc (3)** | **0,951 ± 0,031** | 0,987 ± 0,012 |
+| acc + gyr (6) | 0,942 ± 0,025 | **0,995 ± 0,005** |
+| acc + gyr + mag (9) | 0,99 (split único) | 0,969 ± 0,040 |
 
 - **Magnetómetro fuera.** Mide el campo magnético local — hacia dónde apunta la
   coctelera y qué metal hay cerca —, que fue casi constante dentro de cada clase
   durante la sesión de captura. En la Vía A dispara la exactitud a 0,99: esa
   subida **mide la fuga, no el aprendizaje**, y desaparece en la demo en otro
   salón. En la Vía B ni siquiera mejora.
-- **Giroscopio fuera.** La hipótesis física era buena — `servir` tiene
-  `std_gyr ≈ 14,5` con `std_acc ≈ 0,24`, o sea es rotación casi pura —, pero
-  medida con validación cruzada **empeora las dos vías**. Con ~1000 ventanas de
-  entrenamiento, duplicar canales (39 → 78 características, 3 → 6 canales de
-  entrada) sobreajusta; y `servir` ya se separa por el vector gravedad medio
-  (`accX ≈ +5,7`: la coctelera va inclinada al verter). **La hipótesis no
-  sobrevivió al experimento, y manda el experimento.**
+- **Giroscopio fuera en esta entrega, pero la medición cambió de signo.** Con
+  las tomas viejas de `remover` empeoraba las dos vías (0,927 → 0,904 en A,
+  0,986 → 0,968 en B). Con `remover` regrabado sigue empeorando la **Vía A**
+  (0,951 → 0,942) — duplicar canales con ~1000 ventanas sobreajusta la red de
+  20 neuronas — pero **mejora la Vía B** (0,987 → 0,995) y le reduce la
+  desviación entre pliegues de 0,012 a 0,005. La hipótesis física original
+  (`servir` tiene `std_gyr ≈ 14,5` con `std_acc ≈ 0,24`: rotación casi pura)
+  aguanta ahora que las seis clases tienen movimiento real. **Se entrega con
+  3 ejes** — es lo exportado al sketch y la ganancia es de +0,8 pp sobre un
+  0,987 que ya basta — y pasar la B a 6 ejes queda como la primera mejora a
+  probar después de la entrega.
 
 Como efecto lateral, con 3 ejes la Vía A da **exactamente las 39
 características** del PDF del profesor (3 RMS + 3 asimetría + 3 kurtosis +
@@ -133,6 +139,12 @@ al número de tomas. Mitigación en los notebooks: `class_weight` inverso a la
 frecuencia **y** reporte de matriz de confusión + recall por clase, nunca solo
 la exactitud global.
 
+**Esta tabla no cambió con la regrabación del 21-sep**: las tomas nuevas de
+`remover` también duran 4 s, así que el issue #4 sigue parcialmente abierto. Lo
+que sí cambió es que, con movimiento real dentro, esas 60 ventanas ya bastan:
+el recall de `remover` en CV pasó de 0,72 a **1,00** en la Vía A y de 0,90 a
+**1,00** en la B.
+
 ### Normalización ajustada solo en train
 
 El código de clase aplicaba `StandardScaler` sobre **todos** los datos antes de
@@ -147,19 +159,24 @@ Validación cruzada agrupada por toma, 5 pliegues, 3 ejes, W=125, paso 25:
 
 | | Vía A (39 car. + densa 20/10) | Vía B (Conv1D) |
 |---|--:|--:|
-| Exactitud CV agrupada | 0,927 ± 0,044 | **0,986 ± 0,011** |
-| Exactitud media por clase | 0,907 | **0,977** |
-| Recall `agitar` / `macerar` / `servir` | 1,00 / 0,96 / 0,99 | 1,00 / 1,00 / 0,96 |
-| Recall `reposo` / `reposo_mano` | 0,91 / 0,87 | 1,00 / 1,00 |
-| **Recall `remover`** | **0,72** | **0,90** |
+| Exactitud CV agrupada | 0,951 ± 0,031 | **0,987 ± 0,012** |
+| Exactitud media por clase | 0,960 | **0,990** |
+| Recall `agitar` / `macerar` / `servir` | 1,00 / 0,95 / 0,99 | 1,00 / 0,97 / 0,97 |
+| Recall `reposo` / `reposo_mano` | 0,97 / 0,86 | 1,00 / 1,00 |
+| **Recall `remover`** | **1,00** | **1,00** |
 | Parámetros | 1 076 | 6 150 |
 | Preproceso en el MCU | FFT de 125 puntos × 3 ejes | restar media, dividir desviación |
 | `.tflite` int8 | **4,41 KB** | **15,25 KB** |
-| Exactitud tras cuantizar | −0,4 pp | −0,8 pp |
+| Exactitud tras cuantizar | −1,2 pp | **0,0 pp** |
 
 **Se despliega la Vía B.** Más exactitud, mucha menos varianza entre pliegues,
-mejor recall en la clase difícil y un preproceso en el MCU que son dos
-operaciones en vez de una FFT.
+recall perfecto en `reposo`/`reposo_mano` (la A los confunde entre sí) y un
+preproceso en el MCU que son dos operaciones en vez de una FFT. Además no
+pierde nada al cuantizar a int8.
+
+Con `remover` regrabado las dos vías lo clasifican perfecto, así que ya no es
+la clase que decide: **la que decide ahora es `reposo_mano`**, donde la A se
+queda en 0,86 y la B llega a 1,00.
 
 ### ¿Cabe en el Nano 33 BLE?
 
@@ -192,21 +209,22 @@ Por orden de urgencia para la entrega:
    más dos variantes de reposo. El requisito 2 de la guía pide **5 movimientos +
    reposo**, así que **el dataset tal como está no cumple**. Son ~2 min de
    captura: 10 tomas × 10 s.
-2. **Volver a grabar `remover`.** Es el hallazgo nuevo de estos notebooks y no
-   estaba en `docs/pendientes-dataset.md`: las 10 tomas de `remover` tienen
-   `std_acc ≈ 0,06`, del mismo orden que `reposo` (0,03). **Casi no hay
-   movimiento en la señal.** Lo único que separa `remover` de `reposo` es el
-   vector gravedad medio, o sea la **orientación** en la que quedó la coctelera.
-   Que la Conv1D llegue a 0,90 de recall sobre una señal casi plana es
-   sospechosamente bueno: lo más probable es que esté usando la orientación y no
-   el gesto, y eso no sobrevive a la demo. Además las tomas duran 4 s en vez de
-   10, que es la causa del desbalance del issue #4. Regrabar arregla las dos
-   cosas de una vez.
+2. ~~**Volver a grabar `remover`.**~~ ☑ **Hecho el 21-sep.** Las tomas viejas
+   tenían `std_acc ≈ 0,06`, del mismo orden que `reposo` (0,03) — casi sin
+   movimiento en la señal, así que lo que separaba `remover` de `reposo` era el
+   vector gravedad medio, o sea la **orientación**. Las tomas regrabadas miden
+   **`std_acc` 0,645 de mediana** (0,380–1,316 por toma) y el recall en CV sube
+   a **1,00 en las dos vías**. Detalle y evidencia en
+   [`docs/pendientes-dataset.md`, D7](../docs/pendientes-dataset.md#d7--remover-no-tenia-movimiento-capturado).
+   **Lo que no se arregló:** las tomas nuevas siguen durando 4 s, así que
+   `remover` sigue siendo 60 de 1020 ventanas y el
+   [issue #4](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/4)
+   sigue parcialmente abierto. Faltan tomas de 10 s.
 3. **Capturar una partición de test de verdad**
    ([issue #3](https://github.com/caesar-dat-com/miniproyecto1-tinyml/issues/3)).
    El split por toma la simula bien, pero lo correcto es grabar 2–3 tomas por
    clase aparte y subirlas con `--category testing`. Si se deja que Edge Impulse
-   parta solo, parte **por ventanas**, que es justo el error que infla 13 pp.
+   parta solo, parte **por ventanas**, que es justo el error que infla 9,4 pp.
 4. **Proyecto público de Edge Impulse** (requisito 4). Estos notebooks lo
    complementan — sirven para justificar las decisiones y para el paper —, pero
    **no lo sustituyen**. Falta re-subir el dataset con `info-6clases.labels` y
@@ -216,10 +234,14 @@ Por orden de urgencia para la entrega:
    estimaciones de sobremesa y así está dicho dentro de los notebooks. Hay que
    compilar y cronometrar antes de prometer la latencia de 0,4 s entre
    predicciones.
-6. **`reposo` y `reposo_mano` se confunden entre sí** en la Vía A (recall 0,91 y
-   0,87). Para el MVP da igual — las dos disparan la misma acción, ninguna —,
-   así que una opción razonable es fusionarlas en una sola clase `reposo` y
-   quedarse con 5. Hay que decidirlo en grupo.
+6. **`reposo` y `reposo_mano` se confunden entre sí** en la Vía A (recall 0,97 y
+   0,86; la B las separa perfecto). Para el MVP da igual — las dos disparan la
+   misma acción, ninguna —, así que una opción razonable es fusionarlas en una
+   sola clase `reposo` y quedarse con 5. Hay que decidirlo en grupo.
+7. **Probar la Vía B con acelerómetro + giroscopio.** Con `remover` regrabado,
+   6 ejes dan 0,995 ± 0,005 en CV contra 0,987 ± 0,012 con 3. No se metió en la
+   entrega porque cambia modelo *y* sketch a última hora, pero es la primera
+   mejora a probar después.
 
 ## Archivos generados
 
