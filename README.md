@@ -149,12 +149,12 @@ Sin build ni dependencias. Cuatro formas de conectar:
 | **Serial USB** | Solo desarrollo — la entrega prohíbe el cable. |
 | **Simulador** | Las seis clases sintéticas: se puede mostrar el flujo sin hardware. |
 
-La interfaz es un **bar de autor dentro de una consola de doble pantalla**:
-arriba el escaparate con el gesto que toca y el cronómetro, abajo la barra
-táctil con la carta. Cinco cócteles, entrenamiento de gestos sueltos, puntuación
-con estrellas y una libreta que señala en qué gesto flojeas. La app no clasifica
-nada: el modelo corre en el Arduino y aquí solo se juzga lo que llega en las
-líneas `I,<clase>,<confianza>`.
+La interfaz tiene una estética de **novela gráfica de coctelería**: papel
+marfil, tinta oscura, ilustraciones vectoriales y acentos rojo quemado. Incluye
+cinco cócteles, práctica de gestos, servicio cronometrado y libreta de marcas,
+con navegación permanente, temas claro/oscuro y movimientos sutiles.
+La app no clasifica nada: el modelo corre en el Arduino y aquí solo se juzga
+lo que llega en las líneas `I,<clase>,<confianza>`.
 
 Detrás está el **Taller**: gráficas en vivo de acelerómetro y giroscopio con
 frecuencia real medida, **grabador de tomas etiquetadas** con cuenta atrás y

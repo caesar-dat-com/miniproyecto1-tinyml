@@ -1,8 +1,8 @@
 # MixLab — la app
 
-Un **bar de autor metido en una consola de doble pantalla**. Arriba el
-escaparate, abajo la barra táctil: eliges cóctel, la app te pide un gesto y la
-coctelera dice si lo hiciste bien.
+Una **barra de coctelería con estética de novela gráfica**: papel marfil,
+tinta oscura, rojo quemado e ilustraciones propias. Eliges cóctel, la app te
+pide un gesto y la coctelera dice si lo hiciste bien.
 
 Detrás de la puerta de servicio está el **Taller**: conectar la placa, ver el
 movimiento en vivo, grabar el dataset y exportarlo.
@@ -45,28 +45,17 @@ python3 -m http.server 8080
 
 | | |
 |---|---|
-| `index.html` | **Portada.** Foto de bar de fondo y controles gordos de juego. Es la puerta de entrada y está pensada para dedo. |
-| `consola.html` | **La consola.** El salón de doble pantalla y, detrás, el taller. |
+| `index.html` | **Portada.** Cartel editorial ilustrado, cuatro modos y acceso al Taller. |
+| `consola.html` | **La consola.** Recetas, práctica, servicio, libreta y Taller con navegación permanente. |
 
 ### La portada
 
-Pensada para **iPad y teléfono**: nada por debajo de 56 px, sin nada que dependa
-del hover, con los márgenes de seguridad de iPhone respetados y sin scroll en
-ninguna orientación. En apaisado las cuatro tarjetas pasan a una fila.
+Diseño adaptable a teléfono, iPad y escritorio. En móvil la portada permite
+scroll natural y la consola mantiene la navegación a mano. La libreta vacía
+es accesible y explica cómo empezar; las estrellas proceden de las marcas reales.
 
-La foto de fondo pesaba **1,5 MB en PNG**. Va servida en cuatro anchos
-(640/960/1280/1672) en WebP con JPEG de reserva: el teléfono se baja **20 KB** y
-el iPad 33 KB, un 96 % menos. Detrás hay una miniatura borrosa de 200 bytes
-incrustada en el CSS para que no haya un fogonazo negro mientras baja la foto.
-
-El velo que oscurece la foto son dos degradados, **no un `backdrop-filter`**: un
-filtro a pantalla completa cuesta caro en iPad y aquí da el mismo contraste
-gratis.
-
-Las medallas de cada tarjeta salen de la **libreta real** — la portada carga
-`game.js` en vez de reimplementar el formato de guardado. La Libreta aparece con
-candado hasta que haya algo que anotar, y al tocarla lleva a la carta, que es lo
-que hay que hacer para abrirla.
+La ayuda y las recetas admiten teclado, Escape y foco contenido en el diálogo.
+Cuando no hay conexión, la receta ofrece un acceso directo al Taller.
 
 ## El salón
 
@@ -145,8 +134,16 @@ con una sola mano el modelo aprende esa mano.
 ## Archivos
 
 ```text
-index.html         Consola (salón) + taller, en una sola página
-css/app.css        Tokens de la sala y de la pantalla + tokens de visualización
+index.html         Portada editorial y ayuda
+consola.html       Recetas, práctica, servicio, libreta y Taller
+css/base.css       Tokens, temas, tipografía y componentes compartidos
+css/landing.css    Portada adaptable
+css/app.css        Vistas de la consola y gráficas
+fonts/             Fuentes WOFF2 locales y licencias OFL
+img/               Ilustraciones SVG e iconos locales
+js/theme.js        Tema del sistema y preferencia manual persistente
+js/dialog.js       Navegación de teclado dentro de las hojas
+js/landing.js      Medallas y ayuda de la portada
 js/protocol.js     Parser de línea, troceador de flujo, buffer circular, clases
 js/transports.js   BLE · WebSocket · Serial · Simulador (una sola interfaz)
 js/chart.js        Gráfica de líneas en vivo sobre canvas, con hover
@@ -164,15 +161,17 @@ Dónde se editan las cosas, cada una en un solo sitio:
 
 ## Sobre el aspecto
 
-La consola es CSS puro: sin imágenes, sin fuentes descargadas. El latón es un
-degradado recortado sobre el texto, el grano una textura SVG en línea, y la
-rejilla de la pantalla un `repeating-linear-gradient`. Todo para que la app
-siga abriendo sin red.
+Barlow Condensed para titulares y DM Sans para lectura, servidas como WOFF2
+locales con sus licencias OFL. Ilustraciones SVG locales, tramas de semitono,
+bordes de tinta y sombras cortas. No hay dependencias ni solicitudes externas
+para cargar la interfaz.
 
-La pantalla de abajo **crece con el alto que sobre** en vez de quedarse en 4:3
-fijo: en un móvil quedaban 200 px muertos debajo de la consola mientras la
-carta se cortaba en el cuarto plato. En ventanas bajas se retiran además los
-subtítulos del menú, antes que dejar el menú principal con scroll.
+El tema sigue `prefers-color-scheme`; el botón ◐ permite guardar una preferencia
+(`mixlab.theme`). Las entradas y respuestas táctiles usan transiciones cortas,
+sin animaciones continuas. `prefers-reduced-motion` desactiva el movimiento.
+
+Durante el servicio, el gesto, el cronómetro y el simulador tienen prioridad;
+«Ver todos los pasos» despliega el detalle de la receta.
 
 Las marcas viven en `localStorage` (`mixlab.libreta.v1`), separadas de las tomas
 del dataset. Borrar la libreta no toca las tomas.

@@ -5,28 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MixLab · Coctelería TinyML</title>
 <meta name="description" content="Recetas, entrenamiento de gestos y taller de sensores de MixLab.">
-<meta name="theme-color" content="#120c07">
+<meta name="theme-color" content="#eee9dc">
+<script src="js/theme.js"></script>
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23120c07'/%3E%3Cpath d='M15 17h34L36 33v13h9v4H19v-4h9V33z' fill='none' stroke='%23f5b942' stroke-width='3.4' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/app.css">
 </head>
 
-<body>
-
-<div class="fondo fondo--hondo" aria-hidden="true">
-  <picture>
-    <source type="image/webp"
-            srcset="img/bar-640.webp 640w, img/bar-960.webp 960w, img/bar-1280.webp 1280w, img/bar-1672.webp 1672w"
-            sizes="100vw">
-    <img src="img/bar-1280.jpg"
-         srcset="img/bar-640.jpg 640w, img/bar-960.jpg 960w, img/bar-1280.jpg 1280w, img/bar-1672.jpg 1672w"
-         sizes="100vw" alt="" decoding="async" fetchpriority="high">
-  </picture>
-  <div class="fondo__velo"></div>
-</div>
+<body class="console">
+<a class="skip-link" href="#escenario">Saltar al contenido</a>
 
 <!-- ══════════════════════════ HUD ══════════════════════════ -->
 <header class="hud">
@@ -40,21 +30,23 @@
   </span>
 
   <div class="hud__dcha">
+    <button class="redondo theme-control" type="button" data-theme-toggle aria-label="Cambiar tema">◐</button>
     <span class="chapa chapa--humo" id="chapaPlaca" role="status" aria-live="polite">
       <span class="chapa__ico" id="chapaPunto" aria-hidden="true">●</span>
       <span id="chapaTxt">Sin placa</span>
     </span>
     <button class="redondo redondo--verde" type="button" id="btnTaller" aria-label="Taller de sensores">
-      <span aria-hidden="true">🔧</span>
+      <svg class="icon" aria-hidden="true"><use href="img/icons.svg#tool"/></svg>
     </button>
   </div>
 </header>
 
-<div class="escenario">
+<main class="escenario" id="escenario">
 
 <!-- ══════════════════════════ RECETAS ══════════════════════════ -->
 <section class="vista es-activa" data-vista="recetas">
   <div class="lienzo">
+    <div class="view-intro"><p class="eyebrow">01 / LA CARTA DE LA CASA</p><h1>CINCO CLÁSICOS.<br><em>TU PROPIO ESTILO.</em></h1><p>Elige un cóctel. Descubre sus pasos. Hazlo tuyo.</p></div>
     <div class="rejilla" id="rejillaRecetas"></div>
   </div>
 </section>
@@ -62,7 +54,8 @@
 <!-- ══════════════════════════ ENTRENAR ══════════════════════════ -->
 <section class="vista" data-vista="entrenar">
   <div class="lienzo">
-    <p class="bajada" style="text-align:center">
+    <div class="view-intro"><p class="eyebrow">02 / EL OFICIO</p><h1>TODO ESTÁ EN <em>EL GESTO.</em></h1></div>
+    <p class="bajada">
       Elige un gesto y repítelo 10 segundos. El medidor te dice si la placa te
       está entendiendo.
     </p>
@@ -90,10 +83,10 @@
 <section class="vista" data-vista="taller">
 
   <nav class="taller__nav" aria-label="Secciones del taller">
-    <button class="pieza es-activa" type="button" data-pest="conectar" aria-selected="true">📡 Conectar</button>
-    <button class="pieza" type="button" data-pest="vivo"     aria-selected="false">📈 En vivo</button>
-    <button class="pieza" type="button" data-pest="capturar" aria-selected="false">⏺ Capturar</button>
-    <button class="pieza" type="button" data-pest="inferir"  aria-selected="false">🧠 Inferencia</button>
+    <button class="pieza es-activa" type="button" data-pest="conectar" aria-pressed="true">Conectar</button>
+    <button class="pieza" type="button" data-pest="vivo"     aria-pressed="false">En vivo</button>
+    <button class="pieza" type="button" data-pest="capturar" aria-pressed="false">Capturar</button>
+    <button class="pieza" type="button" data-pest="inferir"  aria-pressed="false">Inferencia</button>
   </nav>
 
   <div class="lienzo">
@@ -107,11 +100,11 @@
       </div>
 
       <h1 class="t1">Conectar la placa</h1>
-      <p class="bajada">Cuatro caminos, un solo formato de línea.</p>
+      <p class="bajada">Conecta tu coctelera o explora la experiencia con el simulador.</p>
 
       <div class="rejilla-t">
         <article class="panel tarjeta enchufe" data-enchufe="ble">
-          <header><span class="enchufe__ico" aria-hidden="true">📡</span><h3>Bluetooth LE</h3></header>
+          <header><svg class="icon" aria-hidden="true"><use href="img/icons.svg#tool"/></svg><h3>Bluetooth LE</h3></header>
           <p>Nano 33 BLE, o Uno con módulo HM-10. Sin cables: es el camino de la demo.</p>
           <p class="enchufe__meta">Servicio UART Nordic · notificaciones</p>
           <button class="grande grande--chico" type="button" data-conectar="ble">Buscar dispositivo</button>
@@ -119,7 +112,7 @@
         </article>
 
         <article class="panel tarjeta enchufe" data-enchufe="wifi">
-          <header><span class="enchufe__ico" aria-hidden="true">📶</span><h3>WiFi</h3></header>
+          <header><svg class="icon" aria-hidden="true"><use href="img/icons.svg#pour"/></svg><h3>WiFi</h3></header>
           <p>Uno R4 WiFi o ESP32 sirviendo un WebSocket en la red local.</p>
           <label class="campo">
             <span class="campo__et">Dirección del WebSocket</span>
@@ -133,7 +126,7 @@
         </article>
 
         <article class="panel tarjeta enchufe" data-enchufe="serial">
-          <header><span class="enchufe__ico" aria-hidden="true">🔌</span><h3>Serial USB</h3></header>
+          <header><svg class="icon" aria-hidden="true"><use href="img/icons.svg#tool"/></svg><h3>Serial USB</h3></header>
           <p>Cable directo. Cómodo para desarrollo y calibración.</p>
           <p class="enchufe__meta">115200 baudios · 8N1</p>
           <button class="grande grande--chico" type="button" data-conectar="serial">Elegir puerto</button>
@@ -145,7 +138,7 @@
         </article>
 
         <article class="panel tarjeta enchufe" data-enchufe="sim">
-          <header><span class="enchufe__ico" aria-hidden="true">🎲</span><h3>Simulador</h3></header>
+          <header><svg class="icon" aria-hidden="true"><use href="img/icons.svg#shake"/></svg><h3>Simulador</h3></header>
           <p>Gestos sintéticos con ruido. Sirve para jugar y probar sin hardware.</p>
           <label class="campo">
             <span class="campo__et">Gesto a simular</span>
@@ -305,7 +298,14 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
   </div>
 </section>
 
-</div><!-- /escenario -->
+</main><!-- /escenario -->
+<nav class="console-nav" aria-label="Secciones de MixLab">
+  <button type="button" data-ir="recetas"><svg class="icon" aria-hidden="true"><use href="img/icons.svg#glass"/></svg><span>Recetas</span></button>
+  <button type="button" data-ir="entrenar"><svg class="icon" aria-hidden="true"><use href="img/icons.svg#shake"/></svg><span>Entrenar</span></button>
+  <button type="button" data-ir="jugar"><svg class="icon" aria-hidden="true"><use href="img/icons.svg#clock"/></svg><span>Servicio</span></button>
+  <button type="button" data-ir="progreso"><svg class="icon" aria-hidden="true"><use href="img/icons.svg#book"/></svg><span>Libreta</span></button>
+  <button type="button" data-ir="taller"><svg class="icon" aria-hidden="true"><use href="img/icons.svg#tool"/></svg><span>Taller</span></button>
+</nav>
 
 <!-- ══════════════════════════ HOJA DE RECETA ══════════════════════════ -->
 <div class="velo" id="veloHoja" hidden></div>
@@ -316,6 +316,7 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
   <ol class="receta" id="hojaPasos" style="max-width:none"></ol>
   <div class="zocalo" style="max-width:none">
     <button class="grande grande--suave grande--chico" type="button" data-cerrar-hoja style="flex:0 0 auto">Cerrar</button>
+    <button class="grande grande--suave" type="button" id="btnConectarHoja">Ir al Taller ↗</button>
     <button class="grande" type="button" id="btnServirHoja" data-servir>▶ Servir</button>
   </div>
 </section>
@@ -328,5 +329,6 @@ H,&lt;placa&gt;,&lt;frecuencia_hz&gt;                    ← saludo al conectar<
 <script src="js/recorder.js"></script>
 <script src="js/game.js"></script>
 <script src="js/main.js"></script>
+<script src="js/dialog.js"></script>
 </body>
 </html>

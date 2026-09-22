@@ -3,167 +3,66 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MixLab · Coctelería TinyML</title>
-<meta name="description" content="La coctelera que te enseña: gestos de bartender reconocidos con un sensor inercial y TinyML.">
-<meta name="theme-color" content="#120c07">
-
-<!-- Pantalla completa al añadir a la pantalla de inicio en iPad y iPhone -->
+<title>MixLab · El arte está en tus manos</title>
+<meta name="description" content="Aprende el gesto detrás de un buen cóctel. Recetas, práctica y una coctelera que entiende tus movimientos con TinyML.">
+<meta name="theme-color" content="#eee9dc">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="MixLab">
-
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23120c07'/%3E%3Cpath d='M15 17h34L36 33v13h9v4H19v-4h9V33z' fill='none' stroke='%23f5b942' stroke-width='3.4' stroke-linejoin='round'/%3E%3C/svg%3E">
-
-<!-- La foto de fondo se precarga: es lo primero que se ve y lo único pesado -->
-<link rel="preload" as="image" href="img/bar-1280.webp"
-      imagesrcset="img/bar-640.webp 640w, img/bar-960.webp 960w, img/bar-1280.webp 1280w, img/bar-1672.webp 1672w"
-      imagesizes="100vw">
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<script src="js/theme.js"></script>
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/landing.css">
 </head>
-
 <body>
-
-<!-- ══════════════ FONDO ══════════════ -->
-<div class="fondo" aria-hidden="true">
-  <picture>
-    <source type="image/webp"
-            srcset="img/bar-640.webp 640w, img/bar-960.webp 960w, img/bar-1280.webp 1280w, img/bar-1672.webp 1672w"
-            sizes="100vw">
-    <img src="img/bar-1280.jpg"
-         srcset="img/bar-640.jpg 640w, img/bar-960.jpg 960w, img/bar-1280.jpg 1280w, img/bar-1672.jpg 1672w"
-         sizes="100vw" alt="" decoding="async" fetchpriority="high">
-  </picture>
-  <div class="fondo__velo"></div>
-</div>
-
-<!-- ══════════════ HUD SUPERIOR ══════════════ -->
+<a class="skip-link" href="#contenido">Saltar al contenido</a>
 <header class="hud">
-  <div class="chapa" id="chapaEstrellas" title="Estrellas conseguidas">
-    <span class="chapa__ico" aria-hidden="true">★</span>
-    <span class="chapa__n"><span id="nEstrellas">0</span><small>/15</small></span>
+  <a class="wordmark" href="index.html" aria-label="MixLab, inicio"><svg class="icon" aria-hidden="true"><use href="img/icons.svg#glass"/></svg> MIXLAB<span class="wordmark__dot">·</span></a>
+  <span class="hud__edition eyebrow">COCTELERÍA EN MOVIMIENTO<br>EST. 2026 · VOL. 01</span>
+  <div class="hud__tools">
+    <div class="chapa" id="chapaEstrellas" title="Estrellas conseguidas"><span class="chapa__ico" aria-hidden="true">★</span><span class="chapa__n"><span id="nEstrellas">0</span><small> / 15</small></span></div>
+    <button class="redondo" type="button" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema">◐</button>
+    <button class="redondo fullscreen" type="button" id="btnPantalla" aria-label="Pantalla completa" title="Pantalla completa">⛶</button>
+    <button class="redondo" type="button" id="btnComo" aria-label="Cómo funciona" aria-expanded="false" aria-controls="hojaComo">?</button>
   </div>
-
-  <nav class="redondos" aria-label="Accesos">
-    <a class="redondo redondo--verde" href="consola.html#taller" aria-label="Taller de sensores" data-tip="Taller">
-      <span aria-hidden="true">🔧</span>
-    </a>
-    <a class="redondo redondo--azul" href="consola.html#progreso" aria-label="Tu libreta" data-tip="Libreta">
-      <span aria-hidden="true">📓</span>
-    </a>
-    <button class="redondo redondo--dorado" type="button" id="btnPantalla" aria-label="Pantalla completa" data-tip="Pantalla">
-      <span aria-hidden="true">⛶</span>
-    </button>
-    <button class="redondo redondo--rojo" type="button" id="btnComo" aria-label="Cómo funciona"
-            aria-expanded="false" aria-controls="hojaComo" data-tip="Ayuda">
-      <span aria-hidden="true">?</span>
-    </button>
-  </nav>
 </header>
-
-<!-- ══════════════ CONTENIDO ══════════════ -->
-<main class="salon">
-
-  <div class="marca">
-    <svg class="marca__copa" viewBox="0 0 120 130" aria-hidden="true">
-      <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 20h92L60 70v44"/>
-        <path d="M34 114h52"/>
-        <path d="M96 12 78 34"/>
-      </g>
-      <circle cx="60" cy="44" r="7" fill="#9bcf4a"/>
-    </svg>
-    <h1 class="marca__nombre">MixLab</h1>
-    <p class="marca__lema">La coctelera que entiende cómo lo hiciste</p>
-  </div>
-
-  <!-- tarjetas grandes, pensadas para dedo -->
-  <nav class="platos" aria-label="Modos de juego">
-
-    <a class="plato plato--ambar" href="consola.html#recetas">
-      <span class="plato__medallas" id="med-recetas" aria-hidden="true"></span>
-      <span class="plato__ico" aria-hidden="true">🍸</span>
-      <span class="plato__nombre">Recetas</span>
-      <span class="plato__nota">La carta de la casa</span>
-    </a>
-
-    <a class="plato plato--verde" href="consola.html#entrenar">
-      <span class="plato__medallas" id="med-entrenar" aria-hidden="true"></span>
-      <span class="plato__ico" aria-hidden="true">🤲</span>
-      <span class="plato__nombre">Entrenar</span>
-      <span class="plato__nota">Un gesto a la vez</span>
-    </a>
-
-    <a class="plato plato--rojo" href="consola.html#jugar">
-      <span class="plato__medallas" id="med-jugar" aria-hidden="true"></span>
-      <span class="plato__ico" aria-hidden="true">⏱️</span>
-      <span class="plato__nombre">Servicio</span>
-      <span class="plato__nota">La receta contra reloj</span>
-    </a>
-
-    <a class="plato plato--azul" href="consola.html#progreso" id="platoLibreta">
-      <span class="plato__medallas" id="med-libreta" aria-hidden="true"></span>
-      <span class="plato__ico" aria-hidden="true">📓</span>
-      <span class="plato__nombre">Libreta</span>
-      <span class="plato__nota">Tus marcas</span>
-      <span class="plato__candado" hidden aria-hidden="true">
-        <span class="plato__candado-ico">🔒</span>
-        <b>Sirve un cóctel primero</b>
-      </span>
-    </a>
-
-  </nav>
-
-  <a class="grande" href="consola.html">
-    <span class="grande__ico" aria-hidden="true">▶</span>
-    <span class="grande__txt">Entrar al bar</span>
-  </a>
-
-  <p class="firma">
-    <span class="firma__punto" id="puntoPlaca" data-estado="off" aria-hidden="true"></span>
-    <span id="textoPlaca">Sin placa · el simulador está en el Taller</span>
-  </p>
-
+<main class="salon" id="contenido">
+  <section class="hero" aria-labelledby="heroTitle">
+    <div class="hero__copy">
+      <p class="eyebrow hero__kicker"><span></span> PEQUEÑA TECNOLOGÍA. GRAN COCTELERÍA.</p>
+      <h1 id="heroTitle">EL ARTE ESTÁ<br>EN <em>TUS MANOS.</em></h1>
+      <p class="hero__description">Un buen cóctel empieza con un gesto.<br>Aprende, practica y encuentra tu ritmo detrás de la barra.</p>
+      <div class="hero__actions"><a class="grande" href="consola.html#recetas">Entrar al bar <span aria-hidden="true">↗</span></a><button class="text-link" type="button" data-help>Cómo funciona <span aria-hidden="true">↗</span></button></div>
+      <p class="firma"><span class="firma__punto" id="puntoPlaca" aria-hidden="true"></span><span id="textoPlaca">¿Sin coctelera? Prueba el <a href="consola.html#taller">simulador</a>.</span></p>
+    </div>
+    <figure class="hero__art">
+      <div class="art__folio eyebrow">FIG. 01 / EL GESTO LO CAMBIA TODO</div>
+      <img src="img/shaker-editorial.svg" width="640" height="610" alt="Ilustración en tinta de una coctelera junto a un vaso con hielo y una rodaja de naranja." fetchpriority="high">
+      <span class="art__note">Un poco de ciencia.<br>Mucho de oficio.</span>
+      <figcaption><span class="eyebrow">AGITAR. REMOVER. SERVIR.</span><span class="art__stamp">HECHO<br>A MANO</span></figcaption>
+    </figure>
+  </section>
+  <section class="chapters" aria-labelledby="chaptersTitle">
+    <div class="section-rule"><h2 id="chaptersTitle" class="eyebrow">TU TURNO DETRÁS DE LA BARRA</h2><span class="eyebrow">CUATRO FORMAS DE EMPEZAR ↓</span></div>
+    <nav class="platos" aria-label="Modos de juego">
+      <a class="plato plato--ambar" href="consola.html#recetas"><span class="chapter-no">01 / LA CARTA</span><span class="plato__medallas" id="med-recetas" aria-hidden="true"></span><svg class="chapter-icon" aria-hidden="true"><use href="img/icons.svg#glass"/></svg><span class="plato__nombre">Recetas <span aria-hidden="true">↗</span></span><span class="plato__nota">Cinco clásicos. Tu propia mano.</span></a>
+      <a class="plato plato--verde" href="consola.html#entrenar"><span class="chapter-no">02 / EL OFICIO</span><span class="plato__medallas" id="med-entrenar" aria-hidden="true"></span><svg class="chapter-icon" aria-hidden="true"><use href="img/icons.svg#shake"/></svg><span class="plato__nombre">Entrenar <span aria-hidden="true">↗</span></span><span class="plato__nota">Domina un gesto a la vez.</span></a>
+      <a class="plato plato--rojo" href="consola.html#jugar"><span class="chapter-no">03 / LA HORA DE LA VERDAD</span><span class="plato__medallas" id="med-jugar" aria-hidden="true"></span><svg class="chapter-icon" aria-hidden="true"><use href="img/icons.svg#clock"/></svg><span class="plato__nombre">Servicio <span aria-hidden="true">↗</span></span><span class="plato__nota">Una receta. El reloj en marcha.</span></a>
+      <a class="plato plato--azul" href="consola.html#progreso" id="platoLibreta"><span class="chapter-no">04 / LA LIBRETA</span><span class="plato__medallas" id="med-libreta" aria-hidden="true"></span><svg class="chapter-icon" aria-hidden="true"><use href="img/icons.svg#book"/></svg><span class="plato__nombre">Tus marcas <span aria-hidden="true">↗</span></span><span class="plato__nota">Cada intento cuenta una historia.</span><span class="plato__candado" hidden aria-hidden="true">Tu primera página está por escribir.</span></a>
+    </nav>
+  </section>
 </main>
-
-<!-- ══════════════ HOJA: CÓMO FUNCIONA ══════════════ -->
+<footer class="colophon"><span class="eyebrow">MIXLAB / TINYML EN MOVIMIENTO</span><span>UAO · Grupo 2 · 2026</span><a href="consola.html#taller">Taller de sensores <span aria-hidden="true">↗</span></a></footer>
 <div class="velo" id="veloHoja" hidden></div>
-
 <section class="hoja" id="hojaComo" role="dialog" aria-modal="true" aria-labelledby="hojaTitulo" hidden>
-  <div class="hoja__asa" aria-hidden="true"></div>
-  <h2 class="hoja__titulo" id="hojaTitulo">Cómo funciona</h2>
-
+  <p class="eyebrow">DE LA MANO A LA PANTALLA</p><h2 class="hoja__titulo" id="hojaTitulo">El gesto es el ingrediente.</h2>
   <ol class="pasos-ayuda">
-    <li>
-      <span class="pasos-ayuda__n">1</span>
-      <span><b>Conecta la coctelera.</b> Lleva un Arduino con sensor de movimiento.
-      ¿No la tienes a mano? En el <b>Taller</b> hay un simulador que finge los gestos.</span>
-    </li>
-    <li>
-      <span class="pasos-ayuda__n">2</span>
-      <span><b>Elige un cóctel.</b> Cada paso de la receta es un gesto de bartender:
-      agitar, remover, servir, macerar o colar.</span>
-    </li>
-    <li>
-      <span class="pasos-ayuda__n">3</span>
-      <span><b>Prepáralo.</b> La placa reconoce el gesto y manda el resultado.
-      La app cronometra, puntúa y reparte estrellas.</span>
-    </li>
+    <li><span class="pasos-ayuda__n">01</span><span><b>Conecta la coctelera.</b> Su sensor lee tus movimientos. También puedes empezar sin hardware con el simulador del Taller.</span></li>
+    <li><span class="pasos-ayuda__n">02</span><span><b>Elige un clásico.</b> Cada receta te guía por los gestos: agitar, remover, servir, macerar y colar.</span></li>
+    <li><span class="pasos-ayuda__n">03</span><span><b>Encuentra tu ritmo.</b> Sigue los pasos y revisa tu precisión. Cada práctica deja una marca en tu libreta.</span></li>
   </ol>
-
-  <p class="hoja__pie">
-    El modelo corre <b>dentro del Arduino</b>, no aquí: esta app solo representa
-    lo que la placa decide.
-  </p>
-
-  <button class="grande grande--suave" type="button" data-cerrar-hoja>Entendido</button>
+  <p class="hoja__pie">La inteligencia está en la coctelera: el modelo corre dentro del Arduino. MixLab muestra el resultado de cada gesto.</p>
+  <button class="grande" type="button" data-cerrar-hoja>Vamos a ello <span aria-hidden="true">↗</span></button>
 </section>
-
-<!-- protocol.js y game.js traen CLASES, RECETAS y la Libreta: la portada
-     lee las marcas de ahí en vez de reimplementar el formato de guardado. -->
-<script src="js/protocol.js"></script>
-<script src="js/game.js"></script>
-<script src="js/landing.js"></script>
+<script src="js/protocol.js"></script><script src="js/game.js"></script><script src="js/landing.js"></script><script src="js/dialog.js"></script>
 </body>
 </html>
