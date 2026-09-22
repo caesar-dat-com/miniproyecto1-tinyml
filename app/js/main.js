@@ -151,7 +151,15 @@
     if (vista === 'progreso') pintarProgreso();
   }
 
-  const COPA = { mojito: '🌿', daiquiri: '🍋', negroni: '🍊', 'old-fashioned': '🥃', margarita: '🧂' };
+  const icono = (path) => `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg>`;
+  const ICON_COPA = icono('M4 3h16l-8 9zM12 12v7M8 21h8');
+  const COPA = {
+    mojito: icono('M5 4c7 0 11 4 11 11-7 0-11-4-11-11zm3 3 9 10M18 3v18'),
+    daiquiri: icono('M4 3h16l-8 9zM12 12v7M8 21h8M15 4l4-3'),
+    negroni: icono('M5 5h14l-1 16H6zm2 5h10M15 3l4 4'),
+    'old-fashioned': icono('M5 6h14l-2 15H7zm1 7h12M15 4l4 3'),
+    margarita: icono('M3 4h18l-9 9zM12 13v6M8 21h8M5 2h14'),
+  };
 
   function pintarRecetas() {
     const d = Libreta.resumen();
@@ -159,7 +167,7 @@
       <button class="plato plato--${TONO[r.grado - 1] || 'ambar'} ${r.id === recetaElegida ? 'es-elegida' : ''}"
               type="button" data-receta="${r.id}">
         <span class="plato__medallas" aria-hidden="true">${medallas(r.marca ? r.marca.estrellas : 0)}</span>
-        <span class="plato__ico" aria-hidden="true">${COPA[r.id] || '🍸'}</span>
+        <span class="plato__ico" aria-hidden="true">${COPA[r.id] || ICON_COPA}</span>
         <span class="plato__nombre">${esc(r.nombre)}</span>
         <span class="plato__nota">${esc(r.nota)}</span>
         <span class="plato__grados" aria-label="Dificultad ${r.grado} de 3">${'◆'.repeat(r.grado)}<span class="apagado">${'◆'.repeat(3 - r.grado)}</span></span>
@@ -170,7 +178,13 @@
     return [0, 1, 2].map(i => `<i class="${i < n ? 'on' : ''}">★</i>`).join('');
   }
 
-  const MANO = { agitar: '🫱', remover: '🌀', servir: '🫗', macerar: '🔨', colar: '🥄' };
+  const MANO = {
+    agitar: icono('M4 8h16M4 8l3-3M4 8l3 3M20 16H4M20 16l-3-3M20 16l-3 3'),
+    remover: icono('M18 7a7 7 0 1 0 1 8M18 3v4h-4'),
+    servir: icono('m5 5 10 2-3 11-7-2zM15 7l4 3M18 13c0 2-2 3-2 5'),
+    macerar: icono('M12 3v13M8 12h8M9 21h6M7 16h10'),
+    colar: icono('M5 5h14l-7 8zM12 13v7M8 5l2 3M12 5v4M16 5l-2 3'),
+  };
 
   function pintarEntrenar() {
     const d = Libreta.resumen();
@@ -180,7 +194,7 @@
       return `<button class="plato plato--${TONO[i % TONO.length]} ${c.id === gestoElegido ? 'es-elegida' : ''}"
                       type="button" data-gesto="${c.id}">
         <span class="plato__medallas" aria-hidden="true">${medallas(g && g.media !== null ? escalon(g.media) : 0)}</span>
-        <span class="plato__ico" aria-hidden="true">${MANO[c.id] || '🤲'}</span>
+        <span class="plato__ico" aria-hidden="true">${MANO[c.id] || ICON_COPA}</span>
         <span class="plato__nombre">${esc(c.label)}</span>
         <span class="plato__nota">${esc(nota)}</span>
       </button>`;
@@ -710,7 +724,7 @@
         });
         if (take) recado(`Toma guardada · ${take.n} muestras a ${take.hzReal} Hz`);
       } finally {
-        $('#btnGrabar').textContent = '⏺ Grabar toma';
+        $('#btnGrabar').textContent = 'Grabar toma';
       }
     });
 

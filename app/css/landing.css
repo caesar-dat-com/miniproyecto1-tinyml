@@ -155,3 +155,43 @@ body { overflow: hidden; }
   .landing-coach__bubble { display: none; }
   .platos { max-width: 560px; }
 }
+
+/* ============================================================ portada editorial */
+.salon { align-items: flex-start; text-align: left; max-width: 1500px; margin: auto; padding-left: clamp(28px, 7vw, 110px); }
+.marca { align-items: flex-start; }
+.marca__copa { width: 42px; color: var(--dorado); filter: none; }
+.marca__nombre {
+  margin-top: 14px; font-family: var(--display); font-size: clamp(4rem, 10vw, 7.8rem); font-style: normal; font-weight: 500;
+  letter-spacing: -.065em; text-transform: none; transform: none; color: var(--crema); line-height: .82; text-shadow: 0 18px 55px rgba(0,0,0,.48);
+}
+.marca__lema { margin-top: 20px; max-width: 430px; font-size: .8rem; letter-spacing: .14em; font-weight: 600; color: rgba(242,234,223,.6); }
+.platos { width: min(680px, 58vw); max-width: 680px; gap: 12px; }
+.salon > .grande { max-width: 330px; }
+.firma { padding: 0; border: 0; border-radius: 0; background: none; color: var(--humo-2); }
+.landing-coach { right: clamp(-130px, -5vw, -25px); bottom: -12%; width: clamp(520px, 53vw, 820px); opacity: .88; filter: drop-shadow(-24px 30px 55px rgba(0,0,0,.58)); animation: landing-float 7s ease-in-out infinite; }
+.landing-coach__halo { display: none; }
+.landing-coach__bubble {
+  left: 2%; top: 18%; width: 250px; padding: 15px 17px; border: 1px solid rgba(242,234,223,.15); border-left: 2px solid var(--dorado);
+  border-radius: 4px; background: rgba(16,13,11,.86); box-shadow: 0 18px 46px rgba(0,0,0,.35); transform: none;
+}
+.landing-coach__bubble::after { display: none; }
+.landing-coach__bubble b { color: #e28a5d; font-size: .72rem; letter-spacing: .14em; }
+.landing-coach__bubble span { font-size: .74rem; color: var(--humo); }
+
+@media (max-width: 760px) {
+  body { overflow: auto; }
+  .hud { top: calc(var(--seg-t) + 9px); left: 10px; right: 10px; }
+  .redondos { gap: 7px; }
+  .redondo { width: 44px; height: 44px; }
+  .salon { min-height: 100dvh; align-items: stretch; text-align: left; justify-content: flex-start; gap: 18px; padding: calc(var(--seg-t) + 80px) 16px calc(var(--seg-b) + 32px); }
+  .marca { align-items: flex-start; }
+  .marca__copa { display: none; }
+  .marca__nombre { font-size: clamp(3.8rem, 20vw, 5.3rem); }
+  .marca__lema { margin-top: 14px; font-size: .7rem; line-height: 1.55; }
+  .platos { width: 100%; max-width: none; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .platos .plato { min-height: 130px; padding: 14px; }
+  .salon > .grande { max-width: none; }
+  .landing-coach { width: 300px; right: -112px; bottom: -65px; opacity: .13; }
+  .landing-coach__bubble { display: none; }
+  .firma { max-width: calc(100% - 100px); font-size: .7rem; }
+}

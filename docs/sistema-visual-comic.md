@@ -1,21 +1,23 @@
-# Sistema visual Comic Fighter de MixLab
+# Sistema visual Editorial Noir de MixLab
 
 ## Objetivo
 
-Presentar el proyecto TinyML como una app de entrenamiento y juego, sin ocultar
-la parte técnica del vaso inteligente. La interfaz combina una barra elegante
-con el ritmo visual de un cómic de lucha.
+Presentar el proyecto TinyML como una app adulta de entrenamiento, sin ocultar
+la parte técnica del vaso inteligente. La interfaz combina un bar nocturno
+premium con el carácter de una novela gráfica contemporánea.
 
 ## Lenguaje visual
 
-- **Tinta:** bordes blancos gruesos y sombras negras duras.
-- **Energía:** amarillo para acciones, rojo para alarma, verde para acierto y
-  azul para información técnica.
-- **Viñetas:** esquinas asimétricas, pequeñas inclinaciones y paneles con trama.
-- **Movimiento:** entradas laterales, brillo, respiración del personaje,
-  cronómetro en alarma y celebraciones por resultado.
-- **Jerarquía:** una acción principal amarilla por pantalla y controles
-  secundarios oscuros.
+- **Paleta:** carbón, marfil, cobre quemado, verde de señal y azul técnico.
+- **Tipografía:** serif editorial para títulos, sans de sistema para interfaz y
+  monoespaciada para telemetría.
+- **Iconografía:** SVG lineal propio; no depende de emojis del sistema.
+- **Movimiento:** transiciones cortas, respiración del personaje y fuego SVG
+  animado únicamente cuando el resultado es bajo.
+- **Jerarquía:** una acción principal cobriza por pantalla y controles
+  secundarios neutros.
+- **Móvil:** personaje con opacidad baja, rejilla de dos columnas, HUD compacto
+  y zonas de scroll independientes para no tapar acciones.
 
 ## Estados del personaje
 

@@ -164,11 +164,12 @@ Dónde se editan las cosas, cada una en un solo sitio:
 
 ## Sobre el aspecto
 
-La interfaz usa un lenguaje de **cómic de combate**: marcos de tinta, paneles
-inclinados, tramas de puntos, rayos de velocidad, colores de alto contraste y
-un personaje coach que cambia de pose según la pantalla y el resultado. Sigue
-siendo CSS y JavaScript locales, sin fuentes ni librerías descargadas, para que
-la app continúe abriendo sin red.
+La interfaz usa un lenguaje de **novela gráfica neo-noir**: superficies carbón,
+cobre quemado, tipografía editorial y un personaje coach que cambia de pose
+según la pantalla y el resultado. Los controles llevan iconos SVG propios y el
+fuego de fallo se dibuja con llamas vectoriales animadas. Sigue siendo CSS y
+JavaScript locales, sin fuentes ni librerías descargadas, para que la app
+continúe abriendo sin red.
 
 Las animaciones están ligadas al estado: entrada de vistas, brillo de botones,
 alarma del cronómetro, golpe de confianza, fuego al fallar y estrellas en un
