@@ -118,3 +118,40 @@ body { overflow: hidden; }
   .marca__copa { width: 46px; }
   .plato { min-height: 100px; }
 }
+
+/* ============================================================ portada cómic */
+.salon { align-items: flex-start; text-align: left; padding-left: clamp(22px, 7vw, 110px); padding-right: clamp(22px, 7vw, 110px); }
+.marca { align-items: flex-start; position: relative; z-index: 3; }
+.marca__copa { width: clamp(48px, 7dvh, 70px); }
+.marca__nombre {
+  font-size: clamp(3.4rem, 10vw, 7rem); font-weight: 900; font-style: italic; text-transform: uppercase;
+  letter-spacing: -.055em; transform: skewX(-7deg); line-height: .82;
+  text-shadow: 4px 4px 0 #ff3d34, 8px 8px 0 #07070b, 0 0 30px rgba(255,201,40,.35);
+}
+.marca__lema { margin-top: 15px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.platos { max-width: 720px; position: relative; z-index: 3; }
+.platos .plato { min-height: 126px; }
+.salon > .grande { max-width: 440px; position: relative; z-index: 3; }
+.firma { padding: 9px 14px; border: 1px solid rgba(255,255,255,.15); border-radius: 8px; background: rgba(8,8,12,.72); }
+
+.landing-coach { position: fixed; z-index: 2; right: clamp(-145px, -7vw, -45px); bottom: clamp(-150px, -9vh, -55px); width: clamp(430px, 48vw, 760px); pointer-events: none; filter: drop-shadow(-20px 22px 0 rgba(0,0,0,.55)); animation: landing-float 4.6s ease-in-out infinite; }
+.landing-coach img { display: block; width: 100%; height: auto; }
+.landing-coach__halo { position: absolute; z-index: -1; width: 78%; aspect-ratio: 1; right: 3%; top: 12%; border-radius: 50%; background: repeating-conic-gradient(#ff3d3444 0 10deg, transparent 10deg 20deg); animation: comic-spin 22s linear infinite reverse; }
+.landing-coach__bubble, .coach__bubble {
+  position: absolute; margin: 0; color: var(--crema); background: #101017ee; border: 3px solid #fff;
+  box-shadow: 7px 7px 0 var(--tinta); border-radius: 18px 18px 4px 18px; transform: rotate(-2deg);
+}
+.landing-coach__bubble { left: -2%; top: 16%; width: min(270px, 45vw); padding: 14px 17px; }
+.landing-coach__bubble::after, .coach__bubble::after { content: ""; position: absolute; right: -20px; bottom: 10px; border: 12px solid transparent; border-left-color: #fff; transform: rotate(18deg); }
+.landing-coach__bubble b, .coach__bubble b { display: block; color: var(--dorado); text-transform: uppercase; font-size: .95rem; letter-spacing: .04em; }
+.landing-coach__bubble span, .coach__bubble span { display: block; margin-top: 3px; font-size: .76rem; line-height: 1.3; color: var(--humo); }
+@keyframes landing-float { 50% { transform: translateY(-10px) rotate(.35deg); } }
+
+@media (max-width: 760px) {
+  .salon { align-items: center; text-align: center; padding-left: 18px; padding-right: 18px; }
+  .marca { align-items: center; }
+  .marca__nombre { font-size: clamp(3rem, 15vw, 4.8rem); }
+  .landing-coach { right: -125px; bottom: -90px; width: 390px; opacity: .28; }
+  .landing-coach__bubble { display: none; }
+  .platos { max-width: 560px; }
+}

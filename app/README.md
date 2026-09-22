@@ -164,10 +164,20 @@ Dónde se editan las cosas, cada una en un solo sitio:
 
 ## Sobre el aspecto
 
-La consola es CSS puro: sin imágenes, sin fuentes descargadas. El latón es un
-degradado recortado sobre el texto, el grano una textura SVG en línea, y la
-rejilla de la pantalla un `repeating-linear-gradient`. Todo para que la app
-siga abriendo sin red.
+La interfaz usa un lenguaje de **cómic de combate**: marcos de tinta, paneles
+inclinados, tramas de puntos, rayos de velocidad, colores de alto contraste y
+un personaje coach que cambia de pose según la pantalla y el resultado. Sigue
+siendo CSS y JavaScript locales, sin fuentes ni librerías descargadas, para que
+la app continúe abriendo sin red.
+
+Las animaciones están ligadas al estado: entrada de vistas, brillo de botones,
+alarma del cronómetro, golpe de confianza, fuego al fallar y estrellas en un
+resultado perfecto. `prefers-reduced-motion` reduce todo el movimiento cuando
+el sistema lo solicita.
+
+El rediseño es únicamente de presentación. No cambia `protocol.js`,
+`transports.js`, `recorder.js` ni el contrato de datos con el vaso inteligente:
+BLE, WebSocket, Serial USB y simulador conservan el mismo funcionamiento.
 
 La pantalla de abajo **crece con el alto que sobre** en vez de quedarse en 4:3
 fijo: en un móvil quedaban 200 px muertos debajo de la consola mientras la

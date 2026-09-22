@@ -42,14 +42,14 @@
   };
 
   const COACH = {
-    welcome:     ['coach-welcome-confident.webp',              'La coach de MixLab te da la bienvenida'],
-    ready:       ['coach-ready-challenge.webp',                 'La coach está lista para comenzar el reto'],
-    enthusiastic:['coach-guide-enthusiastic.webp',              'La coach presenta la receta con entusiasmo'],
-    presenting:  ['coach-guide-presenting.webp',                'La coach explica las herramientas disponibles'],
-    calm:        ['coach-guide-calm.webp',                      'La coach explica tus resultados con calma'],
-    failed:      ['coach-result-failed-one-star-angry.webp',    'La coach reacciona con enfado a un resultado bajo'],
-    good:        ['coach-result-good-three-stars.webp',         'La coach aprueba un resultado intermedio'],
-    perfect:     ['coach-result-perfect-five-stars.webp',       'La coach celebra un resultado excelente'],
+    welcome:      ['coach-welcome-confident.webp',           'La coach de MixLab te da la bienvenida',              'Elige tu reto',      'Hoy vamos por una marca perfecta.'],
+    ready:        ['coach-ready-challenge.webp',              'La coach está lista para comenzar el reto',            '¡En guardia!',       'Firme, preciso y sin perder el ritmo.'],
+    enthusiastic: ['coach-guide-enthusiastic.webp',           'La coach presenta la receta con entusiasmo',           'Receta elegida',     'Lee la secuencia antes de servir.'],
+    presenting:   ['coach-guide-presenting.webp',             'La coach explica las herramientas disponibles',        'Centro técnico',     'Conecta la placa o practica con el simulador.'],
+    calm:         ['coach-guide-calm.webp',                   'La coach explica tus resultados con calma',            'Lee tu combate',     'Tu punto débil indica qué gesto entrenar.'],
+    failed:       ['coach-result-failed-one-star-angry.webp', 'La coach reacciona con enfado a un resultado bajo',     '¡Revancha!',         'Respira, corrige el gesto y vuelve a intentarlo.'],
+    good:         ['coach-result-good-three-stars.webp',      'La coach aprueba un resultado intermedio',              'Buen servicio',      'Ya tienes técnica; ahora busca consistencia.'],
+    perfect:      ['coach-result-perfect-five-stars.webp',    'La coach celebra un resultado excelente',               '¡Perfect mix!',      'Precisión de campeón. Esa ronda fue tuya.'],
   };
 
   function estadoCoach() {
@@ -70,11 +70,14 @@
     const img = $('#coachImg');
     if (!coach || !img) return;
     const mood = estadoCoach();
-    const [archivo, alt] = COACH[mood];
+    const [archivo, alt, titulo, mensaje] = COACH[mood];
     coach.dataset.mood = mood;
+    document.body.dataset.mood = mood;
     img.alt = alt;
     const src = `img/coach/${archivo}`;
     if (!img.src.endsWith(src)) img.src = src;
+    const bubble = $('#coachBubble');
+    if (bubble) bubble.innerHTML = `<b>${esc(titulo)}</b><span>${esc(mensaje)}</span>`;
   }
 
   /* ==========================================================================
@@ -86,6 +89,7 @@
     if (partida?.viva && v !== 'jugar') { partida.abandonar(); partida = null; }
 
     vista = v;
+    document.body.dataset.view = v;
     $$('.vista').forEach(el => el.classList.toggle('es-activa', el.dataset.vista === v));
 
     const [t, n] = ROTULO[v] || ROTULO.recetas;

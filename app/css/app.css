@@ -102,6 +102,60 @@ body { overflow: hidden; overscroll-behavior: none; }
   .coach, .coach__fx, .coach__fx::after { animation: none !important; }
 }
 
+/* ============================================================ consola cómic */
+.escenario { z-index: 2; }
+.vista.es-activa .lienzo > * { animation: vista-comic .38s cubic-bezier(.2,.9,.25,1) both; }
+@keyframes vista-comic { from { opacity: 0; transform: translateX(-22px) skewX(-2deg); } }
+
+.lienzo { padding: 10px 12px 16px; }
+.rejilla { gap: 18px; }
+.rejilla .plato { min-height: 145px; }
+.plato.es-elegida { outline: 4px solid var(--dorado); outline-offset: 5px; box-shadow: 8px 8px 0 var(--tinta), 0 0 28px rgba(255,201,40,.48); }
+
+.coach { z-index: 1; opacity: .48; right: max(-4vw, -45px); bottom: -9vh; width: clamp(310px, 38vw, 540px); }
+.coach__bubble { left: -8%; top: 15%; width: min(250px, 40vw); padding: 12px 15px; opacity: 0; transform: translateY(8px) rotate(-2deg); animation: bubble-in .38s .16s ease forwards; }
+@keyframes bubble-in { to { opacity: 1; transform: translateY(0) rotate(-2deg); } }
+
+.juego { position: relative; width: min(100%, 690px); margin-inline: auto; padding: 24px 28px; border: 3px solid rgba(255,255,255,.16); border-left: 6px solid var(--dorado); border-radius: 12px 34px 12px 34px; background: linear-gradient(145deg, rgba(27,27,37,.92), rgba(9,9,14,.86)); box-shadow: 9px 9px 0 var(--tinta); }
+.juego__paso { display: inline-block; margin: 0 0 8px; padding: 5px 12px; background: var(--rojo); color: #fff; border: 2px solid #fff; transform: skewX(-7deg); box-shadow: 3px 3px 0 var(--tinta); }
+.juego__gesto { font-style: italic; text-transform: uppercase; letter-spacing: -.025em; text-shadow: 3px 3px 0 var(--rojo), 6px 6px 0 var(--tinta); }
+.aro { filter: drop-shadow(8px 8px 0 #07070b); }
+.aro__linea { stroke: var(--dorado); stroke-width: 13; }
+.aro.es-poco { animation: alarma .48s ease-in-out infinite alternate; }
+@keyframes alarma { to { transform: scale(1.055) rotate(1deg); filter: drop-shadow(0 0 18px rgba(255,61,52,.75)); } }
+.medidor__marco { height: 24px; border: 3px solid #fff; border-radius: 5px 14px 5px 14px; box-shadow: 4px 4px 0 var(--tinta); }
+.medidor.es-bueno { animation: hit-good .3s ease; }
+@keyframes hit-good { 50% { transform: scale(1.035); filter: drop-shadow(0 0 16px rgba(35,215,124,.65)); } }
+.pasos__pieza { height: 12px; border-radius: 3px; transform: skewX(-8deg); }
+.receta li { border-radius: 7px 16px 7px 16px; border-left: 4px solid rgba(255,255,255,.22); }
+.receta li.es-actual { border-left-color: var(--dorado); transform: translateX(7px); box-shadow: 4px 4px 0 var(--tinta); }
+
+.acta { position: relative; width: min(100%, 610px); padding: 30px; border: 3px solid #fff; border-radius: 14px 38px 14px 38px; background: linear-gradient(145deg, rgba(31,31,42,.95), rgba(8,8,12,.92)); box-shadow: 10px 10px 0 var(--tinta); overflow: hidden; }
+.acta::before { content: "RESULTADO"; position: absolute; left: -8px; top: 18px; padding: 5px 18px; background: var(--rojo); border: 2px solid #fff; transform: rotate(-5deg); font-weight: 900; letter-spacing: .08em; }
+.acta__estrellas { margin-top: 22px; text-shadow: 0 0 18px rgba(255,201,40,.72); animation: stars-in .55s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes stars-in { from { transform: scale(.35) rotate(-8deg); opacity: 0; } }
+.acta__pts { font-style: italic; text-shadow: 3px 3px 0 var(--rojo), 6px 6px 0 var(--tinta); }
+
+.taller__nav { padding: 6px 8px 10px; }
+.enchufe { border-left: 5px solid var(--azul); transition: transform .2s ease, border-color .2s ease; }
+.enchufe:hover { transform: translateY(-4px); border-color: var(--dorado); }
+.enchufe.es-viva { border-color: var(--verde); box-shadow: 7px 7px 0 var(--tinta), 0 0 24px rgba(35,215,124,.28); }
+.placa { border-left: 4px solid var(--azul); }
+.figura { border-radius: 9px 24px 9px 24px; border: 2px solid var(--filo); box-shadow: 6px 6px 0 var(--tinta); }
+.infiere__cl { font-style: italic; text-transform: uppercase; text-shadow: 3px 3px 0 var(--rojo); }
+
+body[data-mood="failed"] .comic-atmosphere__burst { background: repeating-conic-gradient(from 8deg, rgba(255,61,52,.32) 0 8deg, transparent 8deg 15deg); animation-duration: 4s; }
+body[data-mood="perfect"] .comic-atmosphere__burst { background: repeating-conic-gradient(from 8deg, rgba(255,201,40,.34) 0 8deg, transparent 8deg 15deg); animation-duration: 10s; }
+
+@media (max-width: 680px) {
+  .coach { right: -118px; bottom: -110px; width: 330px; opacity: .24; }
+  .coach__bubble { display: none; }
+  .lienzo { padding-inline: 4px; }
+  .juego, .acta { padding: 20px 16px; }
+  .rejilla { gap: 13px; }
+  .rejilla .plato { min-height: 128px; }
+}
+
 /* El área que hace scroll es solo esta: el HUD y la botonera de abajo
    quedan siempre a mano, que es lo que se espera en una tablet. */
 .lienzo {
