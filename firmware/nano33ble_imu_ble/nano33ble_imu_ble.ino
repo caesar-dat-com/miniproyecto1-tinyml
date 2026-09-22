@@ -25,10 +25,17 @@
 
 #include <ArduinoBLE.h>
 
-#define IMU_LSM9DS1
-// #define IMU_BMI270
+/* dtostrf no viene por defecto en el core mbed: el printf de mbed no trae
+   coma flotante y dtostrf vive en la capa de compatibilidad con AVR. */
+#include <avr/dtostrf.h>
 
-#ifdef IMU_LSM9DS1
+/* OJO con el nombre de este define: Arduino_LSM9DS1 hace internamente
+   "#define IMU IMU_LSM9DS1", asi que un define propio llamado IMU_LSM9DS1
+   deja el objeto IMU en nada y el sketch no compila. Por eso USAR_*. */
+#define USAR_LSM9DS1
+// #define USAR_BMI270
+
+#ifdef USAR_LSM9DS1
   #include <Arduino_LSM9DS1.h>
 #else
   #include <Arduino_BMI270_BMM150.h>
