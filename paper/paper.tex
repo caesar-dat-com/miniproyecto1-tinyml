@@ -1,0 +1,53 @@
+\documentclass[conference]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{booktabs}
+\title{MixLab: coctelera inteligente con TinyML para el reconocimiento de gestos de cocteleria}
+\author{\IEEEauthorblockN{Cesar Armando Reyes Oliveros\\Juan Camilo Diaz Rangel\\Sebastian Santana}
+\IEEEauthorblockA{Facultad de Ingenieria\\Universidad Autonoma de Occidente\\Cali, Colombia}}
+\begin{document}
+\maketitle
+\begin{abstract}
+El aprendizaje de tecnicas de cocteleria requiere retroalimentacion experta no siempre disponible. Este trabajo presenta MixLab, una coctelera inteligente que reconoce cinco gestos de cocteleria mas reposo mediante una CNN 1D entrenada sobre datos del IMU del Arduino Nano 33 BLE Sense y desplegada en la placa con TensorFlow Lite Micro. El modelo alcanza 98,7% de exactitud en validacion cruzada agrupada por toma, recall >= 97% en las seis clases y ocupa 15,25 KB int8. La coctelera transmite cada gesto por BLE a una aplicacion web que guia la receta paso a paso. El sistema opera con bateria, sin computador conectado. El proyecto contribuye al ODS 4 al democratizar la retroalimentacion de calidad en el aprendizaje motor.
+\end{abstract}
+\begin{IEEEkeywords}
+TinyML, reconocimiento de actividad, IMU, BLE, Arduino Nano 33 BLE Sense.
+\end{IEEEkeywords}
+\section{Introduccion}
+Aprender cocteleria exige retroalimentacion continua: agitar y remover producen texturas distintas y el principiante sin experto cerca repite errores. MixLab usa TinyML: un modelo convolucional corre en la coctelera (Arduino Nano 33 BLE Sense), reconoce el gesto en tiempo real y lo transmite por BLE a una app web que guia la receta. Contribuye al ODS 4 (educacion de calidad).
+
+Contribuciones: (1) dataset propio de 60 tomas con 6 clases de gestos; (2) evaluacion honesta con particion por toma y exclusion del magnetometro; (3) despliegue funcional end-to-end con TFLM int8, BLE y app web con simulador.
+
+\section{Trabajos relacionados}
+El reconocimiento de actividad con acelerometros es un campo maduro \cite{bao, kwapisz}; TinyML lo llevo a microcontroladores \cite{warden} y Edge Impulse industrializo el flujo \cite{ei}. El material del curso \cite{curso} establece la linea base (39 caracteristicas manuales + RNA denso) que este proyecto compara contra una CNN 1D sobre la senal cruda. A diferencia de HAR clasico, MixLab ataca gestos finos con un objeto en la mano, donde remover y reposo difieren por decimas de g.
+
+\section{Sistema propuesto}
+Cinco bloques: captura (IMU 62,5 Hz), modelo (ventana 125x3 normalizada, CNN 1D int8), inferencia a bordo (TFLM), transmision BLE (servicio UART Nordic, UUID 6e400001) y app web MixLab (recetas guiadas, simulador, transportes de depuracion). Alimentacion por power bank: la placa no se conecta al PC en uso.
+
+\section{Recoleccion de datos}
+60 tomas (10 por clase) capturadas con Edge Impulse sobre el firmware propio (nano33ble\_imu\_ble), 62,5 Hz, 9 ejes, 10 s por toma salvo remover (4 s). Clases: agitar, macerar, remover, servir, reposo, reposo\_mano. La clase colar de la guia se sustituyo por decision del grupo (seccion 8).
+
+\section{Metodologia}
+Dos vias: A (39 caracteristicas manuales -> densa 20-10-softmax) y B (CNN 1D sobre la ventana cruda). Decisiones medidas: particion por toma con GroupShuffleSplit y verificacion asertiva de no-fuga (partir por ventana infla +13,3 pp); exclusion del magnetometro (su ganancia proviene de la orientacion del sitio, no del gesto); class\_weight por el desbalance de remover (60/1020 ventanas); ventana de 2 s = 125 muestras a 62,5 Hz, verificada con assert sobre interval\_ms = 16,0.
+
+\section{Resultados}
+Validacion cruzada agrupada, 5 pliegues: Via A 0,951 $\pm$ 0,031; Via B \textbf{0,987 $\pm$ 0,012}. Recall por clase (B): agitar 1,00; macerar 0,97; remover 1,00; reposo 1,00; reposo\_mano 1,00; servir 0,97. Cuantizacion int8: 4,41 KB (A) y 15,25 KB (B), dentro de los 256 KB de RAM del Nano 33 BLE; perdida por cuantizacion 0,0 pp en la Via B.
+
+\section{Despliegue}
+El firmware nano33ble\_mixlab\_inferencia corre TFLM: llena la ventana 125x3, normaliza con las constantes del entrenamiento, infiere y transmite \{``g'':``agitar'',''p'':0.87\} por BLE. La app MixLab lo recibe por Web Bluetooth y guia la receta. Compila a 61\% de flash y 39\% de RAM. En la demostracion la placa usa power bank y la app corre en un dispositivo conectado solo por BLE.
+
+\section{Problemas y soluciones}
+(1) Etiquetas por toma en el export: regeneradas a 6 clases. (2) Sin particion de test: CV agrupada por toma como medida honesta; test aparte pendiente. (3) Desbalance de remover (4 s frente a 10 s): class\_weight. (4) Magnetometro sesgado por sitio: excluido con la medida documentada. (5) Senal plana en remover (std\_acc 0,032--0,106 igual a reposo): regrabada con movimiento real (std\_acc 0,38--1,32; recall 0,90 $\rightarrow$ 1,00). (6) Sustitucion de colar por reposo\_mano: decision del grupo documentada; requisito parcialmente cubierto.
+
+\section{Conclusiones}
+MixLab cierra el ciclo completo de TinyML con datos propios y evaluacion honesta. Trabajo futuro: capturar colar y un test aparte, incluir el giroscopio (mejoro la ablacion a 0,995), integrar los actuadores fisicos y publicar el proyecto de Edge Impulse.
+
+\begin{thebibliography}{6}
+\bibitem{bao} L. Bao y S. Intille, ``Activity recognition from user-annotated acceleration data,'' Pervasive Computing, 2004.
+\bibitem{kwapisz} J. R. Kwapisz, G. M. Weiss y S. Moore, ``Activity recognition using cell phone accelerometers,'' ACM SIGKDD, 2011.
+\bibitem{warden} P. Warden y D. Situnayake, TinyML. O'Reilly, 2020.
+\bibitem{ei} Edge Impulse, ``Edge Impulse documentation,'' edgeimpulse.com.
+\bibitem{curso} J. A. Lopez y J. C. Giraldo, ``Un ejemplo de clasificacion de movimiento,'' UAO, 2025.
+\bibitem{nus} Nordic Semiconductor, ``Nordic UART Service,'' developer.nordicsemi.com.
+\end{thebibliography}
+\end{document}
