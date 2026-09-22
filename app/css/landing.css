@@ -20,9 +20,13 @@ h1 em { font-style: normal; color: var(--dorado); }
 .text-link { background: none; border: 0; padding: 12px 0; min-height: 44px; font-size: .88rem; font-weight: 600; cursor: pointer; }
 .text-link span { margin-left: 8px; }
 .text-link:hover, .colophon a:hover { color: var(--dorado); }
-.firma { display: flex; gap: 8px; align-items: center; color: var(--humo-2); font-size: .75rem; margin-top: 23px; }
+.firma { display: flex; gap: 8px; align-items: baseline; color: var(--humo-2); font-size: .75rem; margin-top: 23px; max-width: 46ch; }
 .firma a { text-decoration: underline; text-underline-offset: 3px; }
-.firma__punto { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); flex: none; }
+.firma code { font: .95em var(--mono); }
+.firma__punto { width: 6px; height: 6px; border-radius: 50%; background: var(--verde); flex: none; align-self: center; }
+/* La portada no puede conectar nada: el punto solo marca si el sitio desde el
+   que se sirve permitirá Bluetooth cuando el usuario llegue al Taller. */
+.firma__punto--aviso { background: var(--dorado); }
 .hero__art { position: relative; margin: 26px 0 24px; border: 1.5px solid var(--tinta); background: #e6dfce; color: #25231f; box-shadow: 5px 5px 0 var(--shadow); transform: rotate(1deg); min-width: 0; }
 .hero__art::before { content: ''; position: absolute; width: 60px; height: 20px; background: #d1c5a8b3; top: -9px; left: 42%; transform: rotate(-4deg); }
 .art__folio { padding: 18px 20px 0; font-size: .59rem; }

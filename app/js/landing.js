@@ -49,6 +49,23 @@
     libreta.href = 'consola.html#progreso';
   }
 
+  /* --------------------------------------------------------- dónde se sirve --
+     El Taller avisa de esto, pero el usuario llega antes aquí: si la portada
+     se abrió con doble clic, conviene decirlo antes de que entre al bar y se
+     encuentre el Bluetooth apagado sin explicación.
+
+     Chrome marca file:// como contexto seguro y aun así le quita
+     navigator.bluetooth, así que isSecureContext por sí solo no detecta el
+     caso más probable de la demo. */
+  function initOrigen() {
+    const fichero = location.protocol === 'file:';
+    if (!fichero && window.isSecureContext) return;
+
+    $('#textoPlaca').hidden = true;
+    $(fichero ? '#textoFichero' : '#textoHttp').hidden = false;
+    $('#puntoPlaca').classList.add('firma__punto--aviso');
+  }
+
   /* ------------------------------------------------------ pantalla completa */
   function initPantalla() {
     const btn = $('#btnPantalla');
@@ -104,6 +121,7 @@
   addEventListener('pageshow', pintar);
 
   pintar();
+  initOrigen();
   initPantalla();
   initHoja();
 })();

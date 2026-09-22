@@ -94,9 +94,18 @@
     <!-- ───── conectar ───── -->
     <div class="panel-t es-activa" id="p-conectar">
       <div class="nota nota--aviso panel" id="avisoSeguro" hidden>
-        <strong>Esta página no está en contexto seguro.</strong>
-        Web Bluetooth y Web Serial solo funcionan sobre <code>https://</code> o en
-        <code>localhost</code>. Ábrela por HTTPS o usa el simulador.
+        <p id="avisoFichero" hidden>
+          <strong>Has abierto MixLab con doble clic, como un archivo.</strong>
+          Con <code>file://</code> el navegador apaga Web Bluetooth aunque lo
+          tenga. Sirve la carpeta <code>app/</code> por HTTP
+          (<code>python3 -m http.server 8080</code>) y entra por
+          <code>http://localhost:8080</code>, o usa el simulador de aquí abajo.
+        </p>
+        <p id="avisoHttp" hidden>
+          <strong>Esta página no está en contexto seguro.</strong>
+          Web Bluetooth y Web Serial solo funcionan sobre <code>https://</code> o en
+          <code>localhost</code>. Ábrela por HTTPS o usa el simulador de aquí abajo.
+        </p>
       </div>
 
       <h1 class="t1">Conectar la placa</h1>

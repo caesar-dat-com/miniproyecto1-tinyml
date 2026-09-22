@@ -209,7 +209,7 @@
 
     lienzo.innerHTML = `
       <div class="juego">
-        ${transporte ? '' : '<div class="nota nota--aviso panel">Sin placa no hay juego: el modelo corre en el Arduino y la app solo lee lo que él decide. Conecta desde el <b>Taller</b>, o arranca el <b>simulador</b>.</div>'}
+        ${transporte ? '' : `<div class="nota nota--aviso panel">Sin placa no hay juego: el modelo corre en el Arduino y la app solo lee lo que él decide. Conecta desde el <b>Taller</b>, o arranca el <b>simulador</b>.${ORIGEN_BLOQUEADO ? ` <b>Aquí el Bluetooth no puede funcionar:</b> ${esc(MOTIVO_ORIGEN)} El simulador sí.` : ''}</div>`}
         <h2 class="juego__gesto">${esc(r.nombre)}</h2>
         <p class="juego__texto">${esc(r.nota)}</p>
         <ol class="receta">
@@ -452,10 +452,30 @@
   /* ==========================================================================
      CONEXIÓN
      ======================================================================== */
+  /* Chrome marca file:// como contexto seguro —isSecureContext es true— pero
+     le quita navigator.bluetooth igualmente. Con la comprobación a secas, la
+     página abierta con doble clic no enseñaba ningún aviso y en su lugar la
+     tarjeta BLE decía "este navegador no trae Web Bluetooth": manda al usuario
+     a cambiar de navegador cuando lo que falla es de dónde se sirve la página.
+     Web Serial sí sobrevive a file://, pero requestPort() falla después, así
+     que las dos vías se apagan por el mismo motivo. */
+  const ORIGEN_FICHERO   = location.protocol === 'file:';
+  const ORIGEN_BLOQUEADO = ORIGEN_FICHERO || !window.isSecureContext;
+  const MOTIVO_ORIGEN = ORIGEN_FICHERO
+    ? 'La página está abierta como archivo (file://). Sírvela por HTTP en localhost y vuelve a entrar.'
+    : 'La página no está en contexto seguro. Hace falta https:// o localhost.';
+
   function initConexion() {
-    if (!window.isSecureContext) $('#avisoSeguro').hidden = false;
-    if (!BleTransport.soportado)    marcarSinSoporte('ble');
-    if (!SerialTransport.soportado) marcarSinSoporte('serial');
+    if (ORIGEN_BLOQUEADO) {
+      $('#avisoSeguro').hidden = false;
+      $(ORIGEN_FICHERO ? '#avisoFichero' : '#avisoHttp').hidden = false;
+    }
+    if (ORIGEN_BLOQUEADO || !BleTransport.soportado) {
+      marcarSinSoporte('ble', ORIGEN_BLOQUEADO ? MOTIVO_ORIGEN : '');
+    }
+    if (ORIGEN_BLOQUEADO || !SerialTransport.soportado) {
+      marcarSinSoporte('serial', ORIGEN_BLOQUEADO ? MOTIVO_ORIGEN : '');
+    }
     if (location.protocol === 'https:') $('#avisoMixto').hidden = false;
 
     $('#simGesto').innerHTML = CLASES.map(c => `<option value="${c.id}">${esc(c.label)} — ${esc(c.desc)}</option>`).join('');
@@ -463,10 +483,12 @@
     $('#chapaPlaca').addEventListener('click', () => { if (transporte) desconectar(); else irA('taller'); });
   }
 
-  function marcarSinSoporte(t) {
+  function marcarSinSoporte(t, motivo = '') {
     const card = $(`[data-enchufe="${t}"]`);
     card.classList.add('es-muerta');
-    card.querySelector('[data-sin-soporte]').hidden = false;
+    const nota = card.querySelector('[data-sin-soporte]');
+    if (motivo) nota.textContent = motivo;
+    nota.hidden = false;
     card.querySelector('[data-conectar]').disabled = true;
   }
 
