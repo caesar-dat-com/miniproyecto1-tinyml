@@ -44,6 +44,64 @@ body { overflow: hidden; overscroll-behavior: none; }
 .vista { display: none; flex: 1; min-height: 0; flex-direction: column; }
 .vista.es-activa { display: flex; }
 
+/* ============================================================ coach visual */
+.coach {
+  position: fixed; z-index: 1; right: max(-5vw, -52px); bottom: -10vh;
+  width: clamp(250px, 34vw, 480px); pointer-events: none;
+  opacity: .3; transform-origin: 60% 90%;
+  filter: drop-shadow(0 22px 30px rgba(0,0,0,.62));
+  animation: coach-respira 4.8s ease-in-out infinite;
+  transition: opacity .35s ease, filter .35s ease;
+}
+.coach__img { display: block; width: 100%; height: auto; }
+.coach__fx { position: absolute; inset: 8% -12% 12%; z-index: -1; opacity: 0; }
+
+.coach[data-mood="failed"] { opacity: .52; filter: drop-shadow(0 0 24px rgba(255,65,24,.72)); }
+.coach[data-mood="failed"] .coach__fx {
+  opacity: 1;
+  background:
+    radial-gradient(circle at 30% 82%, rgba(255,55,12,.76), transparent 28%),
+    radial-gradient(circle at 68% 86%, rgba(255,164,35,.7), transparent 34%);
+  animation: coach-fuego .48s ease-in-out infinite alternate;
+}
+.coach[data-mood="failed"] .coach__fx::after {
+  content: "🔥  🔥  🔥"; position: absolute; inset: auto 0 4%;
+  text-align: center; font-size: clamp(2rem, 7vw, 5rem); letter-spacing: .08em;
+}
+.coach[data-mood="good"] { opacity: .5; }
+.coach[data-mood="good"] .coach__fx,
+.coach[data-mood="perfect"] .coach__fx { opacity: 1; }
+.coach[data-mood="good"] .coach__fx::after {
+  content: "✦  ★  ✦"; position: absolute; inset: 12% 0 auto;
+  text-align: center; color: var(--dorado); font-size: clamp(1.8rem, 5vw, 3.5rem);
+  animation: coach-estrellas 1.8s ease-in-out infinite;
+}
+.coach[data-mood="perfect"] {
+  opacity: .62; filter: drop-shadow(0 0 30px rgba(245,185,66,.72));
+  animation: coach-celebra .72s ease-in-out infinite alternate;
+}
+.coach[data-mood="perfect"] .coach__fx::after {
+  content: "★  ✦  ★  ✦  ★"; position: absolute; inset: 4% -10% auto;
+  text-align: center; color: var(--dorado); font-size: clamp(2rem, 6vw, 4.5rem);
+  text-shadow: 0 0 14px #fff3a8; animation: coach-estrellas 1.1s ease-in-out infinite;
+}
+
+@keyframes coach-respira {
+  0%, 100% { transform: translateY(0) rotate(-.4deg); }
+  50% { transform: translateY(-9px) rotate(.5deg); }
+}
+@keyframes coach-celebra { to { transform: translateY(-13px) rotate(1.2deg) scale(1.018); } }
+@keyframes coach-fuego { to { transform: translateY(-12px) scale(1.04); filter: saturate(1.35); } }
+@keyframes coach-estrellas { 50% { transform: translateY(-14px) scale(1.08); opacity: .68; } }
+
+@media (max-width: 680px) {
+  .coach { right: -90px; bottom: -105px; width: 300px; opacity: .18; }
+  .coach[data-mood="failed"], .coach[data-mood="good"], .coach[data-mood="perfect"] { opacity: .38; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .coach, .coach__fx, .coach__fx::after { animation: none !important; }
+}
+
 /* El área que hace scroll es solo esta: el HUD y la botonera de abajo
    quedan siempre a mano, que es lo que se espera en una tablet. */
 .lienzo {

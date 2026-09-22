@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "basePath": "img/coach/",
+  "characters": [
+    { "id": "welcome", "file": "coach-welcome-confident.webp", "expression": "segura y acogedora", "screens": ["recetas"] },
+    { "id": "ready", "file": "coach-ready-challenge.webp", "expression": "lista para el reto", "screens": ["entrenar", "servicio-activo"] },
+    { "id": "enthusiastic", "file": "coach-guide-enthusiastic.webp", "expression": "explicación entusiasta", "screens": ["detalle-receta", "servicio-previo"] },
+    { "id": "presenting", "file": "coach-guide-presenting.webp", "expression": "presentación neutral", "screens": ["taller"] },
+    { "id": "calm", "file": "coach-guide-calm.webp", "expression": "explicación calmada", "screens": ["libreta"] },
+    { "id": "failed", "file": "coach-result-failed-one-star-angry.webp", "expression": "enfadada, una estrella de cinco", "screens": ["resultado-0-o-1-estrellas"] },
+    { "id": "good", "file": "coach-result-good-three-stars.webp", "expression": "aprobación moderada, tres estrellas de cinco", "screens": ["resultado-2-estrellas"] },
+    { "id": "perfect", "file": "coach-result-perfect-five-stars.webp", "expression": "celebración eufórica, cinco estrellas de cinco", "screens": ["resultado-3-estrellas"] }
+  ]
+}

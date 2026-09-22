@@ -41,6 +41,42 @@
     taller:   ['Taller',   'Sensores y dataset'],
   };
 
+  const COACH = {
+    welcome:     ['coach-welcome-confident.webp',              'La coach de MixLab te da la bienvenida'],
+    ready:       ['coach-ready-challenge.webp',                 'La coach está lista para comenzar el reto'],
+    enthusiastic:['coach-guide-enthusiastic.webp',              'La coach presenta la receta con entusiasmo'],
+    presenting:  ['coach-guide-presenting.webp',                'La coach explica las herramientas disponibles'],
+    calm:        ['coach-guide-calm.webp',                      'La coach explica tus resultados con calma'],
+    failed:      ['coach-result-failed-one-star-angry.webp',    'La coach reacciona con enfado a un resultado bajo'],
+    good:        ['coach-result-good-three-stars.webp',         'La coach aprueba un resultado intermedio'],
+    perfect:     ['coach-result-perfect-five-stars.webp',       'La coach celebra un resultado excelente'],
+  };
+
+  function estadoCoach() {
+    if (vista === 'jugar' && ultimaActa) {
+      if (ultimaActa.estrellas >= 3) return 'perfect';
+      if (ultimaActa.estrellas >= 2) return 'good';
+      return 'failed';
+    }
+    if (vista === 'jugar') return partida ? 'ready' : 'enthusiastic';
+    if (vista === 'entrenar') return 'ready';
+    if (vista === 'progreso') return 'calm';
+    if (vista === 'taller') return 'presenting';
+    return 'welcome';
+  }
+
+  function pintarCoach() {
+    const coach = $('#coach');
+    const img = $('#coachImg');
+    if (!coach || !img) return;
+    const mood = estadoCoach();
+    const [archivo, alt] = COACH[mood];
+    coach.dataset.mood = mood;
+    img.alt = alt;
+    const src = `img/coach/${archivo}`;
+    if (!img.src.endsWith(src)) img.src = src;
+  }
+
   /* ==========================================================================
      NAVEGACIÓN
      ======================================================================== */
@@ -61,6 +97,7 @@
     if (location.hash !== '#' + v) history.replaceState(null, '', '#' + v);
 
     pintarVista();
+    pintarCoach();
 
     if (v === 'taller') {
       // El canvas mide 0 mientras la vista está oculta: hay que remedirlo.
