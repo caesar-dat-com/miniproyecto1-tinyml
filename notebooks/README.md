@@ -14,6 +14,7 @@ medidos, no inventados.
 | [`01_datos_exploracion.ipynb`](01_datos_exploracion.ipynb) | Decodifica los 60 `.cbor`, tabla por clase (tomas, duración real, muestras), gráficas de las 6 clases, energía y espectro por eje, y **cuenta cuántas ventanas aporta cada clase** |
 | [`02_entrenamiento_A_caracteristicas.ipynb`](02_entrenamiento_A_caracteristicas.ipynb) | **Vía A** del PDF: 39 características manuales por ventana → densa 20 → 10 → softmax |
 | [`03_entrenamiento_B_conv1d.ipynb`](03_entrenamiento_B_conv1d.ipynb) | **Vía B**, la que usó el profesor en clase: ventana cruda normalizada → Conv1D |
+| [`04_ejercicio2_tflite_anomalias.ipynb`](04_ejercicio2_tflite_anomalias.ipynb) | **Ejercicio en clase 2** (semana 9): descarga el dataset desde este repo, entrena la Vía B, convierte a TFLite int8 y añade **detección de anomalías con K-means**. Ejecutado, con salidas y figuras. Resultados en [`docs/anomalias-kmeans.md`](../docs/anomalias-kmeans.md) |
 
 Los notebooks 02 y 03 son **independientes**: cada uno carga, ventanea, parte y
 entrena por su cuenta. No hace falta ejecutar el 01 antes, aunque el 01 es donde
